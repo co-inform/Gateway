@@ -1,0 +1,138 @@
+ewagger: "2.0"
+info:
+  description: |
+    This document describes the API exposed by Co-Inform's Misinformation Detection Modules Gateway.
+    This Gateway is the single point of entrance of all the requests made by Co-Inform's Browser Plugin.
+  version: "0.0.1"
+  title: "[Draft] Co-Inform Gateway API"
+host: "api.coinform.eu"
+basePath: "/v2"
+schemes:
+- "https"
+paths:
+  /check/claim:
+    post:
+      tags:
+      - "Browser Plugin"
+      summary: "Check a claim"
+      description: "Sends the claim to be checked and gives back a 'check id'"
+      operationId: "checkClaim"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A claim object"
+        required: true
+        schema:
+          $ref: "#/definitions/Claim"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CheckId"
+        400:
+          description: "Invalid input"
+  /check/source:
+    post:
+      tags:
+      - "Browser Plugin"
+      summary: "Check a source"
+      description: "Sends a source to be cheched and gives back a 'check id'"
+      operationId: "checkSource"
+      produces: 
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A source object"
+        required: true
+        schema:
+          $ref: "#/definitions/Source"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CheckId"
+        400:
+          description: "Invalid input"
+  /check/findById/{id}:
+    get:
+      tags:
+      - "Browser Plugin"
+      summary: "Get the ClaimReview"
+      description: "Get a ClaimReview (https://schema.org/ClaimReview) previously requested by its 'check id'"
+      operationId: "checkFindById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of ClaimReview to return"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClaimReview"
+        404:
+          description: "ClaimReview not found"
+  /review:
+    post:
+      tags: 
+      - "MD"
+      summary: "post a finished ClaimReview"
+      description: "Post a fineshed ClaimReview (https://schema.org/ClaimReview)"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A ClaimReview object"
+        required: true
+        schema: 
+          $ref: "#/definitions/ReviewPost"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        200:
+          description: "successful operation"
+        401:
+          description: "unauthorized operation"
+definitions:
+  CheckId:
+    type: "string"
+  Claim:
+    type: "object"
+    properties:
+      url: 
+        type: "string"
+      text:
+        type: "string"
+      author:
+        type: "string"
+  ReviewPost:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "check id"
+      claimReview:
+        $ref: "#/definitions/ClaimReview"
+  ClaimReview:
+    type: "object"
+  Source:
+    type: "object"
+    properties:
+      url: 
+        type: "string"
+      publisher:
+        type: "string"
+      author: 
+        type: "string"
+securityDefinitions:
+  ApiKeyAuth: 
+    type: "apiKey"
+    name: "post_api_key"
+    in: "header"
