@@ -8,15 +8,14 @@ import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
-@RedisHash("review")
+@RedisHash("response")
 @NoArgsConstructor
 @ToString
-public class Review implements Serializable {
+public class QueryResponse implements Serializable {
+
     @Getter
     @Id
-    @NotEmpty(message = "The review must have a assigned ID")
     private String id;
     @Getter
-    @NotEmpty(message = "A review must be included")
-    private LinkedHashMap<String, Object> review;
+    private LinkedHashMap<String, Object> response;
 }

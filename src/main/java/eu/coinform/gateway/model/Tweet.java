@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty;
 import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor
-public class Tweet {
+public class Tweet implements Check {
 
     @Getter
     private String id;

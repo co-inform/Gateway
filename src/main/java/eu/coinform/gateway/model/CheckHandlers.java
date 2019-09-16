@@ -33,19 +33,6 @@ public class CheckHandlers {
     }
 
     @Bean
-    public Consumer<Source> sourceConsumer() {
-        return source -> {
-
-            log.debug("handle source object: {}", source);
-            try {
-                sendPost("source/", objectWriter.writeValueAsString(source), null, null);
-            } catch (JsonProcessingException ex) {
-                log.error("JsonProcessingException could not write {}: {}", source.toString(), ex.getMessage());
-            }
-        };
-    }
-
-    @Bean
     Consumer<TwitterUser> twitterUserConsumer() {
         return twitterUser -> {
             log.debug("handle review object: {}", twitterUser);

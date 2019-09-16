@@ -1,6 +1,6 @@
 package eu.coinform.gateway.config;
 
-import eu.coinform.gateway.model.Review;
+import eu.coinform.gateway.model.QueryResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,8 +36,8 @@ public class RedisConfig {
      */
     @Bean
     @Qualifier("redisTemplate")
-    public RedisTemplate<String, Review> redisTemplate(LettuceConnectionFactory connectionFactory) {
-        RedisTemplate<String, Review> template = new RedisTemplate<>();
+    public RedisTemplate<String, QueryResponse> redisTemplate(LettuceConnectionFactory connectionFactory) {
+        RedisTemplate<String, QueryResponse> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         return template;
     }
