@@ -21,7 +21,7 @@ public class TwitterUser implements Check {
     private String id;
 
     @SuppressWarnings("UnstableApiUsage")
-    public void setScreenName(String twitterId) {
+    public void setScreenName(String screenName) {
         this.screenName = screenName;
         this.id = Hashing.sha256().hashString(screenName, StandardCharsets.UTF_8).toString();
     }
