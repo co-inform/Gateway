@@ -10,13 +10,13 @@ basePath: "/v2"
 schemes:
 - "https"
 paths:
-  /check/claim:
+  /twitter/user:
     post:
       tags:
       - "Browser Plugin"
-      summary: "Check a claim"
-      description: "Sends the claim to be checked and gives back a 'check id'"
-      operationId: "checkClaim"
+      summary: "Check a twitter user"
+      description: "Sends a twitter user to be checked and return a 'query id'"
+      operationId: "twitterUser"
       consumes:
       - "application/json"
       produces:
@@ -24,75 +24,95 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "A claim object"
+        description: "A twitter user"
         required: true
         schema:
-          $ref: "#/definitions/Claim"
+          $ref: "#/definitions/TwitterUser"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/CheckId"
+            $ref: "#/definitions/QueryId"
         400:
           description: "Invalid input"
-  /check/source:
+  /twitter/tweet:
     post:
       tags:
       - "Browser Plugin"
-      summary: "Check a source"
-      description: "Sends a source to be cheched and gives back a 'check id'"
+      summary: "Check a tweet"
+      description: "Sends a tweet to be cheched and gives back a 'query id'"
       operationId: "checkSource"
       produces: 
       - "application/json"
       parameters:
       - in: "body"
         name: "body"
-        description: "A source object"
+        description: "A tweet"
         required: true
         schema:
-          $ref: "#/definitions/Source"
+          $ref: "#/definitions/Tweet"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/CheckId"
+            $ref: "#/definitions/QueryId"
         400:
           description: "Invalid input"
-  /check/findById/{id}:
+  /request/{query_id}:
     get:
       tags:
       - "Browser Plugin"
-      summary: "Get the ClaimReview"
-      description: "Get a ClaimReview (https://schema.org/ClaimReview) previously requested by its 'check id'"
-      operationId: "checkFindById"
+      summary: "Get a response from a query"
+      description: "Get the request from a previous query"
+      operationId: "requestQueryId"
       produces:
       - "application/json"
       parameters:
-      - name: "id"
+      - name: "query_id"
         in: "path"
-        description: "ID of ClaimReview to return"
+        description: "the query_id given by an previous query"
         required: true
         type: "string"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ClaimReview"
+            $ref: "#/definitions/QueryResponse"
         404:
-          description: "ClaimReview not found"
-  /review:
+          description: "no such response"
+  /misinfome:
     post:
       tags: 
       - "MD"
-      summary: "post a finished ClaimReview"
-      description: "Post a fineshed ClaimReview (https://schema.org/ClaimReview)"
+      summary: "post a finished MisinfoMe query"
+      description: "Post a finished MisinfoMe query"
       parameters:
       - in: "body"
         name: "body"
-        description: "A ClaimReview object"
+        description: "MisinfoMe query response"
         required: true
         schema: 
-          $ref: "#/definitions/ReviewPost"
+          $ref: "#/definitions/ModuleAnswer"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        200:
+          description: "successful operation"
+        401:
+          description: "unauthorized operation"
+  /module_x:
+    post:
+      tags:
+        - "MD"
+      summary: "post a finished module_x query"
+      description: "Post a finished module_x query"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "module_x query response"
+          required: true
+          schema:
+            $ref: "#/definitions/ModuleAnswer"
       security:
         - ApiKeyAuth: []
       responses:
@@ -101,36 +121,29 @@ paths:
         401:
           description: "unauthorized operation"
 definitions:
-  CheckId:
+  QueryId:
     type: "string"
-  Claim:
+  TwitterUser:
     type: "object"
     properties:
-      url: 
+      user_id:
         type: "string"
-      text:
+      screen_name:
         type: "string"
-      author:
-        type: "string"
-  ReviewPost:
+  Tweet:
     type: "object"
     properties:
-      id:
+      tweet_id:
         type: "string"
-        description: "check id"
-      claimReview:
-        $ref: "#/definitions/ClaimReview"
-  ClaimReview:
+  QueryResponse:
     type: "object"
-  Source:
+  ModuleAnswer:
     type: "object"
     properties:
-      url: 
+      query_id:
         type: "string"
-      publisher:
-        type: "string"
-      author: 
-        type: "string"
+      answer:
+        type: "object"
 securityDefinitions:
   ApiKeyAuth: 
     type: "apiKey"
