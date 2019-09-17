@@ -1,4 +1,4 @@
-ewagger: "2.0"
+swagger: "2.0"
 info:
   description: |
     This document describes the API exposed by Co-Inform's Misinformation Detection Modules Gateway.
@@ -7,8 +7,8 @@ info:
   title: "[Draft] Co-Inform Gateway API"
 host: "api.coinform.eu"
 basePath: "/v2"
-schemes:
-- "https"
+#schemes:
+#- "https"
 paths:
   /twitter/user:
     post:
@@ -83,7 +83,7 @@ paths:
   /misinfome:
     post:
       tags: 
-      - "MD"
+      - "Modules"
       summary: "post a finished MisinfoMe query"
       description: "Post a finished MisinfoMe query"
       parameters:
@@ -100,10 +100,30 @@ paths:
           description: "successful operation"
         401:
           description: "unauthorized operation"
+  /contentanalysis:
+    post:
+      tags:
+        - "Modules"
+      summary: "post a finished Content Analysis query"
+      description: "Post a finished Content Analysis query"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Content Analysis query response"
+          required: true
+          schema:
+            $ref: "#/definitions/ModuleAnswer"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        200:
+          description: "successful operation"
+        401:
+          description: "unauthorized operation"
   /module_x:
     post:
       tags:
-        - "MD"
+        - "Modules"
       summary: "post a finished module_x query"
       description: "Post a finished module_x query"
       parameters:
