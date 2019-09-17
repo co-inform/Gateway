@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.function.Consumer;
 
 
 @RestController
@@ -23,7 +24,8 @@ public class ResponseController {
     }
 
     @PostMapping("/misinfome")
-    ResponseEntity<?> postMisinfoMe(@Valid @RequestBody QueryResponse queryResponse) {
+    ResponseEntity<?> postMisinfoMe(@Valid @RequestBody QueryResponse queryResponse, @Qualifier("misinfome") Consumer<QueryResponse> responseConsumer) {
+        responseConsumer.accept(queryResponse);
         template.opsForValue().set(queryResponse.getId(), queryResponse);
         log.debug("posting {}: {}", queryResponse.getId(), queryResponse);
         return ResponseEntity.ok().build();
