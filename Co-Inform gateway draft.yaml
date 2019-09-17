@@ -1,4 +1,4 @@
-ewagger: "2.0"
+swagger: "2.0"
 info:
   description: |
     This document describes the API exposed by Co-Inform's Misinformation Detection Modules Gateway.
