@@ -32,7 +32,7 @@ public class RedisConfig {
     /**
      * Set up the redis template with String keys and values
      *
-     * @return
+     * @return redisTemplate
      */
     @Bean
     @Qualifier("redisTemplate")

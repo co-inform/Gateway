@@ -1,0 +1,3 @@
+[submodule "policy_manager"]
+	path = policy_manager
+	url = git@github.com:isspek/policy_manager.git

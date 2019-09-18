@@ -22,9 +22,9 @@ import java.util.function.Consumer;
 @Slf4j
 public class CheckHandlers {
 
-    private String rootUrl;
-    private int port;
-    private ObjectWriter objectWriter;
+    final private String rootUrl;
+    final private int port;
+    final private ObjectWriter objectWriter;
 
     CheckHandlers(@Value("${md.server.url}") String rootUrl, @Value("${md.server.port}") int port, ObjectMapper objectMapper) {
         this.rootUrl = rootUrl;
@@ -78,7 +78,7 @@ public class CheckHandlers {
         }
     }
 
-    private String getParamString(Map<String, String> params) throws UnsupportedEncodingException {
+    private String getParamString(Map<String, String> params) {
         if(params == null || params.isEmpty()) {
             return "";
         }
