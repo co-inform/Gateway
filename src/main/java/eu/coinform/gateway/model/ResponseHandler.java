@@ -1,7 +1,7 @@
 package eu.coinform.gateway.model;
 
-import eu.coinform.gateway.model.redisobjects.ModuleTransaction;
-import eu.coinform.gateway.model.redisobjects.QueryResponse;
+import eu.coinform.gateway.cache.ModuleTransaction;
+import eu.coinform.gateway.cache.QueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

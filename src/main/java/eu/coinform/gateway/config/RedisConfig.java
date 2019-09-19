@@ -1,7 +1,7 @@
 package eu.coinform.gateway.config;
 
-import eu.coinform.gateway.model.redisobjects.ModuleTransaction;
-import eu.coinform.gateway.model.redisobjects.QueryResponse;
+import eu.coinform.gateway.cache.ModuleTransaction;
+import eu.coinform.gateway.cache.QueryResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

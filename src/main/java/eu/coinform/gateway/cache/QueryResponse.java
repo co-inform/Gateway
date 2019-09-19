@@ -1,10 +1,8 @@
-package eu.coinform.gateway.model.redisobjects;
+package eu.coinform.gateway.cache;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 

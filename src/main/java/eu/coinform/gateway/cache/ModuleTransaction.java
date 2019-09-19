@@ -1,4 +1,4 @@
-package eu.coinform.gateway.model.redisobjects;
+package eu.coinform.gateway.cache;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
