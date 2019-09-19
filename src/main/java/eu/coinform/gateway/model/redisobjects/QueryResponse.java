@@ -1,4 +1,4 @@
-package eu.coinform.gateway.model;
+package eu.coinform.gateway.model.redisobjects;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -13,9 +13,6 @@ import java.util.LinkedHashMap;
 @ToString
 public class QueryResponse implements Serializable {
 
-    @Getter
-    @Id
-    private String id;
     @Getter
     private LinkedHashMap<String, Object> response;
 }

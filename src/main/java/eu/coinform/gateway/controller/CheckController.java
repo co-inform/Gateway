@@ -1,6 +1,7 @@
 package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.model.*;
+import eu.coinform.gateway.model.redisobjects.QueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,7 +23,7 @@ public class CheckController {
     private final Consumer<TwitterUser> twitterUserConsumer;
     private final Consumer<Tweet> tweetConsumer;
 
-    CheckController(@Qualifier("redisTemplate") RedisTemplate<String, QueryResponse> template,
+    CheckController(@Qualifier("redisQueryTemplate") RedisTemplate<String, QueryResponse> template,
                     RequestResourceAssembler assembler,
                     Consumer<TwitterUser> twitterUserConsumer,
                     Consumer<Tweet> tweetConsumer
