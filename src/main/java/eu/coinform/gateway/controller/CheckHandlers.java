@@ -25,6 +25,8 @@ import java.util.function.Consumer;
 @Slf4j
 public class CheckHandlers {
 
+    //todo: consumer runner on some kind of threadpool
+
     final private ObjectWriter objectWriter;
 
     CheckHandlers(ObjectMapper objectMapper) {
@@ -34,6 +36,7 @@ public class CheckHandlers {
     @Bean
     Consumer<TwitterUser> twitterUserConsumer() {
         return twitterUser -> {
+            //todo: build and send http request to the module endpoints
             log.debug("handle review object: {}", twitterUser);
         };
     }
@@ -41,6 +44,7 @@ public class CheckHandlers {
     @Bean
     Consumer<Tweet> tweetConsumer() {
         return tweet -> {
+            //todo: build and send http request to the module endpoints
             log.debug("handle tweet object: {}", tweet);
         };
     }

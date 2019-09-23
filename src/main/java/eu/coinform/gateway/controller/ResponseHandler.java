@@ -14,14 +14,19 @@ import java.util.function.Consumer;
 @Slf4j
 public class ResponseHandler {
 
+    //todo: Build the policy engine connectin
+
     @Bean
     @Qualifier("moduleResponse")
     BiConsumer<ModuleTransaction, QueryResponse> responseConsumer() {
         return (transaction, response) -> {
+            //todo: Aggregate and send the responces to the policy engine
             log.debug("Response {} to {}: {}", transaction.getTransactionId(), transaction.getModule(), response.toString());
         };
     }
 
+    /*
+    // Probably replaced by the 'moduleResponse' bean
     @Bean
     @Qualifier("misinfome")
     Consumer<QueryResponse> misinfomeConsumer() {
@@ -29,5 +34,6 @@ public class ResponseHandler {
           log.debug("Handle MisinfoMe: {}", response);
         };
     }
+     */
 
 }

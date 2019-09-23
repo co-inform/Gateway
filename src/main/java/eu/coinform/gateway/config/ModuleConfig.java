@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @Slf4j
@@ -15,9 +18,18 @@ public class ModuleConfig {
 
     @Bean
     @Qualifier("misinfome")
-    public Module misinfoMeModule(@Value("misinfome.server.scheme") String scheme,
+    public Module misinfoMeModule(@Value("misinfome.name") String name,
+                                  @Value("misinfome.server.scheme") String scheme,
                                   @Value("misinfome.server.url") String url,
-                                  @Value("misinfome.server.port") int port) {
-        return new Module("MisinfoMe", scheme, url, port);
+                                  @Value("misinfome.server.port") int port,
+                                  Map<String, Module> moduleMap) {
+        Module misinfomeModule = new Module(name, scheme, url, port);
+        moduleMap.put(name, misinfomeModule);
+        return misinfomeModule;
+    }
+
+    @Bean
+    public Map<String, Module> getModuleMap() {
+        return new ConcurrentHashMap<>();
     }
 }
