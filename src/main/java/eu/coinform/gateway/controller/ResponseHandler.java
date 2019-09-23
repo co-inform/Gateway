@@ -14,13 +14,13 @@ import java.util.function.Consumer;
 @Slf4j
 public class ResponseHandler {
 
-    //todo: Build the policy engine connectin
+    //todo: Build the policy engine connection
 
     @Bean
     @Qualifier("moduleResponse")
     public BiConsumer<ModuleTransaction, QueryResponse> responseConsumer() {
         return (transaction, response) -> {
-            //todo: Aggregate and send the responces to the policy engine
+            //todo: Aggregate and send the responses to the policy engine
             log.debug("Response {} to {}: {}", transaction.getTransactionId(), transaction.getModule(), response.toString());
         };
     }
