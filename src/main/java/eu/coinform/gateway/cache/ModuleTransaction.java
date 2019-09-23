@@ -13,6 +13,6 @@ public class ModuleTransaction {
     @Getter
     private String transactionId;
     @Getter
-    private Module module;
+    private String module;
 }
 

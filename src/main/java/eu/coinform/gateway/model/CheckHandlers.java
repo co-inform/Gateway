@@ -25,13 +25,9 @@ import java.util.function.Consumer;
 @Slf4j
 public class CheckHandlers {
 
-    final private String rootUrl;
-    final private int port;
     final private ObjectWriter objectWriter;
 
-    CheckHandlers(@Value("${md.server.url}") String rootUrl, @Value("${md.server.port}") int port, ObjectMapper objectMapper) {
-        this.rootUrl = rootUrl;
-        this.port = port;
+    CheckHandlers(ObjectMapper objectMapper) {
         this.objectWriter = objectMapper.writer();
     }
 
