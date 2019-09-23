@@ -7,7 +7,10 @@ import eu.coinform.gateway.service.Module;
 import eu.coinform.gateway.service.ModuleRequest;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
+import eu.coinform.gateway.service.Module;
+import eu.coinform.gateway.service.ModuleRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Function;
 
 @Configuration
@@ -32,10 +36,10 @@ public class ModuleConfig {
 
     @Bean
     @Qualifier("misinfome")
-    public Module misinfoMeModule(@Value("misinfome.name") String name,
-                                  @Value("misinfome.server.scheme") String scheme,
-                                  @Value("misinfome.server.url") String url,
-                                  @Value("misinfome.server.port") int port,
+    public Module misinfoMeModule(@Value("${misinfome.name}") String name,
+                                  @Value("${misinfome.server.scheme}") String scheme,
+                                  @Value("${misinfome.server.url}") String url,
+                                  @Value("${misinfome.server.port}") int port,
                                   Map<String, Module> moduleMap,
                                   Function<ModuleRequest, HttpResponse> requestRunner) {
         Module misinfomeModule = new Module(name, scheme, url, port, requestRunner);
