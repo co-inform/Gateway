@@ -1,5 +1,6 @@
 package eu.coinform.gateway.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.hash.Hashing;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,11 +18,13 @@ public class Tweet implements Check {
 
     @Getter
     @NotEmpty(message = "no tweetId specified")
-    private String tweet_id;
+    @JsonProperty("tweet_id")
+    private String tweetId;
 
     @SuppressWarnings("UnstableApiUsage")
-    public void setTweet_id(String tweet_id) {
-        this.tweet_id = tweet_id;
-        this.id = Hashing.sha256().hashString(tweet_id, StandardCharsets.UTF_8).toString();
+    @JsonProperty("tweet_id")
+    public void setTweetId(String tweetId) {
+        this.tweetId = tweetId;
+        this.id = Hashing.sha256().hashString(tweetId, StandardCharsets.UTF_8).toString();
     }
 }

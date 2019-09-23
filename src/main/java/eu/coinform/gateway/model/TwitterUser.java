@@ -1,5 +1,6 @@
 package eu.coinform.gateway.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.hash.Hashing;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,16 +16,19 @@ public class TwitterUser implements Check {
     @Setter
     @Getter
     @NotEmpty(message = "There must be a specified twitter user_id")
-    private String twitter_id;
+    @JsonProperty("twitter_id")
+    private String twitterId;
     @Getter
     @NotEmpty(message = "There must be a specified twitter screen_name")
-    private String screen_name;
+    @JsonProperty("screen_name")
+    private String screenName;
     @Getter
     private String id;
 
     @SuppressWarnings("UnstableApiUsage")
-    public void setScreen_name(String screen_name) {
-        this.screen_name = screen_name;
-        this.id = Hashing.sha256().hashString(screen_name, StandardCharsets.UTF_8).toString();
+    @JsonProperty("screen_name")
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
+        this.id = Hashing.sha256().hashString(screenName, StandardCharsets.UTF_8).toString();
     }
 }
