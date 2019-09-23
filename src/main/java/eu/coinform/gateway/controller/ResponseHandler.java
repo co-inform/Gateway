@@ -18,7 +18,7 @@ public class ResponseHandler {
 
     @Bean
     @Qualifier("moduleResponse")
-    BiConsumer<ModuleTransaction, QueryResponse> responseConsumer() {
+    public BiConsumer<ModuleTransaction, QueryResponse> responseConsumer() {
         return (transaction, response) -> {
             //todo: Aggregate and send the responces to the policy engine
             log.debug("Response {} to {}: {}", transaction.getTransactionId(), transaction.getModule(), response.toString());

@@ -1,25 +1,21 @@
 package eu.coinform.gateway.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import eu.coinform.gateway.service.ModuleRequest;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
+import eu.coinform.gateway.service.Module;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.net.http.HttpRequest;
-import java.nio.charset.MalformedInputException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Component
 @Slf4j
@@ -27,25 +23,43 @@ public class CheckHandlers {
 
     //todo: consumer runner on some kind of threadpool
 
-    final private ObjectWriter objectWriter;
-
-    CheckHandlers(ObjectMapper objectMapper) {
-        this.objectWriter = objectMapper.writer();
-    }
-
     @Bean
-    Consumer<TwitterUser> twitterUserConsumer() {
-        return twitterUser -> {
-            //todo: build and send http request to the module endpoints
-            log.debug("handle review object: {}", twitterUser);
+    public Function<ModuleRequest, HttpResponse> requestRunner() {
+        return moduleRequest -> {
+            HttpResponse httpResponse = null;
+            try {
+                HttpClient httpClient = HttpClients.createMinimal();
+                httpResponse = httpClient.execute(moduleRequest);
+            } catch (ClientProtocolException ex) {
+                moduleRequest.moduleRequestException(ex, "http protocol error");
+            } catch (IOException ex) {
+                moduleRequest.moduleRequestException(ex, "connection problem");
+            }
+            return httpResponse;
         };
     }
 
     @Bean
-    Consumer<Tweet> tweetConsumer() {
+    public Consumer<TwitterUser> twitterUserConsumer(Map<String, Module> moduleMap) {
+        return twitterUser -> {
+            log.debug("handle review object: {}", twitterUser);
+            for (Module module: moduleMap.values()) {
+                //todo: handle negative http results, like 404
+                log.debug("{}: {}", module.getName(),
+                        module.getTwitterUserModuleRequestFunction()
+                                .andThen(requestRunner())
+                                .apply(twitterUser));
+            }
+        };
+    }
+
+    @Bean
+    public Consumer<Tweet> tweetConsumer(Map<String, Module> moduleMap) {
         return tweet -> {
-            //todo: build and send http request to the module endpoints
             log.debug("handle tweet object: {}", tweet);
+            for (Module module: moduleMap.values()) {
+                module.getTweetModuleRequestFunction().apply(tweet);
+            }
         };
     }
 }

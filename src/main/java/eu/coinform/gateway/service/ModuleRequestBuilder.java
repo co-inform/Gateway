@@ -1,6 +1,7 @@
-package eu.coinform.gateway.model;
+package eu.coinform.gateway.service;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -12,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class ModuleRequestBuilder {
 
@@ -22,6 +24,10 @@ public class ModuleRequestBuilder {
     private String url;
     private int port;
     private String path;
+    private Function<ModuleRequest, HttpResponse> requestRunner;
+    private int maxAttempts;
+
+    public static final int DEFAULT_MAX_ATTEMPTS = 3;
 
     public ModuleRequestBuilder() {
         headers = new HashMap<>();
@@ -32,7 +38,7 @@ public class ModuleRequestBuilder {
         return this;
     }
 
-    public ModuleRequestBuilder addContent(String json) throws UnsupportedEncodingException {
+    public ModuleRequestBuilder setContent(String json) throws UnsupportedEncodingException {
         headers.put("Content-type", "application/json");
         httpEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
         return this;
@@ -63,6 +69,16 @@ public class ModuleRequestBuilder {
         return this;
     }
 
+    public ModuleRequestBuilder setRequestRunner(Function<ModuleRequest, HttpResponse> requestRunner) {
+        this.requestRunner = requestRunner;
+        return this;
+    }
+
+    public ModuleRequestBuilder setMaxAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+        return this;
+    }
+
     public ModuleRequest build() throws ModuleRequestException{
         URI uri;
         try {
@@ -76,7 +92,11 @@ public class ModuleRequestBuilder {
                 httpRequest = new HttpGet(uri);
                 break;
             case POST:
-                httpRequest = new HttpPost(uri);
+                HttpPost httpPost = new HttpPost(uri);
+                if (httpEntity != null) {
+                    httpPost.setEntity(httpEntity);
+                }
+                httpRequest = httpPost;
                 break;
             default:
                 throw new ModuleRequestException("The request must have a set request method");
@@ -84,7 +104,10 @@ public class ModuleRequestBuilder {
         for (Map.Entry<String, String> header: headers.entrySet()) {
             httpRequest.setHeader(header.getKey(), header.getValue());
         }
-        return (ModuleRequest) httpRequest;
+        ModuleRequest moduleRequest = (ModuleRequest) httpRequest;
+        moduleRequest.setRequestRunner(requestRunner);
+        moduleRequest.setMaxAttempts(maxAttempts);
+        return moduleRequest;
     }
 
     public enum  Request {
