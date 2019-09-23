@@ -18,10 +18,10 @@ public class ModuleConfig {
 
     @Bean
     @Qualifier("misinfome")
-    public Module misinfoMeModule(@Value("misinfome.name") String name,
-                                  @Value("misinfome.server.scheme") String scheme,
-                                  @Value("misinfome.server.url") String url,
-                                  @Value("misinfome.server.port") int port,
+    public Module misinfoMeModule(@Value("${misinfome.name}") String name,
+                                  @Value("${misinfome.server.scheme}") String scheme,
+                                  @Value("${misinfome.server.url}") String url,
+                                  @Value("${misinfome.server.port}") int port,
                                   Map<String, Module> moduleMap) {
         Module misinfomeModule = new Module(name, scheme, url, port);
         moduleMap.put(name, misinfomeModule);
