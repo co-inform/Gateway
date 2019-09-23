@@ -1,4 +1,4 @@
-package eu.coinform.gateway.model;
+package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
@@ -18,7 +18,7 @@ public class ResponseHandler {
     @Qualifier("moduleResponse")
     BiConsumer<ModuleTransaction, QueryResponse> responseConsumer() {
         return (transaction, response) -> {
-            log.debug("Response {} to {}: {}", transaction.getTransactionId(), transaction.getModule().name(), response.toString());
+            log.debug("Response {} to {}: {}", transaction.getTransactionId(), transaction.getModule(), response.toString());
         };
     }
 

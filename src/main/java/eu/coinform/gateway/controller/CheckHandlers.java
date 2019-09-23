@@ -1,4 +1,4 @@
-package eu.coinform.gateway.model;
+package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
