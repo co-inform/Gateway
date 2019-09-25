@@ -73,7 +73,6 @@ public class CheckControllerTest {
     @Test
     public void contextLoads() throws Exception {
         assertThat(checkController).isNotNull();
-//        checkController.
     }
 
     @Test
@@ -95,6 +94,8 @@ public class CheckControllerTest {
 
     @Test
     public void twitterTweet() {
+        log.debug("Int twitterTweet test");
+
         assertTrue(true);
     }
 }
