@@ -1,7 +1,6 @@
 package eu.coinform.gateway.controller;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
@@ -24,14 +22,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -87,7 +83,7 @@ public class CheckControllerTest {
     public void twitterUser() throws Exception{
         log.debug("In twitteruser test");
 
-         checkResource = new Resource<>(twitterUser,
+        checkResource = new Resource<>(twitterUser,
                 linkTo(methodOn(CheckController.class).findById(twitterUser.getId())).withSelfRel());
 
         log.debug("Twitteruser: " + twitterUser.toString());
@@ -134,7 +130,7 @@ public class CheckControllerTest {
         log.debug("Response: {}", response.getContentAsString());
         log.debug("checkResource: {}", jsonTester.write(checkResource).getJson());
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString().regionMatches(0,jsonTester.write(checkResource).getJson(),0,106));
+        assertThat(response.getContentAsString().regionMatches(0,jsonTester.write(checkResource).getJson(),0,106)).isTrue();
     }
 
     @Test
