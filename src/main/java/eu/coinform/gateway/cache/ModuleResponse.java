@@ -3,22 +3,17 @@ package eu.coinform.gateway.cache;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
 @RedisHash("response")
-@NoArgsConstructor
+@RequiredArgsConstructor
 @ToString
-public class QueryResponse implements Serializable {
+public class ModuleResponse {
 
     @Getter
-    private Status status;
-    @Getter
+    @NotEmpty(message = "The Module Response must contain an response object")
     private LinkedHashMap<String, Object> response;
 
-    public enum Status {
-        done,
-        partly_done,
-        in_progress
-    }
 }

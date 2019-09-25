@@ -2,6 +2,7 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.service.CheckHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -42,8 +43,8 @@ public class CheckController {
         return assembler.toResource(tweet);
     }
 
-    @GetMapping("/response/{id}")
-    public org.springframework.hateoas.Resource<QueryResponse> findById(@PathVariable(value = "id", required = true) String id) {
+    @GetMapping("/response/{query_id}")
+    public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String id) {
         QueryResponse queryResponse = template.opsForValue().get(id);
         if (queryResponse == null) {
             throw new ResponseNotFoundException(id);

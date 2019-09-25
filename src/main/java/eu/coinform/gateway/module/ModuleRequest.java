@@ -1,4 +1,4 @@
-package eu.coinform.gateway.service;
+package eu.coinform.gateway.module;
 
 import lombok.AccessLevel;
 import lombok.Getter;

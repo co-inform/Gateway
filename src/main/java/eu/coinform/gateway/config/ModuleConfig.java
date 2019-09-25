@@ -3,11 +3,11 @@ package eu.coinform.gateway.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import eu.coinform.gateway.service.*;
+import eu.coinform.gateway.module.*;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
-import eu.coinform.gateway.service.Module;
-import eu.coinform.gateway.service.ModuleRequest;
+import eu.coinform.gateway.module.Module;
+import eu.coinform.gateway.module.ModuleRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +24,12 @@ import java.util.function.Function;
 public class ModuleConfig {
 
     final private ObjectWriter objectWriter;
+    final private String callbackBaseUrl;
 
-    ModuleConfig(ObjectMapper objectMapper) {
+    ModuleConfig(ObjectMapper objectMapper,
+                 @Value("{gateway.url}{gateway.callback.endpoint}") String callbackBaseUrl) {
         this.objectWriter = objectMapper.writer();
+        this.callbackBaseUrl = callbackBaseUrl;
     }
 
 
@@ -42,16 +45,15 @@ public class ModuleConfig {
 
         Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
             ModuleRequest request = null;
+            MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl); //todo:correct json
             try {
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder()
                         .setPath("") //todo: set correct path
-                        .setContent(objectWriter.writeValueAsString(tweet)) //todo:correct json
+                        .setContent(content)
                         .build();
 
             } catch (JsonProcessingException ex) {
                 log.error("The tweet object could not be parsed, {}", tweet);
-            } catch (UnsupportedEncodingException ex) {
-                log.error("The tweet object used unsupported encoding, {}", tweet);
             } catch (ModuleRequestBuilderException ex) {
                 log.error(ex.getMessage());
             }
@@ -60,14 +62,13 @@ public class ModuleConfig {
         Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
             ModuleRequest request = null;
             try {
+                MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl); //todo:correct json
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder()
                         .setPath("") //todo: set correct path
-                        .setContent(objectWriter.writeValueAsString(twitterUser)) //todo: correct json
+                        .setContent(content) //todo: correct json
                         .build();
             } catch (JsonProcessingException ex) {
                 log.error("The twitter user object could not be parsed, {}", twitterUser);
-            } catch (UnsupportedEncodingException ex) {
-                log.error("The twitter user object used unsupported encoding, {}", twitterUser);
             } catch (ModuleRequestBuilderException ex) {
                 log.error(ex.getMessage());
             }

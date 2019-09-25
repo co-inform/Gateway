@@ -1,5 +1,6 @@
 package eu.coinform.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -10,6 +11,8 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableAsync
 public class AsyncConfig {
+
+    //todo: get settings from the properties file
 
     @Bean(name = "asyncExecutor")
     public Executor asyncExecutor() {
