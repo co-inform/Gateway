@@ -27,8 +27,7 @@ public class Module {
     @Getter
     private Function<TwitterUser, ModuleRequest> twitterUserModuleRequestFunction;
 
-    public Module(String name, String scheme, String url, int port,
-                  Function<ModuleRequest, HttpResponse> requestRunner) {
-        this.moduleRequestFactory = new ModuleRequestFactory(scheme, url, port, requestRunner);
+    public Module(String name, String scheme, String url, int port) {
+        this.moduleRequestFactory = new ModuleRequestFactory(scheme, url, port);
     }
 }
