@@ -1,5 +1,6 @@
 package eu.coinform.gateway.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -15,7 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 public class ModuleRequestBuilder {
+
+    public static final int DEFAULT_MAX_ATTEMPTS = 3;
 
     private ModuleRequestBuilder.Request request;
     private Map<String, String> headers;
@@ -24,10 +28,11 @@ public class ModuleRequestBuilder {
     private String url;
     private int port;
     private String path;
-    private Function<ModuleRequest, HttpResponse> requestRunner;
-    private int maxAttempts;
-
-    public static final int DEFAULT_MAX_ATTEMPTS = 3;
+    private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
+    private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse -> {
+        log.debug("request '{}' got responce: {}", toString(), httpResponse.toString());
+        return httpResponse;
+    });
 
     public ModuleRequestBuilder() {
         headers = new HashMap<>();
@@ -69,22 +74,22 @@ public class ModuleRequestBuilder {
         return this;
     }
 
-    public ModuleRequestBuilder setRequestRunner(Function<ModuleRequest, HttpResponse> requestRunner) {
-        this.requestRunner = requestRunner;
-        return this;
-    }
-
     public ModuleRequestBuilder setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
         return this;
     }
 
-    public ModuleRequest build() throws ModuleRequestException{
+    public ModuleRequestBuilder setResponseHandler(Function<HttpResponse, HttpResponse> responseHandler) {
+        this.responseHandler = responseHandler;
+        return this;
+    }
+
+    public ModuleRequest build() throws ModuleRequestBuilderException{
         URI uri;
         try {
             uri = new URI(scheme, url + ":" + port, path, null);
         } catch (URISyntaxException ex) {
-            throw new ModuleRequestException("Could not create a valid URI");
+            throw new ModuleRequestBuilderException("Could not create a valid URI");
         }
         HttpUriRequest httpRequest;
         switch (request) {
@@ -99,14 +104,14 @@ public class ModuleRequestBuilder {
                 httpRequest = httpPost;
                 break;
             default:
-                throw new ModuleRequestException("The request must have a set request method");
+                throw new ModuleRequestBuilderException("The request must have a set request method");
         }
         for (Map.Entry<String, String> header: headers.entrySet()) {
             httpRequest.setHeader(header.getKey(), header.getValue());
         }
         ModuleRequest moduleRequest = (ModuleRequest) httpRequest;
-        moduleRequest.setRequestRunner(requestRunner);
         moduleRequest.setMaxAttempts(maxAttempts);
+        moduleRequest.setResponseHandler(responseHandler);
         return moduleRequest;
     }
 
