@@ -63,7 +63,7 @@ public class CheckControllerTest {
         JacksonTester.initFields(this, mapper);
         twitterUser.setScreenName(screenName);
         twitterUser.setTwitterId(userId);
-        log.debug("setupTests: " + twitterUser.toString());
+        log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
         log.debug("Tweet {}", tweet.toString());
 
@@ -80,6 +80,7 @@ public class CheckControllerTest {
     @Test
     public void contextLoads() throws Exception {
         assertThat(checkController).isNotNull();
+        assertThat(jsonTester).isNotNull();
     }
 
     @Test
@@ -123,7 +124,6 @@ public class CheckControllerTest {
         given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(checkResource);
 
         // when
-
         MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(jsonTW)
