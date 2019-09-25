@@ -3,8 +3,7 @@ package eu.coinform.gateway.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import eu.coinform.gateway.service.Module;
-import eu.coinform.gateway.service.ModuleRequest;
+import eu.coinform.gateway.service.*;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.service.Module;
@@ -40,9 +39,8 @@ public class ModuleConfig {
                                   @Value("${misinfome.server.scheme}") String scheme,
                                   @Value("${misinfome.server.url}") String url,
                                   @Value("${misinfome.server.port}") int port,
-                                  Map<String, Module> moduleMap,
-                                  Function<ModuleRequest, HttpResponse> requestRunner) {
-        Module misinfomeModule = new Module(name, scheme, url, port, requestRunner);
+                                  Map<String, Module> moduleMap) {
+        Module misinfomeModule = new Module(name, scheme, url, port);
         moduleMap.put(name, misinfomeModule);
 
         Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
@@ -57,6 +55,8 @@ public class ModuleConfig {
                 log.error("The tweet object could not be parsed, {}", tweet);
             } catch (UnsupportedEncodingException ex) {
                 log.error("The tweet object used unsupported encoding, {}", tweet);
+            } catch (ModuleRequestBuilderException ex) {
+                log.error(ex.getMessage());
             }
             return request;
         };
@@ -67,11 +67,12 @@ public class ModuleConfig {
                         .setPath("") //todo: set correct path
                         .setContent(objectWriter.writeValueAsString(twitterUser)) //todo: correct json
                         .build();
-
             } catch (JsonProcessingException ex) {
                 log.error("The twitter user object could not be parsed, {}", twitterUser);
             } catch (UnsupportedEncodingException ex) {
                 log.error("The twitter user object used unsupported encoding, {}", twitterUser);
+            } catch (ModuleRequestBuilderException ex) {
+                log.error(ex.getMessage());
             }
 
             return request;
