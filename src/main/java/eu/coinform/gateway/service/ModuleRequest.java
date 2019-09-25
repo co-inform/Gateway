@@ -24,9 +24,6 @@ abstract public class ModuleRequest implements HttpUriRequest {
     private Exception[] exceptions;
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    private Function<ModuleRequest, HttpResponse> requestRunner;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
     private Function<HttpResponse, HttpResponse> responseHandler;
 
     private HttpResponse moduleRequestException(Exception ex, String message) throws ModuleRequestException {

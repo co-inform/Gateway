@@ -1,9 +1,5 @@
 package eu.coinform.gateway.service;
 
-import org.apache.http.HttpResponse;
-
-import java.util.function.Function;
-
 public class ModuleRequestFactory {
     private String scheme;
     private String url;

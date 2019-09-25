@@ -9,8 +9,6 @@ import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.service.Module;
 import eu.coinform.gateway.service.ModuleRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +17,6 @@ import org.springframework.context.annotation.Configuration;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Function;
 
 @Configuration

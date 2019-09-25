@@ -9,7 +9,6 @@ import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.function.Consumer;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
