@@ -20,29 +20,26 @@ public class CheckController {
 
     private final RedisTemplate<String, QueryResponse> template;
     private final RequestResourceAssembler assembler;
-    private final Consumer<TwitterUser> twitterUserConsumer;
-    private final Consumer<Tweet> tweetConsumer;
+    private final CheckHandler checkHandler;
 
     CheckController(@Qualifier("redisQueryTemplate") RedisTemplate<String, QueryResponse> template,
                     RequestResourceAssembler assembler,
-                    Consumer<TwitterUser> twitterUserConsumer,
-                    Consumer<Tweet> tweetConsumer
+                    CheckHandler checkHandler
     ) {
         this.template = template;
         this.assembler = assembler;
-        this.twitterUserConsumer = twitterUserConsumer;
-        this.tweetConsumer = tweetConsumer;
+        this.checkHandler = checkHandler;
     }
 
     @PostMapping("/twitter/user")
     public Resource<Check> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
-        twitterUserConsumer.accept(twitterUser);
+        checkHandler.twitterUserConsumer(twitterUser);
         return assembler.toResource(twitterUser);
     }
 
     @PostMapping("/twitter/tweet")
     public Resource<Check> twitterTweet(@Valid @RequestBody Tweet tweet) {
-        tweetConsumer.accept(tweet);
+        checkHandler.tweetConsumer(tweet);
         return assembler.toResource(tweet);
     }
 

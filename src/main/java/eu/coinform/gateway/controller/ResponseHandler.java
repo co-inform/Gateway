@@ -5,24 +5,23 @@ import eu.coinform.gateway.cache.QueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-@Component
+@Service
 @Slf4j
 public class ResponseHandler {
 
     //todo: Build the policy engine connection
 
-    @Bean
-    @Qualifier("moduleResponse")
-    public BiConsumer<ModuleTransaction, QueryResponse> responseConsumer() {
-        return (transaction, response) -> {
-            //todo: Aggregate and send the responses to the policy engine
-            log.debug("Response {} to {}: {}", transaction.getTransactionId(), transaction.getModule(), response.toString());
-        };
+    @Async("AsyncExecutor")
+    public void responseConsumer(ModuleTransaction moduleTransaction, QueryResponse queryResponse) {
+        //todo: Aggregate and send the responses to the policy engine
+        log.debug("Response {} to {}: {}", moduleTransaction.getTransactionId(), moduleTransaction.getModule(), moduleTransaction.toString());
     }
 
     /*

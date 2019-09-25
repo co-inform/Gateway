@@ -2,6 +2,7 @@ package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.http.HttpResponse;

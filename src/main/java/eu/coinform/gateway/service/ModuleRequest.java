@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
 import java.util.function.Function;
@@ -35,12 +36,17 @@ abstract public class ModuleRequest implements HttpUriRequest {
         }
         exceptions[attempts] = ex;
         if (++attempts < maxAttempts) {
-            return makeRequest();
+            return sendRequest();
         }
         throw new ModuleRequestException(String.format("Could not complete moduleRequest, failed after %d tries. Last exception: %s", maxAttempts, ex.getMessage()), exceptions);
     }
 
-    public HttpResponse makeRequest() throws ModuleRequestException{
+    @Async("asyncExecutor")
+    public void makeRequest() throws ModuleRequestException {
+        sendRequest();
+    }
+
+    private HttpResponse sendRequest() throws ModuleRequestException{
         HttpResponse httpResponse = null;
         try {
             HttpClient httpClient = HttpClients.createMinimal();

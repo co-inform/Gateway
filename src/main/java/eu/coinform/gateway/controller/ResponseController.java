@@ -19,12 +19,12 @@ public class ResponseController {
 
     private final RedisTemplate<String, QueryResponse> queryTemplate;
     private final RedisTemplate<String, ModuleTransaction> transactionTemplate;
-    private final BiConsumer<ModuleTransaction, QueryResponse> responseConsumer;
+    private final ResponseHandler responseHandler;
 
     ResponseController(@Qualifier("redisQueryTemplate") RedisTemplate<String, QueryResponse> queryTemplate,
                        @Qualifier("redisTransactionTemplate") RedisTemplate<String, ModuleTransaction> transactionTemplate,
-                       BiConsumer<ModuleTransaction, QueryResponse> responseConsumer) {
-        this.responseConsumer = responseConsumer;
+                       ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
         this.transactionTemplate = transactionTemplate;
         this.queryTemplate = queryTemplate;
     }
@@ -36,7 +36,7 @@ public class ResponseController {
         if (moduleTransaction == null) {
             throw new NoSuchTransactionIdException(transaction_id);
         }
-        responseConsumer.accept(moduleTransaction, queryResponse);
+        responseHandler.responseConsumer(moduleTransaction, queryResponse);
         return ResponseEntity.ok().build();
     };
 
