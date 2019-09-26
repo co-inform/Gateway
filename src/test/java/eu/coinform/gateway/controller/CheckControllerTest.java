@@ -2,8 +2,10 @@ package eu.coinform.gateway.controller;
 
 import static org.mockito.BDDMockito.given;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.Check;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
@@ -11,20 +13,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.LinkedHashMap;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,11 +52,21 @@ public class CheckControllerTest {
     private final String tweetId = "1176610391058722816";
     private final String userId = "25073877";
     private final String screenName = "realDonaldTrump";
+    private final String idUrl = "/response/%s";
     private final String tweetUrl = "/twitter/tweet";
     private final String userUrl = "/twitter/user";
 
     @MockBean
     private CheckController checkController;
+
+    @InjectMocks
+    private QueryResponse queryResponse;
+
+    //@Spy
+    LinkedHashMap<String, Object> spyMap = new LinkedHashMap<>();
+
+//    @Autowired
+//    QueryResponse queryResponse;
 
     private Resource<Check> checkResource;
     private TwitterUser twitterUser = new TwitterUser();
@@ -177,6 +199,39 @@ public class CheckControllerTest {
 
         // then
                 .andDo(print()).andExpect((status().is4xxClientError()));
+    }
+
+    @Test
+    public void successfullIdGet() throws Exception{
+        log.debug("In successfullIdGet()");
+
+        spyMap.put(tweet.getId(),"Great Success");
+
+        Resource<QueryResponse> queryResource = new Resource<>(queryResponse,
+                linkTo(methodOn(CheckController.class).findById(tweet.getId())).withSelfRel());
+
+        String url = String.format(idUrl, tweet.getId());
+        log.debug("Resource: {}",queryResource.toString());
+        log.debug("Response: {}", queryResponse.toString());
+        log.debug("testmap: {}", spyMap);
+        log.debug("url: {}", url);
+
+        assertThat(queryResource).isNotNull();
+
+        mockMvc = MockMvcBuilders.standaloneSetup(queryResponse).build();
+        when(checkController.findById(tweet.getId())).thenReturn(queryResource);
+
+        // given
+        //given(queryResponse.getResponse()).willReturn(spyMap);
+        //given(checkController.findById(tweet.getId())).willReturn(queryResource);
+
+        // when
+        mockMvc.perform(get(url).accept(MediaType.APPLICATION_JSON_UTF8))
+
+        // then
+                .andDo(print()).andReturn().getResponse().getStatus();
+
+
     }
 
 }
