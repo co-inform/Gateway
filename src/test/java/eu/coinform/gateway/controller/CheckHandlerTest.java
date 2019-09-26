@@ -7,8 +7,6 @@ import static org.junit.Assert.*;
 
 public class CheckHandlerTest {
 
-    @Autowired
-    CheckHandler checkHandler;
 
     @Test
     public void twitterUserConsumer() {

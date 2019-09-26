@@ -1,5 +1,8 @@
-package eu.coinform.gateway.service;
+package eu.coinform.gateway.module;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,8 +36,13 @@ public class ModuleRequestBuilder {
         log.debug("request '{}' got responce: {}", toString(), httpResponse.toString());
         return httpResponse;
     });
+    private ObjectMapper objectMapper;
+    private String transactionId;
+    private String queryId;
 
-    public ModuleRequestBuilder() {
+    public ModuleRequestBuilder(String queryId ,ObjectMapper objectMapper) {
+        this.queryId = queryId;
+        this.objectMapper = objectMapper;
         headers = new HashMap<>();
     }
 
@@ -43,9 +51,10 @@ public class ModuleRequestBuilder {
         return this;
     }
 
-    public ModuleRequestBuilder setContent(String json) throws UnsupportedEncodingException {
+    public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
         headers.put("Content-type", "application/json");
-        httpEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        transactionId = content.getTransactionId();
+        httpEntity = new StringEntity(objectMapper.writeValueAsString(content), ContentType.APPLICATION_JSON);
         return this;
     }
 
@@ -98,9 +107,10 @@ public class ModuleRequestBuilder {
                 break;
             case POST:
                 HttpPost httpPost = new HttpPost(uri);
-                if (httpEntity != null) {
-                    httpPost.setEntity(httpEntity);
+                if (httpEntity == null) {
+                    throw new ModuleRequestBuilderException("The POST request must have Content");
                 }
+                httpPost.setEntity(httpEntity);
                 httpRequest = httpPost;
                 break;
             default:
@@ -112,6 +122,8 @@ public class ModuleRequestBuilder {
         ModuleRequest moduleRequest = (ModuleRequest) httpRequest;
         moduleRequest.setMaxAttempts(maxAttempts);
         moduleRequest.setResponseHandler(responseHandler);
+        moduleRequest.setTransactionId(transactionId);
+        moduleRequest.setQueryId(queryId);
         return moduleRequest;
     }
 
