@@ -1,5 +1,6 @@
 package eu.coinform.gateway.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.hash.Hashing;
 import lombok.Getter;
@@ -11,10 +12,11 @@ import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor
 @ToString
-public class Tweet implements Check {
+public class Tweet implements QueryObject {
 
     @Getter
-    private String id;
+    @JsonIgnore
+    private String queryId;
 
     @Getter
     @NotEmpty(message = "no tweetId specified")
@@ -25,6 +27,6 @@ public class Tweet implements Check {
     @JsonProperty("tweet_id")
     public void setTweetId(String tweetId) {
         this.tweetId = tweetId;
-        this.id = Hashing.sha256().hashString(tweetId, StandardCharsets.UTF_8).toString();
+        this.queryId = Hashing.sha256().hashString(tweetId, StandardCharsets.UTF_8).toString();
     }
 }

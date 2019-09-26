@@ -1,4 +1,4 @@
-package eu.coinform.gateway.service;
+package eu.coinform.gateway.module;
 
 public class ModuleRequestBuilderException extends Exception {
 

@@ -1,4 +1,4 @@
-package eu.coinform.gateway.service;
+package eu.coinform.gateway.module;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,6 +25,12 @@ abstract public class ModuleRequest implements HttpUriRequest {
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private Function<HttpResponse, HttpResponse> responseHandler;
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private String transactionId;
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private String queryId;
 
     private HttpResponse moduleRequestException(Exception ex, String message) throws ModuleRequestException {
         log.error("{}, {}: {}", message, ex.getClass().getName(), ex.getMessage());

@@ -50,4 +50,12 @@ public class RedisConfig {
         template.setConnectionFactory(connectionFactory);
         return template;
     }
+
+    @Bean
+    @Qualifier("redisModuleTemplate")
+    public RedisTemplate<String, Object> redisModuleTemplate(LettuceConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        return template;
+    }
 }

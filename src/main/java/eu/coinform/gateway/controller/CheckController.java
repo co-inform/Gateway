@@ -2,13 +2,16 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.service.CheckHandler;
+import eu.coinform.gateway.service.RedisHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -17,37 +20,53 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Slf4j
 public class CheckController {
 
-    private final RedisTemplate<String, QueryResponse> template;
-    private final RequestResourceAssembler assembler;
+    private final QueryResponseAssembler assembler;
     private final CheckHandler checkHandler;
+    private final RedisHandler redisHandler;
 
-    CheckController(@Qualifier("redisQueryTemplate") RedisTemplate<String, QueryResponse> template,
-                    RequestResourceAssembler assembler,
+    CheckController(RedisHandler redisHandler,
+                    QueryResponseAssembler assembler,
                     CheckHandler checkHandler
     ) {
-        this.template = template;
+        this.redisHandler = redisHandler;
         this.assembler = assembler;
         this.checkHandler = checkHandler;
     }
 
     @PostMapping("/twitter/user")
-    public Resource<Check> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
-        checkHandler.twitterUserConsumer(twitterUser);
-        return assembler.toResource(twitterUser);
+    public Resource<QueryResponse> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
+        return queryEndpoint(twitterUser,
+                (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
     }
 
     @PostMapping("/twitter/tweet")
-    public Resource<Check> twitterTweet(@Valid @RequestBody Tweet tweet) {
-        checkHandler.tweetConsumer(tweet);
-        return assembler.toResource(tweet);
+    public Resource<QueryResponse> twitterTweet(@Valid @RequestBody Tweet tweet) {
+        return queryEndpoint(tweet,
+                (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet));
     }
 
-    @GetMapping("/response/{id}")
-    public org.springframework.hateoas.Resource<QueryResponse> findById(@PathVariable(value = "id", required = true) String id) {
-        QueryResponse queryResponse = template.opsForValue().get(id);
-        if (queryResponse == null) {
-            throw new ResponseNotFoundException(id);
+    private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
+        CompletableFuture<QueryResponse> queryResponseFuture;
+        try {
+            queryResponseFuture = redisHandler.getQueryResponse(queryObject.getQueryId());
+        } catch (NoSuchQueryIdException ex) {
+            queryResponseFuture = redisHandler.setQueryResponse(queryObject.getQueryId(),
+                    new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null));
         }
+        QueryResponse queryResponse = queryResponseFuture.join();
+        if (queryResponse.getStatus() == QueryResponse.Status.done) {
+            //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
+            // Like if the cache is older than some threshold it is handled as a new query.
+            // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
+            return assembler.toResource(queryResponse);
+        }
+        queryObjectConsumer.accept(queryObject);
+        return assembler.toResource(queryResponse);
+    }
+
+    @GetMapping("/response/{query_id}")
+    public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String id) {
+        QueryResponse queryResponse = redisHandler.getQueryResponse(id).join();
         return new Resource<>(queryResponse,
                 linkTo(methodOn(CheckController.class).findById(id)).withSelfRel());
     }

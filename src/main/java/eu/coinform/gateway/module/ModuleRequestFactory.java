@@ -1,9 +1,12 @@
-package eu.coinform.gateway.service;
+package eu.coinform.gateway.module;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ModuleRequestFactory {
     private String scheme;
     private String url;
     private int port;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     ModuleRequestFactory(String scheme, String url, int port) {
         this.scheme = scheme;
@@ -11,8 +14,8 @@ public class ModuleRequestFactory {
         this.port = port;
     }
 
-    public ModuleRequestBuilder getRequestBuilder() {
-        ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder();
+    public ModuleRequestBuilder getRequestBuilder(String queryId) {
+        ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(queryId, objectMapper);
         requestBuilder.setScheme(scheme)
                 .setUrl(url)
                 .setPort(port);
