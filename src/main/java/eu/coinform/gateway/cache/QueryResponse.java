@@ -1,5 +1,6 @@
 package eu.coinform.gateway.cache;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.checkerframework.common.value.qual.StringVal;
@@ -10,12 +11,15 @@ import java.util.LinkedHashMap;
 
 @RedisHash("response")
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
+@EqualsAndHashCode
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class QueryResponse implements Serializable {
 
     @Getter
     @JsonProperty("query_id")
-    final private String queryId;
+    private String queryId;
     @Setter
     @Getter
     private Status status;

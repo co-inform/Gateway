@@ -4,7 +4,8 @@ import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.coinform.gateway.model.Check;
+import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.model.QueryResponseAssembler;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -46,10 +45,10 @@ public class CheckControllerTest {
     @MockBean
     private CheckController checkController;
 
-    private Resource<Check> checkResource;
     private TwitterUser twitterUser = new TwitterUser();
     private Tweet tweet = new Tweet();
-    private JacksonTester<Resource<Check>> jsonTester;
+    private JacksonTester<Resource<QueryResponse>> jsonTester;
+    private QueryResponseAssembler queryResponseAssembler = new QueryResponseAssembler();
 
     @Autowired
     private MockMvc mockMvc;
@@ -83,15 +82,15 @@ public class CheckControllerTest {
     public void twitterUser() throws Exception{
         log.debug("In twitteruser test");
 
-        checkResource = new Resource<>(twitterUser,
-                linkTo(methodOn(CheckController.class).findById(twitterUser.getId())).withSelfRel());
+        QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Twitteruser: " + twitterUser.toString());
-        assertThat(checkResource).isNotNull();
+        assertThat(queryResorce).isNotNull();
 
         // given
         given(checkController.twitterUser(Mockito.any(TwitterUser.class)))
-                .willReturn(checkResource);
+                .willReturn(queryResorce);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(userUrl)
@@ -102,22 +101,25 @@ public class CheckControllerTest {
 
         // then
         log.debug("Response {}", response.getContentAsString());
-        log.debug("checkResource: {}", jsonTester.write(checkResource).getJson());
+        log.debug("checkResource: {}", jsonTester.write(queryResorce).getJson());
+        QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
+
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString().regionMatches(0, jsonTester.write(checkResource).getJson(),0,129)).isTrue();
+        assertThat(resp).isEqualTo(queryResponse);
     }
 
     @Test
     public void twitterTweet() throws Exception{
         log.debug("Int twitterTweet test");
-        checkResource = new Resource<>(tweet,
-                linkTo(methodOn(CheckController.class).findById(tweet.getId())).withSelfRel());
+
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Tweet: {}",tweet.toString());
-        assertThat(checkResource).isNotNull();
+        assertThat(queryResource).isNotNull();
 
         // given
-        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(checkResource);
+        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResource);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
@@ -128,23 +130,25 @@ public class CheckControllerTest {
 
         // then
         log.debug("Response: {}", response.getContentAsString());
-        log.debug("checkResource: {}", jsonTester.write(checkResource).getJson());
+        log.debug("checkResource: {}", jsonTester.write(queryResource).getJson());
+        QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
+
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString().regionMatches(0,jsonTester.write(checkResource).getJson(),0,106)).isTrue();
+        assertThat(resp).isEqualTo(queryResponse);
     }
 
     @Test
     public void malformedTwitterUser() throws Exception {
         log.debug("In failedTwitterUser()");
 
-        checkResource = new Resource<>(twitterUser,
-                linkTo(methodOn(CheckController.class).findById(twitterUser.getId())).withSelfRel());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("TwitterUser: {}", twitterUser.toString());
-        assertThat(checkResource).isNotNull();
+        assertThat(queryResorce).isNotNull();
 
         // given
-        given(checkController.twitterUser((Mockito.any(TwitterUser.class)))).willReturn(checkResource);
+        given(checkController.twitterUser((Mockito.any(TwitterUser.class)))).willReturn(queryResorce);
 
         // when
         mockMvc.perform(post(userUrl)
@@ -160,14 +164,14 @@ public class CheckControllerTest {
     public void malformedTwitterTweet() throws Exception {
         log.debug("In malformedTwitterTweet()");
 
-        checkResource = new Resource<>(tweet,
-                linkTo(methodOn(CheckController.class).findById(tweet.getId())).withSelfRel());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("TwitterTweet: {}", tweet.toString());
-        assertThat(checkResource).isNotNull();
+        assertThat(queryResorce).isNotNull();
 
         // given
-        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(checkResource);
+        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResorce);
 
         // when
         mockMvc.perform(post(tweetUrl)
