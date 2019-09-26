@@ -1,4 +1,4 @@
-package eu.coinform.gateway;
+package eu.coinform.gateway.config;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.context.TestConfiguration;
