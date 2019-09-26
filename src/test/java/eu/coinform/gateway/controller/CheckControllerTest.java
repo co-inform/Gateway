@@ -68,7 +68,7 @@ public class CheckControllerTest {
 //    @Autowired
 //    QueryResponse queryResponse;
 
-    private Resource<Check> checkResource;
+//    private Resource<Check> checkResource;
     private TwitterUser twitterUser = new TwitterUser();
     private Tweet tweet = new Tweet();
     private JacksonTester<Resource<QueryResponse>> jsonTester;
@@ -211,32 +211,47 @@ public class CheckControllerTest {
     public void successfullIdGet() throws Exception{
         log.debug("In successfullIdGet()");
 
-        spyMap.put(tweet.getId(),"Great Success");
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
-        Resource<QueryResponse> queryResource = new Resource<>(queryResponse,
-                linkTo(methodOn(CheckController.class).findById(tweet.getId())).withSelfRel());
-
-        String url = String.format(idUrl, tweet.getId());
-        log.debug("Resource: {}",queryResource.toString());
-        log.debug("Response: {}", queryResponse.toString());
-        log.debug("testmap: {}", spyMap);
-        log.debug("url: {}", url);
-
+        String url = String.format(idUrl, tweet.getQueryId());
         assertThat(queryResource).isNotNull();
-
-        mockMvc = MockMvcBuilders.standaloneSetup(queryResponse).build();
-        when(checkController.findById(tweet.getId())).thenReturn(queryResource);
-
         // given
-        //given(queryResponse.getResponse()).willReturn(spyMap);
-        //given(checkController.findById(tweet.getId())).willReturn(queryResource);
+        given(checkController.findById(tweet.getQueryId())).willReturn(queryResource);
 
         // when
-        mockMvc.perform(get(url).accept(MediaType.APPLICATION_JSON_UTF8))
+        MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
+                    .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andReturn().getResponse();
+
+        QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
 
         // then
-                .andDo(print()).andReturn().getResponse().getStatus();
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response).isEqualTo(queryResponse);
+    }
 
+    @Test
+    public void nullIdGet() throws Exception {
+        log.debug("In nullIdGet()");
+
+        QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
+
+        String url = String.format(idUrl, "");
+        assertThat(queryResource).isNotNull();
+
+        log.debug("url: {}", url);
+        // given
+        given(checkController.findById(tweet.getQueryId())).willReturn(queryResource);
+
+        // when
+        MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn().getResponse();
+
+        // then
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
 
     }
 
