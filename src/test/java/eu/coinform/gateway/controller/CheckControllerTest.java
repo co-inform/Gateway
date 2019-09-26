@@ -59,16 +59,6 @@ public class CheckControllerTest {
     @MockBean
     private CheckController checkController;
 
-    @InjectMocks
-    private QueryResponse queryResponse;
-
-    //@Spy
-    LinkedHashMap<String, Object> spyMap = new LinkedHashMap<>();
-
-//    @Autowired
-//    QueryResponse queryResponse;
-
-//    private Resource<Check> checkResource;
     private TwitterUser twitterUser = new TwitterUser();
     private Tweet tweet = new Tweet();
     private JacksonTester<Resource<QueryResponse>> jsonTester;
@@ -243,7 +233,7 @@ public class CheckControllerTest {
 
         log.debug("url: {}", url);
         // given
-        given(checkController.findById(tweet.getQueryId())).willReturn(queryResource);
+        given(checkController.findById("")).willReturn(queryResource);
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
