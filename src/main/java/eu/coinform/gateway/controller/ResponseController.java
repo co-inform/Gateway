@@ -36,9 +36,9 @@ public class ResponseController {
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
 
         log.debug("Response received with transaction_id: {}", transaction_id);
-        redisHandler.setModuleResponse(transaction_id, moduleResponse);
-        CompletableFuture<ModuleTransaction> moduleTransaction = redisHandler.getModuleTransaction(transaction_id);
-        responseHandler.responseConsumer(moduleTransaction.join(), moduleResponse);
+        CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
+        CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getModuleTransaction(transaction_id);
+        responseHandler.responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());
         return ResponseEntity.ok().build();
     };
 

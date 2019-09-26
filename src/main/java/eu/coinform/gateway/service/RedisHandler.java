@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -47,6 +48,12 @@ public class RedisHandler {
     }
 
     @Async("AsyncExecutor")
+    public CompletableFuture<QueryResponse> setAndGetQueryResponse(String key, QueryResponse queryResponse) {
+        QueryResponse oldQueryResponse = queryResponseTemplate.opsForValue().getAndSet(key, queryResponse);
+        return CompletableFuture.completedFuture(oldQueryResponse);
+    }
+
+    @Async("AsyncExecutor")
     public CompletableFuture<ModuleResponse> getModuleResponse(String transactionId) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = moduleTransactionTemplate.opsForValue().get(transactionId);
         if (moduleTransaction == null) {
@@ -71,6 +78,13 @@ public class RedisHandler {
                 moduleTransaction.getModule(),
                 moduleResponse);
         return CompletableFuture.completedFuture(moduleResponse);
+    }
+
+    @Async("AsyncExecutor")
+    public CompletableFuture<Map<String, ModuleResponse>> getModuleResponses(String queryId) {
+        HashOperations<String, String, ModuleResponse> hashOperations = moduleResponseTemplate.opsForHash();
+        Map<String, ModuleResponse> responses = hashOperations.entries(String.format("%s%s",MODULE_RESPONSE_PREFIX, queryId));
+        return CompletableFuture.completedFuture(responses);
     }
 
     @Async("AsyncExecutor")

@@ -3,7 +3,6 @@ package eu.coinform.gateway.cache;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import org.checkerframework.common.value.qual.StringVal;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.io.Serializable;
@@ -32,4 +31,5 @@ public class QueryResponse implements Serializable {
         partly_done,
         in_progress
     }
+
 }
