@@ -4,6 +4,7 @@ import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.service.ResponseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.concurrent.CompletableFuture;
 
 
 @RestController
@@ -20,16 +22,13 @@ import javax.validation.Valid;
 public class ResponseController {
 
 
-    private final RedisTemplate<String, QueryResponse> queryTemplate;
-    private final RedisTemplate<String, ModuleTransaction> transactionTemplate;
+    private final RedisHandler redisHandler;
     private final ResponseHandler responseHandler;
 
-    ResponseController(@Qualifier("redisQueryTemplate") RedisTemplate<String, QueryResponse> queryTemplate,
-                       @Qualifier("redisTransactionTemplate") RedisTemplate<String, ModuleTransaction> transactionTemplate,
+    ResponseController(RedisHandler redisHandler,
                        ResponseHandler responseHandler) {
         this.responseHandler = responseHandler;
-        this.transactionTemplate = transactionTemplate;
-        this.queryTemplate = queryTemplate;
+        this.redisHandler = redisHandler;
     }
 
     @PostMapping("/module/response/{transaction_id}")
@@ -37,11 +36,9 @@ public class ResponseController {
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
 
         log.debug("Response received with transaction_id: {}", transaction_id);
-        ModuleTransaction moduleTransaction = transactionTemplate.opsForValue().get(transaction_id);
-        if (moduleTransaction == null) {
-            throw new NoSuchTransactionIdException(transaction_id);
-        }
-        responseHandler.responseConsumer(moduleTransaction, queryResponse);
+        redisHandler.setModuleResponse(transaction_id, moduleResponse);
+        CompletableFuture<ModuleTransaction> moduleTransaction = redisHandler.getModuleTransaction(transaction_id);
+        responseHandler.responseConsumer(moduleTransaction.join(), moduleResponse);
         return ResponseEntity.ok().build();
     };
 

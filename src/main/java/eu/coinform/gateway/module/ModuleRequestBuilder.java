@@ -37,8 +37,11 @@ public class ModuleRequestBuilder {
         return httpResponse;
     });
     private ObjectMapper objectMapper;
+    private String transactionId;
+    private String queryId;
 
-    public ModuleRequestBuilder(ObjectMapper objectMapper) {
+    public ModuleRequestBuilder(String queryId ,ObjectMapper objectMapper) {
+        this.queryId = queryId;
         this.objectMapper = objectMapper;
         headers = new HashMap<>();
     }
@@ -50,6 +53,7 @@ public class ModuleRequestBuilder {
 
     public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
         headers.put("Content-type", "application/json");
+        transactionId = content.getTransactionId();
         httpEntity = new StringEntity(objectMapper.writeValueAsString(content), ContentType.APPLICATION_JSON);
         return this;
     }
@@ -118,6 +122,8 @@ public class ModuleRequestBuilder {
         ModuleRequest moduleRequest = (ModuleRequest) httpRequest;
         moduleRequest.setMaxAttempts(maxAttempts);
         moduleRequest.setResponseHandler(responseHandler);
+        moduleRequest.setTransactionId(transactionId);
+        moduleRequest.setQueryId(queryId);
         return moduleRequest;
     }
 

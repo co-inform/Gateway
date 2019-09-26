@@ -1,8 +1,10 @@
 package eu.coinform.gateway.service;
 
+import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
+import eu.coinform.gateway.module.ModuleRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -16,6 +18,8 @@ public class CheckHandler {
 
     @Autowired
     Map<String, Module> moduleMap;
+    @Autowired
+    RedisHandler redisHandler;
 
     @Async("AsyncExecutor")
     public void twitterUserConsumer(TwitterUser twitterUser) {
@@ -31,9 +35,11 @@ public class CheckHandler {
     public void tweetConsumer(Tweet tweet) {
         log.debug("handle tweet object: {}", tweet);
         for (Module module: moduleMap.values()) {
-            module.getTweetModuleRequestFunction()
-                    .apply(tweet)
-                    .makeRequest();
+            ModuleRequest moduleRequest = module.getTweetModuleRequestFunction()
+                    .apply(tweet);
+            redisHandler.setModuleTransaction(new ModuleTransaction(moduleRequest.getTransactionId(),
+                    module.getName(),
+                    moduleRequest.getQueryId()));
         }
     }
 }

@@ -1,7 +1,7 @@
 package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
-import eu.coinform.gateway.model.ResponseNotFoundException;
+import eu.coinform.gateway.model.NoSuchQueryIdException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ExceptionHandlerController {
 
     @ResponseBody
-    @ExceptionHandler(ResponseNotFoundException.class)
+    @ExceptionHandler(NoSuchQueryIdException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String responseNotFoundHandler(ResponseNotFoundException e) {
+    public String noSuchQueryIdException(NoSuchQueryIdException e) {
         return e.getMessage();
     }
 

@@ -14,8 +14,8 @@ public class ModuleRequestFactory {
         this.port = port;
     }
 
-    public ModuleRequestBuilder getRequestBuilder() {
-        ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(objectMapper);
+    public ModuleRequestBuilder getRequestBuilder(String queryId) {
+        ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(queryId, objectMapper);
         requestBuilder.setScheme(scheme)
                 .setUrl(url)
                 .setPort(port);

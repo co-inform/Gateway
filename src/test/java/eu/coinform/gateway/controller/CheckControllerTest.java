@@ -4,7 +4,9 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.coinform.gateway.model.Check;
+import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.model.QueryObject;
+import eu.coinform.gateway.model.QueryResponseAssembler;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,7 @@ public class CheckControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private QueryResponseAssembler queryResponseAssembler = new QueryResponseAssembler();
 
     @Before
     public void setupTests(){
@@ -75,37 +78,39 @@ public class CheckControllerTest {
     public void twitterUser() throws Exception{
         log.debug("In twitteruser test");
 
-        Resource<Check> checkResource = new Resource<>(twitterUser,
-                linkTo(methodOn(CheckController.class).findById(twitterUser.getId())).withSelfRel());
+        Resource<QueryResponse> queryResponse = queryResponseAssembler
+                .toResource(new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null));
+        log.debug("QueryResponse: {}", mapper.writeValueAsString(queryResponse));
 
         log.debug("Twitteruser: " + twitterUser.toString());
-        assertThat(checkResource).isNotNull();
+        assertThat(queryResponse).isNotNull();
 
-        when(checkController.twitterUser(Mockito.any(TwitterUser.class))).thenReturn(checkResource);
+        when(checkController.twitterUser(Mockito.any(TwitterUser.class))).thenReturn(queryResponse);
         mockMvc.perform(post("/twitter/user")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(jsonTU)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print()).andExpect(status().isOk())
-                .andExpect(content().json(jsonTU));
+                .andExpect(content().json(mapper.writeValueAsString(queryResponse)));
     }
 
     @Test
     public void twitterTweet() throws Exception{
         log.debug("Int twitterTweet test");
-        Resource<Check> checkResource = new Resource<>(tweet,
-                linkTo(methodOn(CheckController.class).findById(tweet.getId())).withSelfRel());
+        Resource<QueryResponse> queryResponse = queryResponseAssembler
+                .toResource(new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null));
+        log.debug("QueryResponse: {}", mapper.writeValueAsString(queryResponse));
 
         log.debug("Tweet: {}",tweet.toString());
-        assertThat(checkResource).isNotNull();
+        assertThat(queryResponse).isNotNull();
 
-        when(checkController.twitterTweet(Mockito.any(Tweet.class))).thenReturn(checkResource);
+        when(checkController.twitterTweet(Mockito.any(Tweet.class))).thenReturn(queryResponse);
         mockMvc.perform(post("/twitter/tweet")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(jsonTW)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print()).andExpect((status().isOk()))
-                .andExpect(content().json(jsonTW));
+                .andExpect(content().json(mapper.writeValueAsString(queryResponse)));
 
     }
 }

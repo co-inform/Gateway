@@ -4,11 +4,9 @@ import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
-import eu.coinform.gateway.model.ResponseNotFoundException;
+import eu.coinform.gateway.model.NoSuchQueryIdException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -34,17 +32,18 @@ public class RedisHandler {
     }
 
     @Async("AsyncExecutor")
-    public CompletableFuture<QueryResponse> getQueryResponse(String queryId) {
+    public CompletableFuture<QueryResponse> getQueryResponse(String queryId) throws NoSuchQueryIdException {
         QueryResponse queryResponse = queryResponseTemplate.opsForValue().get(queryId);
         if (queryResponse == null) {
-            throw new ResponseNotFoundException(queryId);
+            throw new NoSuchQueryIdException(queryId);
         }
         return CompletableFuture.completedFuture(queryResponse);
     }
 
     @Async("AsyncExecutor")
-    public void setQueryResponse(String key, QueryResponse queryResponse) {
+    public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
         queryResponseTemplate.opsForValue().set(key, queryResponse);
+        return CompletableFuture.completedFuture(queryResponse);
     }
 
     @Async("AsyncExecutor")
@@ -61,7 +60,7 @@ public class RedisHandler {
     }
 
     @Async("AsyncExecutor")
-    public void setModuleResponse(String transactionId, ModuleResponse moduleResponse) throws NoSuchTransactionIdException {
+    public CompletableFuture<ModuleResponse> setModuleResponse(String transactionId, ModuleResponse moduleResponse) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = moduleTransactionTemplate.opsForValue().get(transactionId);
         if (moduleTransaction == null) {
             throw new NoSuchTransactionIdException(transactionId);
@@ -71,10 +70,21 @@ public class RedisHandler {
                 String.format("%s%s",MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()),
                 moduleTransaction.getModule(),
                 moduleResponse);
+        return CompletableFuture.completedFuture(moduleResponse);
     }
 
     @Async("AsyncExecutor")
-    public void setModuleTransaction(ModuleTransaction moduleTransaction) {
+    public CompletableFuture<ModuleTransaction> getModuleTransaction(String transactionId) throws NoSuchTransactionIdException {
+        ModuleTransaction moduleTransaction = moduleTransactionTemplate.opsForValue().get(transactionId);
+        if (moduleTransaction == null) {
+            throw new NoSuchTransactionIdException(transactionId);
+        }
+        return CompletableFuture.completedFuture(moduleTransaction);
+    }
+
+    @Async("AsyncExecutor")
+    public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
         moduleTransactionTemplate.opsForValue().set(moduleTransaction.getTransactionId(), moduleTransaction);
+        return CompletableFuture.completedFuture(moduleTransaction);
     }
 }

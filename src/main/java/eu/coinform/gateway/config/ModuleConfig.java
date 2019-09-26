@@ -47,7 +47,7 @@ public class ModuleConfig {
             ModuleRequest request = null;
             MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl); //todo:correct json
             try {
-                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder()
+                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("") //todo: set correct path
                         .setContent(content)
                         .build();
@@ -63,7 +63,7 @@ public class ModuleConfig {
             ModuleRequest request = null;
             try {
                 MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl); //todo:correct json
-                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder()
+                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
                         .setPath("") //todo: set correct path
                         .setContent(content) //todo: correct json
                         .build();
