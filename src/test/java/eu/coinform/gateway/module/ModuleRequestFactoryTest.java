@@ -96,14 +96,9 @@ public class ModuleRequestFactoryTest {
 
 }
 
-
-
-
-
-
     private class MRCImplementation extends ModuleRequestContent{
 
-        public MRCImplementation(String callbackBaseUrl) {
+        MRCImplementation(String callbackBaseUrl) {
             super(callbackBaseUrl);
         }
     }
