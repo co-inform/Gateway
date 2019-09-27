@@ -19,9 +19,14 @@ public class Tweet implements QueryObject {
     private String queryId;
 
     @Getter
-    @NotEmpty(message = "no tweetId specified")
+    @NotEmpty(message = "no tweet_id specified")
     @JsonProperty("tweet_id")
     private String tweetId;
+
+    @Getter
+    @NotEmpty(message = "no tweet_text specified")
+    @JsonProperty("tweet_text")
+    private String tweetText;
 
     @SuppressWarnings("UnstableApiUsage")
     @JsonProperty("tweet_id")
