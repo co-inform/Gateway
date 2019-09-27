@@ -2,12 +2,9 @@ package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleResponse;
 import javafx.util.Pair;
-import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,12 +17,13 @@ public class ResponseAggregator {
 
     final private ConcurrentMap<String, ConcurrentMap<String, ModuleResponse>> responseMap;
     final private ConcurrentLinkedQueue<Pair<Long, String>> expireQueue;
-    @Value("{gateway.aggregate.timeout}")
-    private Long aggregateTimeout;
 
-    public ResponseAggregator(ResponseHandler responseHandler) {
+    private long aggregateTimeout;
+
+    public ResponseAggregator(@Value("${gateway.aggregate.timeout}") String aggregateTimeoutString) {
         responseMap = new ConcurrentHashMap<>();
         expireQueue = new ConcurrentLinkedQueue<>();
+        aggregateTimeout = Long.parseLong(aggregateTimeoutString);
     }
 
     public void addResponse(String queryId,
