@@ -1,18 +1,13 @@
 package eu.coinform.gateway.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -24,7 +19,6 @@ public class ModuleRequestBuilder {
 
     public static final int DEFAULT_MAX_ATTEMPTS = 3;
 
-    private ModuleRequestBuilder.Request request;
     private Map<String, String> headers;
     private HttpEntity httpEntity;
     private String scheme;
@@ -44,11 +38,6 @@ public class ModuleRequestBuilder {
         this.queryId = queryId;
         this.objectMapper = objectMapper;
         headers = new HashMap<>();
-    }
-
-    public ModuleRequestBuilder setMethod(ModuleRequestBuilder.Request method) {
-        this.request = method;
-        return this;
     }
 
     public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
@@ -96,39 +85,22 @@ public class ModuleRequestBuilder {
     public ModuleRequest build() throws ModuleRequestBuilderException{
         URI uri;
         try {
-            uri = new URI(scheme, url + ":" + port, path, null);
+            uri = new URI(scheme,null, url, port, path, null, null);
         } catch (URISyntaxException ex) {
-            throw new ModuleRequestBuilderException("Could not create a valid URI");
+            throw new ModuleRequestBuilderException("Could not create a valid URI " + ex.getMessage());
         }
-        HttpUriRequest httpRequest;
-        switch (request) {
-            case GET:
-                httpRequest = new HttpGet(uri);
-                break;
-            case POST:
-                HttpPost httpPost = new HttpPost(uri);
-                if (httpEntity == null) {
-                    throw new ModuleRequestBuilderException("The POST request must have Content");
-                }
-                httpPost.setEntity(httpEntity);
-                httpRequest = httpPost;
-                break;
-            default:
-                throw new ModuleRequestBuilderException("The request must have a set request method");
+        ModuleRequest httpRequest = new ModuleRequest(uri);
+        if (httpEntity == null) {
+            throw new ModuleRequestBuilderException("The POST request must have Content");
         }
+        httpRequest.setEntity(httpEntity);
         for (Map.Entry<String, String> header: headers.entrySet()) {
             httpRequest.setHeader(header.getKey(), header.getValue());
         }
-        ModuleRequest moduleRequest = (ModuleRequest) httpRequest;
-        moduleRequest.setMaxAttempts(maxAttempts);
-        moduleRequest.setResponseHandler(responseHandler);
-        moduleRequest.setTransactionId(transactionId);
-        moduleRequest.setQueryId(queryId);
-        return moduleRequest;
-    }
-
-    public enum  Request {
-        GET,
-        POST
+        httpRequest.setMaxAttempts(maxAttempts);
+        httpRequest.setResponseHandler(responseHandler);
+        httpRequest.setTransactionId(transactionId);
+        httpRequest.setQueryId(queryId);
+        return httpRequest;
     }
 }

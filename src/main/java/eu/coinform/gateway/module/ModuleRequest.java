@@ -7,15 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.function.Function;
 
 @Slf4j
-abstract public class ModuleRequest implements HttpUriRequest {
+public class ModuleRequest extends HttpPost {
     @Getter
     private int attempts = 0;
     @Getter
@@ -31,6 +34,10 @@ abstract public class ModuleRequest implements HttpUriRequest {
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private String queryId;
+
+    protected ModuleRequest(URI uri) {
+        super(uri);
+    }
 
     private HttpResponse moduleRequestException(Exception ex, String message) throws ModuleRequestException {
         log.error("{}, {}: {}", message, ex.getClass().getName(), ex.getMessage());
@@ -53,7 +60,7 @@ abstract public class ModuleRequest implements HttpUriRequest {
         HttpResponse httpResponse = null;
         try {
             HttpClient httpClient = HttpClients.createMinimal();
-            httpResponse = httpClient.execute(this);
+            httpResponse = httpClient.execute(this );
         } catch (ClientProtocolException ex) {
             httpResponse = moduleRequestException(ex, "http protocol error");
         } catch (IOException ex) {
@@ -61,6 +68,11 @@ abstract public class ModuleRequest implements HttpUriRequest {
         }
         httpResponse = getResponseHandler().apply(httpResponse);
         return httpResponse;
+    }
+
+    @Override
+    public String getMethod() {
+        return HttpPost.METHOD_NAME;
     }
 }
 
