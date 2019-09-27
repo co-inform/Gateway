@@ -11,9 +11,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.LongStream;
 
 @Service
@@ -23,15 +26,16 @@ public class ResponseHandler {
     final private RedisHandler redisHandler;
     final private Map<String, Module> moduleMap;
     final private Random random;
-    @Value("{gateway.redis.atomic.maxdelay}")
-    private long maxDelay;
+    final private ResponseAggregator responseAggregator;
 
     public ResponseHandler(RedisHandler redisHandler,
                            Map<String, Module> moduleMap,
-                           Random random) {
+                           Random random,
+                           ResponseAggregator responseAggregator) {
         this.redisHandler = redisHandler;
         this.moduleMap = moduleMap;
         this.random = random;
+        this.responseAggregator = responseAggregator;
     }
 
     //todo: Build the policy engine connection
@@ -41,27 +45,23 @@ public class ResponseHandler {
         //todo: Aggregate and send the responses to the policy engine
         log.debug("Response {} to {}: {}", moduleTransaction.getTransactionId(), moduleTransaction.getModule(), moduleTransaction.toString());
 
-        // An atomic adding of the moduleResponse to the Query
-        boolean retry = false;
-        QueryResponse initialQR;
-        QueryResponse updatedQR;
-        initialQR = redisHandler.getQueryResponse(moduleTransaction.getQueryId()).join();
-        updatedQR = redisHandler.getQueryResponse(moduleTransaction.getQueryId()).join();
-        updatedQR.getResponse().put(moduleTransaction.getModule(), moduleResponse);
-        QueryResponse atUpdateQR = redisHandler
-                    .setAndGetQueryResponse(moduleTransaction.getQueryId(), updatedQR)
-                    .join();
-        if (!initialQR.equals(atUpdateQR))
-            do {
-                try {
-                    wait((random.nextLong() + maxDelay) % maxDelay);
-                } catch (InterruptedException ex) {
-                    log.error("Delay for atomic QueryResponse interupted: {}", ex.getMessage());
-                }
+        responseAggregator.addResponse(moduleTransaction.getQueryId(),
+                moduleTransaction.getTransactionId(),
+                moduleResponse,
+                (queryId) ->
+                        new ConcurrentHashMap<String, ModuleResponse>(redisHandler.getModuleResponses(queryId).join())
+                );
 
-            } while (!atUpdateQR.equals())
-        }
-
+        //todo: at the moment the response aggregator is only processing things when a new module response is added.
+        //todo: this side-stepps the policy engine and put the responses directly to the QueryResponse cache.
+        responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
+            LinkedHashMap<String, Object> responseField = new LinkedHashMap<>();
+            for (Map.Entry<String, ModuleResponse> response: moduleResponses.entrySet()) {
+                responseField.put(response.getKey(), response.getValue());
+            }
+            redisHandler.setQueryResponse(queryId, new QueryResponse(queryId, QueryResponse.Status.done, responseField));
+        });
     }
 
 }
+
