@@ -24,6 +24,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -39,6 +40,7 @@ public class CheckControllerTest {
     private final String tweetId = "1176610391058722816";
     private final String userId = "25073877";
     private final String screenName = "realDonaldTrump";
+    private final String idUrl = "/response/%s";
     private final String tweetUrl = "/twitter/tweet";
     private final String userUrl = "/twitter/user";
 
@@ -181,6 +183,54 @@ public class CheckControllerTest {
 
         // then
                 .andDo(print()).andExpect((status().is4xxClientError()));
+    }
+
+    @Test
+    public void successfullIdGet() throws Exception{
+        log.debug("In successfullIdGet()");
+
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
+
+        String url = String.format(idUrl, tweet.getQueryId());
+        assertThat(queryResource).isNotNull();
+        // given
+        given(checkController.findById(tweet.getQueryId())).willReturn(queryResource);
+
+        // when
+        MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
+                    .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andReturn().getResponse();
+
+        QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
+
+        // then
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response).isEqualTo(queryResponse);
+    }
+
+    @Test
+    public void nullIdGet() throws Exception {
+        log.debug("In nullIdGet()");
+
+        QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
+
+        String url = String.format(idUrl, "");
+        assertThat(queryResource).isNotNull();
+
+        log.debug("url: {}", url);
+        // given
+        given(checkController.findById("")).willReturn(queryResource);
+
+        // when
+        MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn().getResponse();
+
+        // then
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+
     }
 
 }
