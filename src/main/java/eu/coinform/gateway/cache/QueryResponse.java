@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.RedisHash;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
-@RedisHash("response")
+@RedisHash("queryId")
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

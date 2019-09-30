@@ -27,7 +27,7 @@ public class ModuleConfig {
     final private String callbackBaseUrl;
 
     ModuleConfig(ObjectMapper objectMapper,
-                 @Value("{gateway.url}{gateway.callback.endpoint}") String callbackBaseUrl) {
+                 @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}") String callbackBaseUrl) {
         this.objectWriter = objectMapper.writer();
         this.callbackBaseUrl = callbackBaseUrl;
     }
@@ -44,7 +44,7 @@ public class ModuleConfig {
 
         Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
             ModuleRequest request = null;
-            StupidContent content = new StupidContent(callbackBaseUrl, tweet.getTweetId(), tweet.getTweetText()); //todo:correct json
+            StupidContent content = new StupidContent(callbackBaseUrl, tweet.getTweetId(), tweet.getTweetText(), "fan ta dig!"); //todo:correct json
             try {
                 request = stupidModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/tweet")
@@ -56,6 +56,7 @@ public class ModuleConfig {
             } catch (ModuleRequestBuilderException ex) {
                 log.error(ex.getMessage());
             }
+            log.debug("a tweet reqeust built: {}", request);
             return request;
         };
         Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {

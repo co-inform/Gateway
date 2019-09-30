@@ -34,7 +34,7 @@ public class ResponseHandler {
 
     //todo: Build the policy engine connection
 
-    @Async("AsyncExecutor")
+    @Async("asyncExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
         //todo: Aggregate and send the responses to the policy engine
         log.debug("Response {} to {}: {}", moduleTransaction.getTransactionId(), moduleTransaction.getModule(), moduleTransaction.toString());

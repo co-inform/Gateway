@@ -34,6 +34,7 @@ public class ResponseAggregator {
                             Function<String, ConcurrentHashMap<String, ModuleResponse>> populateAggregator) {
         ConcurrentMap<String, ModuleResponse> transactionMap = responseMap
                 .putIfAbsent(queryId, populateAggregator.apply(queryId));
+        transactionMap = responseMap.get(queryId);
         transactionMap.put(moduleName, moduleResponse);
         responseMap.put(queryId, transactionMap);
         expireQueue.add(new Pair<>(System.currentTimeMillis(), queryId));
