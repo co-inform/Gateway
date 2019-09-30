@@ -21,23 +21,9 @@ public class RedisHandler {
 
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
 
-    /*
-    private final RedisTemplate<String, QueryResponse> queryResponseTemplate;
-    private final RedisTemplate<String, ModuleTransaction> moduleTransactionTemplate;
-    private final RedisTemplate<String, Object> moduleResponseTemplate;
-     */
     private final RedisTemplate<String, Object> redisTemplate;
 
-    /*
-    RedisHandler(@Qualifier("redisQueryTemplate") RedisTemplate<String, QueryResponse> queryResponseTemplate,
-                 @Qualifier("redisTransactionTemplate") RedisTemplate<String, ModuleTransaction> moduleTransactionTemplate,
-                 @Qualifier("redisModuleTemplate") RedisTemplate<String, Object> moduleResponseTemplate){
-
-     */
     RedisHandler(RedisTemplate<String, Object> redisTemplate) {
-//      this.queryResponseTemplate = queryResponseTemplate;
-//      this.moduleTransactionTemplate = moduleTransactionTemplate;
-//      this.moduleResponseTemplate = moduleResponseTemplate;
         this.redisTemplate = redisTemplate;
     }
 

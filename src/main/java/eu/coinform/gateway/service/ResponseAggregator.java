@@ -1,8 +1,8 @@
 package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleResponse;
-//import javafx.util.Pair;
 import eu.coinform.gateway.model.Pair;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +18,10 @@ public class ResponseAggregator {
     // todo: Rewrite it to cache on a Memcached server instead of local map.
     // Making it possible for multiple spring server instances to run in parallel
 
-    final private ConcurrentMap<String, ConcurrentMap<String, ModuleResponse>> responseMap;
+    final private ConcurrentMap<String, ConcurrentHashMap<String, ModuleResponse>> responseMap;
     final private ConcurrentLinkedQueue<Pair<Long, String>> expireQueue;
 
+    @Getter
     private long aggregateTimeout;
 
     public ResponseAggregator(@Value("${gateway.aggregate.timeout}") String aggregateTimeoutString) {
@@ -33,17 +34,17 @@ public class ResponseAggregator {
                             String moduleName,
                             ModuleResponse moduleResponse,
                             Function<String, ConcurrentHashMap<String, ModuleResponse>> populateAggregator) {
-        ConcurrentMap<String, ModuleResponse> transactionMap = responseMap
-                .putIfAbsent(queryId, populateAggregator.apply(queryId));
-        transactionMap = responseMap.get(queryId);
-        transactionMap.put(moduleName, moduleResponse);
-        responseMap.put(queryId, transactionMap);
+        responseMap.putIfAbsent(queryId, populateAggregator.apply(queryId));
+        ConcurrentHashMap<String, ModuleResponse> nameToResponseMap = responseMap.get(queryId);
+        nameToResponseMap.put(moduleName, moduleResponse);
+        responseMap.put(queryId, nameToResponseMap);
         expireQueue.add(new Pair<>(System.currentTimeMillis(), queryId));
     }
 
     synchronized public void processAggregatedResponses(BiConsumer<String, Map<String, ModuleResponse>> aggregatedResponsesProcesses) {
         Pair<Long, String> oldestQueryId;
-        while ((System.currentTimeMillis() - expireQueue.peek().getKey()) > aggregateTimeout) {
+
+        while (!expireQueue.isEmpty() && (System.currentTimeMillis() - expireQueue.peek().getKey()) > aggregateTimeout) {
             oldestQueryId = expireQueue.poll();
             ConcurrentMap<String, ModuleResponse> moduleResponses = responseMap.get(oldestQueryId.getValue());
             responseMap.remove(oldestQueryId.getValue(), moduleResponses);
