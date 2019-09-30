@@ -5,10 +5,11 @@ import lombok.Getter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @EqualsAndHashCode
 @ToString
-public class Pair<K, V> {
+public class Pair<K extends Serializable, V extends Serializable> implements Serializable {
 
     @Getter
     private K key;
@@ -21,5 +22,8 @@ public class Pair<K, V> {
         this.value = inV;
     }
 
+    static public <K extends Serializable, V extends Serializable> Pair<K,V> of(@NotNull K inK, @NotNull V inV){
+        return new Pair<>(inK,inV);
+    }
 
 }
