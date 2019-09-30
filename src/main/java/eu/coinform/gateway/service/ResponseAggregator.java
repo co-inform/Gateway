@@ -14,6 +14,8 @@ import java.util.function.Function;
 
 @Service
 public class ResponseAggregator {
+    // todo: Rewrite it to cache on a Memcached server instead of local map.
+    // Making it possible for multiple spring server instances to run in parallel
 
     final private ConcurrentMap<String, ConcurrentMap<String, ModuleResponse>> responseMap;
     final private ConcurrentLinkedQueue<Pair<Long, String>> expireQueue;

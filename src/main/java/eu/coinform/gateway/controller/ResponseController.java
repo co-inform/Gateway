@@ -31,7 +31,7 @@ public class ResponseController {
         this.redisHandler = redisHandler;
     }
 
-    @PostMapping("/module/response/{transaction_id}")
+    @PostMapping("${gateway.callback.endpoint}{transaction_id}")
     ResponseEntity<?> postResponse(@PathVariable(value = "transaction_id", required = true) String transaction_id,
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
 
