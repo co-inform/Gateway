@@ -1,7 +1,8 @@
 package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleResponse;
-import javafx.util.Pair;
+//import javafx.util.Pair;
+import eu.coinform.gateway.model.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
