@@ -61,6 +61,7 @@ public class CheckControllerTest {
         twitterUser.setTwitterId(userId);
         log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
+        tweet.setTweetText("Hejbaberiba");
         log.debug("Tweet {}", tweet.toString());
 
         try {
