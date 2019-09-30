@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.hash.Hashing;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
@@ -24,6 +25,7 @@ public class Tweet implements QueryObject {
     private String tweetId;
 
     @Getter
+    @Setter
     @NotEmpty(message = "no tweet_text specified")
     @JsonProperty("tweet_text")
     private String tweetText;
