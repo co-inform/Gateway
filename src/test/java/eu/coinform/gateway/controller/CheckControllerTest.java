@@ -1,9 +1,8 @@
 package eu.coinform.gateway.controller;
 
-import static org.mockito.BDDMockito.given;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.QueryResponseAssembler;
 import eu.coinform.gateway.model.Tweet;
@@ -24,9 +23,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,6 +45,7 @@ public class CheckControllerTest {
     private final String idUrl = "/response/%s";
     private final String tweetUrl = "/twitter/tweet";
     private final String userUrl = "/twitter/user";
+    final Function<StackWalker, String> methodName = s -> s.walk(sfs -> sfs.skip(1).findFirst().get().getMethodName());
 
     @MockBean
     private CheckController checkController;
@@ -62,6 +65,7 @@ public class CheckControllerTest {
         twitterUser.setTwitterId(userId);
         log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
+        tweet.setTweetText("Hejbaberiba");
         log.debug("Tweet {}", tweet.toString());
 
         try {
@@ -82,7 +86,7 @@ public class CheckControllerTest {
 
     @Test
     public void twitterUser() throws Exception{
-        log.debug("In twitteruser test");
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null);
         Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
@@ -112,7 +116,7 @@ public class CheckControllerTest {
 
     @Test
     public void twitterTweet() throws Exception{
-        log.debug("Int twitterTweet test");
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
@@ -141,7 +145,7 @@ public class CheckControllerTest {
 
     @Test
     public void malformedTwitterUser() throws Exception {
-        log.debug("In failedTwitterUser()");
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
         Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
@@ -164,7 +168,7 @@ public class CheckControllerTest {
 
     @Test
     public void malformedTwitterTweet() throws Exception {
-        log.debug("In malformedTwitterTweet()");
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
         Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
@@ -187,7 +191,7 @@ public class CheckControllerTest {
 
     @Test
     public void successfullIdGet() throws Exception{
-        log.debug("In successfullIdGet()");
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
@@ -211,7 +215,7 @@ public class CheckControllerTest {
 
     @Test
     public void nullIdGet() throws Exception {
-        log.debug("In nullIdGet()");
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null);
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
@@ -233,4 +237,38 @@ public class CheckControllerTest {
 
     }
 
+    @Test
+    public void noTweetTextFailTest() throws Exception{
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+
+        tweet.setTweetText(null);
+        jsonTW = mapper.writeValueAsString(tweet);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
+
+        log.debug("Tweet: {}",tweet.toString());
+        assertThat(queryResource).isNotNull();
+
+        // given
+        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResource);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(jsonTW)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn().getResponse();
+
+        // then
+        log.debug("Response: {}", response.getContentAsString());
+        log.debug("checkResource: {}", jsonTester.write(queryResource).getJson());
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        try {
+            QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
+        } catch (MismatchedInputException e){
+            assertThat(true).isTrue();
+        }
+
+    }
 }
