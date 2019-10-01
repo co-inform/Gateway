@@ -6,4 +6,4 @@ ADD target/gateway-*.jar /opt/gateway/gateway.jar
 
 ENTRYPOINT exec java -jar /opt/gateway/gateway.jar
 
-EXPOSE 8080
+EXPOSE 80

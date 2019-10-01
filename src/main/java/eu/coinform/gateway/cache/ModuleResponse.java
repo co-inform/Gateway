@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 @RedisHash("response")
 @RequiredArgsConstructor
 @ToString
-public class ModuleResponse {
+public class ModuleResponse implements Serializable {
 
     @Getter
     @NotEmpty(message = "The Module Response must contain an response object")

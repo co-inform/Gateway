@@ -3,19 +3,20 @@ package eu.coinform.gateway.cache;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash("moduleTransaction")
+@RedisHash("transactionId")
 @RequiredArgsConstructor
+@NoArgsConstructor
 @ToString
 public class ModuleTransaction {
 
     @Getter
     @NonNull
-    final private String transactionId;
+    private String transactionId;
     @Getter
     @NonNull
-    final private String module;
+    private String module;
     @Getter
     @NonNull
-    final private String queryId;
+    private String queryId;
 }
 

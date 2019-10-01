@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -19,32 +18,35 @@ public class ResponseHandler {
 
     final private RedisHandler redisHandler;
     final private Map<String, Module> moduleMap;
-    final private Random random;
     final private ResponseAggregator responseAggregator;
 
     public ResponseHandler(RedisHandler redisHandler,
                            Map<String, Module> moduleMap,
-                           Random random,
                            ResponseAggregator responseAggregator) {
         this.redisHandler = redisHandler;
         this.moduleMap = moduleMap;
-        this.random = random;
         this.responseAggregator = responseAggregator;
     }
 
     //todo: Build the policy engine connection
 
-    @Async("AsyncExecutor")
+    @Async("asyncExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
         //todo: Aggregate and send the responses to the policy engine
         log.debug("Response {} to {}: {}", moduleTransaction.getTransactionId(), moduleTransaction.getModule(), moduleTransaction.toString());
 
         responseAggregator.addResponse(moduleTransaction.getQueryId(),
-                moduleTransaction.getTransactionId(),
+                moduleTransaction.getModule(),
                 moduleResponse,
                 (queryId) ->
-                        new ConcurrentHashMap<String, ModuleResponse>(redisHandler.getModuleResponses(queryId).join())
-                );
+                    new ConcurrentHashMap<>(redisHandler.getModuleResponses(queryId).join())
+                 );
+
+        try {
+            Thread.sleep(responseAggregator.getAggregateTimeout() + 50);
+        } catch (InterruptedException ex) {
+            log.error("response consumer thread interrupted: {}", ex.getMessage());
+        }
 
         //todo: at the moment the response aggregator is only processing things when a new module response is added.
         //todo: this side-stepps the policy engine and put the responses directly to the QueryResponse cache.
