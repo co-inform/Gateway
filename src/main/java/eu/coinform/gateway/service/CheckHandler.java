@@ -21,7 +21,7 @@ public class CheckHandler {
     @Autowired
     RedisHandler redisHandler;
 
-    @Async("AsyncExecutor")
+    @Async("asyncExecutor")
     public void twitterUserConsumer(TwitterUser twitterUser) {
         log.debug("handle review object: {}", twitterUser);
         for (Module module: moduleMap.values()) {
@@ -31,15 +31,17 @@ public class CheckHandler {
         }
     }
 
-    @Async("AsyncExecutor")
+    @Async("asyncExecutor")
     public void tweetConsumer(Tweet tweet) {
         log.debug("handle tweet object: {}", tweet);
-        for (Module module: moduleMap.values()) {
-            ModuleRequest moduleRequest = module.getTweetModuleRequestFunction()
+        for (Map.Entry<String, Module> module: moduleMap.entrySet()) {
+            log.debug("handle for module: {} -> {}", module.getKey(), module.getValue());
+            ModuleRequest moduleRequest = module.getValue().getTweetModuleRequestFunction()
                     .apply(tweet);
             redisHandler.setModuleTransaction(new ModuleTransaction(moduleRequest.getTransactionId(),
-                    module.getName(),
+                    module.getValue().getName(),
                     moduleRequest.getQueryId()));
+            moduleRequest.makeRequest();
         }
     }
 }

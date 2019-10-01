@@ -36,7 +36,7 @@ public class CheckController {
     @PostMapping("/twitter/user")
     public Resource<QueryResponse> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
         return queryEndpoint(twitterUser,
-                (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
+               (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
     }
 
     @PostMapping("/twitter/tweet")
@@ -47,12 +47,10 @@ public class CheckController {
 
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         CompletableFuture<QueryResponse> queryResponseFuture;
-        try {
-            queryResponseFuture = redisHandler.getQueryResponse(queryObject.getQueryId());
-        } catch (NoSuchQueryIdException ex) {
-            queryResponseFuture = redisHandler.setQueryResponse(queryObject.getQueryId(),
-                    new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null));
-        }
+        queryResponseFuture = redisHandler.getQueryResponse(queryObject.getQueryId()).exceptionally((throwable ->
+                    redisHandler.setQueryResponse(queryObject.getQueryId(),
+                        new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join()
+            ));
         QueryResponse queryResponse = queryResponseFuture.join();
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
