@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -19,16 +18,13 @@ public class ResponseHandler {
 
     final private RedisHandler redisHandler;
     final private Map<String, Module> moduleMap;
-    final private Random random;
     final private ResponseAggregator responseAggregator;
 
     public ResponseHandler(RedisHandler redisHandler,
                            Map<String, Module> moduleMap,
-                           Random random,
                            ResponseAggregator responseAggregator) {
         this.redisHandler = redisHandler;
         this.moduleMap = moduleMap;
-        this.random = random;
         this.responseAggregator = responseAggregator;
     }
 

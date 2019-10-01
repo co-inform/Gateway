@@ -23,52 +23,12 @@ import java.util.function.Function;
 @Slf4j
 public class ModuleConfig {
 
-    final private ObjectWriter objectWriter;
     final private String callbackBaseUrl;
 
-    ModuleConfig(ObjectMapper objectMapper,
-                 @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}") String callbackBaseUrl) {
-        this.objectWriter = objectMapper.writer();
+    ModuleConfig(@Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}") String callbackBaseUrl) {
         this.callbackBaseUrl = callbackBaseUrl;
     }
 
-    @Bean
-    @Qualifier("stupid")
-    public Module stupidModule(@Value("${stupid.name}") String name,
-                                  @Value("${stupid.server.scheme}") String scheme,
-                                  @Value("${stupid.server.url}") String url,
-                                  @Value("${stupid.server.port}") int port,
-                                  Map<String, Module> moduleMap) {
-        Module stupidModule = new Module(name, scheme, url, port);
-        moduleMap.put(name, stupidModule);
-
-        Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
-            ModuleRequest request = null;
-            StupidContent content = new StupidContent(callbackBaseUrl, tweet.getTweetId(), tweet.getTweetText(), "fan ta dig!"); //todo:correct json
-            try {
-                request = stupidModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                        .setPath("/tweet")
-                        .setContent(content)
-                        .build();
-
-            } catch (JsonProcessingException ex) {
-                log.error("The tweet object could not be parsed, {}", tweet);
-            } catch (ModuleRequestBuilderException ex) {
-                log.error(ex.getMessage());
-            }
-            log.debug("a tweet reqeust built: {}", request);
-            return request;
-        };
-        Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
-            return null;
-        };
-        stupidModule.setTweetModuleRequestFunction(tweetFunction);
-        stupidModule.setTwitterUserModuleRequestFunction(twitterUserFunction);
-
-        return stupidModule;
-    }
-
-    /*
     @Bean
     @Qualifier("misinfome")
     public Module misinfoMeModule(@Value("${misinfome.name}") String name,
@@ -116,8 +76,6 @@ public class ModuleConfig {
 
         return misinfomeModule;
     }
-
-     */
 
     @Bean
     public Map<String, Module> getModuleMap() {
