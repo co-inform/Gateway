@@ -15,8 +15,7 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
     private K key;
     @Getter
     private V value;
-
-
+    
     public Pair(@NotNull final K inK, @NotNull final V inV){
         this.key = inK;
         this.value = inV;
