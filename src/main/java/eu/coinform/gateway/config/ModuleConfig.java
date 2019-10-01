@@ -41,11 +41,12 @@ public class ModuleConfig {
 
         Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
             ModuleRequest request = null;
-            MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl); //todo:correct json
+            MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
             try {
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                        .setPath("") //todo: set correct path
+                        .setPath("/credibility/tweets/"+tweet.getTweetId())
                         .setContent(content)
+                        .addQuery("callback_url", content.getCallbackUrl())
                         .build();
 
             } catch (JsonProcessingException ex) {
@@ -58,10 +59,12 @@ public class ModuleConfig {
         Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
             ModuleRequest request = null;
             try {
-                MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl); //todo:correct json
+                MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
-                        .setPath("") //todo: set correct path
-                        .setContent(content) //todo: correct json
+                        .setPath("/credibility/users")
+                        .setContent(content)
+                        .addQuery("screen_name", twitterUser.getScreenName())
+                        .addQuery("callback_url", content.getCallbackUrl())
                         .build();
             } catch (JsonProcessingException ex) {
                 log.error("The twitter user object could not be parsed, {}", twitterUser);

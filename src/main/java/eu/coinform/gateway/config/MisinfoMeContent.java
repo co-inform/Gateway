@@ -11,6 +11,4 @@ public class MisinfoMeContent extends ModuleRequestContent {
         super(callbackBaseUrl);
     }
 
-    @JsonProperty("some_content")
-    private LinkedHashMap<String, Object> someContent;
 }

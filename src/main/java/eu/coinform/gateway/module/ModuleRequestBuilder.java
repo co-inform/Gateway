@@ -33,11 +33,13 @@ public class ModuleRequestBuilder {
     private ObjectMapper objectMapper;
     private String transactionId;
     private String queryId;
+    private Map<String, String> queries;
 
     public ModuleRequestBuilder(String queryId ,ObjectMapper objectMapper) {
         this.queryId = queryId;
         this.objectMapper = objectMapper;
         headers = new HashMap<>();
+        queries = new HashMap<>();
     }
 
     public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
@@ -82,10 +84,20 @@ public class ModuleRequestBuilder {
         return this;
     }
 
+    public ModuleRequestBuilder addQuery(String key, String value) {
+        queries.put(key, value);
+        return this;
+    }
+
     public ModuleRequest build() throws ModuleRequestBuilderException{
+        StringBuilder sb = new StringBuilder();
+        queries.forEach((key, value) ->
+                sb.append(key)
+                .append("=")
+                .append(value));
         URI uri;
         try {
-            uri = new URI(scheme,null, url, port, path, null, null);
+            uri = new URI(scheme,null, url, port, path, sb.length() == 0 ? null : sb.toString(), null);
         } catch (URISyntaxException ex) {
             throw new ModuleRequestBuilderException("Could not create a valid URI " + ex.getMessage());
         }
@@ -96,6 +108,8 @@ public class ModuleRequestBuilder {
         httpRequest.setEntity(httpEntity);
         for (Map.Entry<String, String> header: headers.entrySet()) {
             httpRequest.setHeader(header.getKey(), header.getValue());
+        }
+        for (Map.Entry<String, String> query: queries.entrySet()) {
         }
         httpRequest.setMaxAttempts(maxAttempts);
         httpRequest.setResponseHandler(responseHandler);
