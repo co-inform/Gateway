@@ -29,7 +29,7 @@ public class RedisConfig {
     public LettuceConnectionFactory redisConnectionFactory() {
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(new RedisStandaloneConfiguration(hostName, port));
         lettuceConnectionFactory.setShareNativeConnection(true);
-        lettuceConnectionFactory.afterPropertiesSet();
+        //lettuceConnectionFactory.afterPropertiesSet();
         return lettuceConnectionFactory;
     }
 
@@ -45,7 +45,7 @@ public class RedisConfig {
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        template.afterPropertiesSet();
+        //template.afterPropertiesSet();
         return template;
     }
 

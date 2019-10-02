@@ -2,6 +2,8 @@ version: '3'
 services:
   gateway:
     image: coinform/gateway:latest
+    depends_on:
+      - redis
     ports:
       - "8080:8080"
     deploy:

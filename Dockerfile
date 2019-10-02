@@ -1,9 +1,8 @@
 FROM openjdk:11-jre
 
-VOLUME /etc/gateway
-RUN mkdir /opt/gateway
-ADD target/gateway-*SNAPSHOT.jar /opt/gateway/gateway.jar
-
-ENTRYPOINT exec java -jar /opt/gateway/gateway.jar
+VOLUME /tmp
+ARG JAR_FILE
+COPY ${JAR_FILE} gateway.jar
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/gateway.jar"]
 
 EXPOSE 8080

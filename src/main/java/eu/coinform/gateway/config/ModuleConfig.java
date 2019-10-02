@@ -41,6 +41,7 @@ public class ModuleConfig {
         Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
             ModuleRequest request = null;
             MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
+            log.debug("send post with content: {}", content.toString());
             try {
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/credibility/tweets/"+tweet.getTweetId())

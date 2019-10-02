@@ -3,9 +3,11 @@ package eu.coinform.gateway.module;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.UUID;
 
+@ToString
 public abstract class ModuleRequestContent {
 
     public ModuleRequestContent(String callbackBaseUrl) {
