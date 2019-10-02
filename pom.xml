@@ -137,6 +137,7 @@
 					</execution>
 					<execution>
 						<id>tag-version</id>
+						<phase>install</phase>
 						<goals>
 							<goal>build</goal>
 							<goal>tag</goal>
