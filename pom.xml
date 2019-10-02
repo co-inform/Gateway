@@ -126,6 +126,7 @@
 				<executions>
 					<execution>
 						<id>tag-latest</id>
+						<phase>install</phase>
 						<goals>
 							<goal>build</goal>
 							<goal>tag</goal>

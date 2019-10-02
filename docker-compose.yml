@@ -8,8 +8,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-    networks:
-      - webnet
   redis:
     image: redis
     ports:
@@ -17,8 +15,3 @@ services:
     deploy:
       placement:
         constraints: [node.role == manager]
-    networks:
-      - webnet
-networks:
-  webnet:
-
