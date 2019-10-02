@@ -1,9 +1,9 @@
 version: '3'
 services:
   gateway:
-    image: gateway:latest
+    image: coinform/gateway:latest
     ports:
-      - "80:80"
+      - "8080:8080"
     deploy:
       replicas: 1
       restart_policy:
