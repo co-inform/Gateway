@@ -109,8 +109,8 @@ public class ModuleRequestBuilder {
         for (Map.Entry<String, String> header: headers.entrySet()) {
             httpRequest.setHeader(header.getKey(), header.getValue());
         }
-        for (Map.Entry<String, String> query: queries.entrySet()) {
-        }
+//        for (Map.Entry<String, String> query: queries.entrySet()) {
+//        } // fixas ovan med stringbuildern?
         httpRequest.setMaxAttempts(maxAttempts);
         httpRequest.setResponseHandler(responseHandler);
         httpRequest.setTransactionId(transactionId);

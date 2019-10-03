@@ -1,5 +1,6 @@
 package eu.coinform.gateway.module;
 
+import eu.coinform.gateway.model.QueryObject;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import lombok.Getter;
@@ -35,4 +36,12 @@ public class Module {
         this.url = url;
         this.port = port;
     }
+
+
+    // T is the Object that is queried ie a tweet or TwitterUser
+    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter){
+        return moduleFunction.apply(parameter);
+    }
+
+
 }
