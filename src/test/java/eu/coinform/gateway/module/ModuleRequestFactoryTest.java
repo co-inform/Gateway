@@ -22,7 +22,7 @@ public class ModuleRequestFactoryTest {
 
     @Before
     public void setup(){
-        moduleRequestFactory = new ModuleRequestFactory("http", "www.example.com", 80);
+        moduleRequestFactory = new ModuleRequestFactory("http", "www.example.com", "", 80);
         moduleRequestBuilder = moduleRequestFactory.getRequestBuilder(uuid);
         mrcImplementation = new MRCImplementation("/modules/response/");
     }
@@ -64,7 +64,7 @@ public class ModuleRequestFactoryTest {
     @Test
     public void getRequestBuilderMalformedUIRITest(){
 
-        moduleRequestFactory = new ModuleRequestFactory("http", "[www.example.com]", 80);
+        moduleRequestFactory = new ModuleRequestFactory("http", "[www.example.com]", "", 80);
         assertThat(moduleRequestFactory).isNotNull();
 
         moduleRequestBuilder = moduleRequestFactory.getRequestBuilder(uuid);

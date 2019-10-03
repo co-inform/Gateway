@@ -31,9 +31,10 @@ public class ModuleConfig {
     public Module misinfoMeModule(@Value("${misinfome.name}") String name,
                                   @Value("${misinfome.server.scheme}") String scheme,
                                   @Value("${misinfome.server.url}") String url,
+                                  @Value("${misinfome.server.base_endpoint}") String baseEndpoint,
                                   @Value("${misinfome.server.port}") int port,
                                   Map<String, Module> moduleMap) {
-        Module misinfomeModule = new Module(name, scheme, url, port);
+        Module misinfomeModule = new Module(name, scheme, url, baseEndpoint, port);
         moduleMap.put(name, misinfomeModule);
 
         Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
@@ -44,6 +45,7 @@ public class ModuleConfig {
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/credibility/tweets/"+tweet.getTweetId())
                         .setContent(content)
+                        .setHeader("accept", "application/json")
                         .addQuery("callback_url", content.getCallbackUrl())
                         .build();
 
@@ -61,6 +63,7 @@ public class ModuleConfig {
                 request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
                         .setPath("/credibility/users")
                         .setContent(content)
+                        .setHeader("accept", "application/json")
                         .addQuery("screen_name", twitterUser.getScreenName())
                         .addQuery("callback_url", content.getCallbackUrl())
                         .build();
