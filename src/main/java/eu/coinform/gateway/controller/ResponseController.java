@@ -1,15 +1,10 @@
 package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.cache.ModuleResponse;
-import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.cache.ModuleTransaction;
-import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.service.ResponseHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -29,7 +29,6 @@ public class RedisConfig {
     public LettuceConnectionFactory redisConnectionFactory() {
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(new RedisStandaloneConfiguration(hostName, port));
         lettuceConnectionFactory.setShareNativeConnection(true);
-        //lettuceConnectionFactory.afterPropertiesSet();
         return lettuceConnectionFactory;
     }
 
@@ -39,34 +38,11 @@ public class RedisConfig {
      * @return redisTemplate
      */
     @Bean
-   // @Qualifier("redisQueryTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        //template.afterPropertiesSet();
         return template;
     }
-
-    /*
-    @Bean
-    @Qualifier("redisTransactionTemplate")
-    public RedisTemplate<String, ModuleTransaction> redisTransactionTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, ModuleTransaction> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        template.afterPropertiesSet();
-        return template;
-    }
-
-    @Bean
-    @Qualifier("redisModuleTemplate")
-    public RedisTemplate<String, Object> redisModuleTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-        template.afterPropertiesSet();
-        return template;
-    }
-
-     */
 }

@@ -6,7 +6,6 @@ import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;

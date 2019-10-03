@@ -1,10 +1,11 @@
 package eu.coinform.gateway.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import eu.coinform.gateway.module.*;
 import eu.coinform.gateway.model.Tweet;
+import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
-import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,108 +20,66 @@ import java.util.function.Function;
 @Slf4j
 public class ModuleConfig {
 
-//    private final Function<StackWalker, String> methodName = s -> s.walk(sfs -> sfs.skip(1).findFirst().get().getMethodName());
+    final private String callbackBaseUrl;
 
-    @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}")
-    protected String callbackBaseUrl;
-
-//    @Bean
-//    @Qualifier("callbackBaseUrl")
-//    public String callbackBaseUrl(){
-//        return this.callbackBaseUrl;
-//    }
-
-
-//    ModuleConfig(@Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}") String callbackBaseUrl) {
-//        this.callbackBaseUrl = callbackBaseUrl;
-//    }
-
-//    @Bean
-//    @Qualifier("misinfome")
-//    public Module misinfoMeModule(@Value("${misinfome.name}") String name,
-//                                  @Value("${misinfome.server.scheme}") String scheme,
-//                                  @Value("${misinfome.server.url}") String url,
-//                                  @Value("${misinfome.server.port}") int port,
-//                                  Map<String, Module> moduleMap) {
-//        Module misinfomeModule = new Module(name, scheme, url, port);
-//        moduleMap.put(name, misinfomeModule);
-//
-//        Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
-//            ModuleRequest request = null;
-//            MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
-//            log.debug("send post with content: {}", content.toString());
-//            try {
-//                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-//                        .setPath("/credibility/tweets/"+tweet.getTweetId())
-//                        .setContent(content)
-//                        .addQuery("callback_url", content.getCallbackUrl())
-//                        .build();
-//
-//            } catch (JsonProcessingException ex) {
-//                log.error("The tweet object could not be parsed, {}", tweet);
-//            } catch (ModuleRequestBuilderException ex) {
-//                log.error(ex.getMessage());
-//            }
-//            return request;
-//        };
-//        Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
-//            ModuleRequest request = null;
-//            try {
-//                MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
-//                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
-//                        .setPath("/credibility/users")
-//                        .setContent(content)
-//                        .addQuery("screen_name", twitterUser.getScreenName())
-//                        .addQuery("callback_url", content.getCallbackUrl())
-//                        .build();
-//            } catch (JsonProcessingException ex) {
-//                log.error("The twitter user object could not be parsed, {}", twitterUser);
-//            } catch (ModuleRequestBuilderException ex) {
-//                log.error(ex.getMessage());
-//            }
-//
-//            return request;
-//        };
-//        misinfomeModule.setTweetModuleRequestFunction(tweetFunction);
-//        misinfomeModule.setTwitterUserModuleRequestFunction(twitterUserFunction);
-//
-//        return misinfomeModule;
-//    }
+    ModuleConfig(@Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}") String callbackBaseUrl) {
+        this.callbackBaseUrl = callbackBaseUrl;
+    }
 
     @Bean
-    @Qualifier("contentanalysis")
-    public Module contentAnalysisModule(@Value("${contentanalysis.name}") String name,
-                                        @Value("${contentanalysis.server.scheme}") String scheme,
-                                        @Value("${contentanalysis.server.url}") String url, //todo: find the server adress and add it to the properties file!
-                                        @Value("${contentanalysis.server.port}") int port,
-                                        Map<String, Module> moduleMap) {
+    @Qualifier("misinfome")
+    public Module misinfoMeModule(@Value("${misinfome.name}") String name,
+                                  @Value("${misinfome.server.scheme}") String scheme,
+                                  @Value("${misinfome.server.url}") String url,
+                                  @Value("${misinfome.server.base_endpoint}") String baseEndpoint,
+                                  @Value("${misinfome.server.port}") int port,
+                                  Map<String, Module> moduleMap) {
+        Module misinfomeModule = new Module(name, scheme, url, baseEndpoint, port);
+        moduleMap.put(name, misinfomeModule);
 
-        Module contentAnalysisModule = new Module(name, scheme, url, port);
-        moduleMap.put(name, contentAnalysisModule);
-
-        Function<Tweet, ModuleRequest> stanceFunction = (tweet) -> {
-
+        Function<Tweet, ModuleRequest> tweetFunction = (tweet) -> {
             ModuleRequest request = null;
-            ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
-
-//            log.debug("{} sends {}", methodName.apply(StackWalker.getInstance()), content.toString());
-
+            MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
+            log.debug("send post with content: {}", content.toString());
             try {
-                request = contentAnalysisModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                        .setPath("/post/stance")
+                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
+                        .setPath("/credibility/tweets/"+tweet.getTweetId())
                         .setContent(content)
+                        .setHeader("accept", "application/json")
+                        .addQuery("callback_url", content.getCallbackUrl())
                         .build();
-            } catch (JsonProcessingException | ModuleRequestBuilderException e){
-  //              log.error("{} threw {}", methodName.apply(StackWalker.getInstance()), e.getMessage());
+
+            } catch (JsonProcessingException ex) {
+                log.error("The tweet object could not be parsed, {}", tweet);
+            } catch (ModuleRequestBuilderException ex) {
+                log.error(ex.getMessage());
+            }
+            return request;
+        };
+        Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
+            ModuleRequest request = null;
+            try {
+                MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
+                request = misinfomeModule.getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
+                        .setPath("/credibility/users")
+                        .setContent(content)
+                        .setHeader("accept", "application/json")
+                        .addQuery("screen_name", twitterUser.getScreenName())
+                        .addQuery("callback_url", content.getCallbackUrl())
+                        .build();
+            } catch (JsonProcessingException ex) {
+                log.error("The twitter user object could not be parsed, {}", twitterUser);
+            } catch (ModuleRequestBuilderException ex) {
+                log.error(ex.getMessage());
             }
 
             return request;
         };
+        misinfomeModule.setTweetModuleRequestFunction(tweetFunction);
+        misinfomeModule.setTwitterUserModuleRequestFunction(twitterUserFunction);
 
-
-        return contentAnalysisModule;
+        return misinfomeModule;
     }
-
 
     @Bean
     public Map<String, Module> getModuleMap() {

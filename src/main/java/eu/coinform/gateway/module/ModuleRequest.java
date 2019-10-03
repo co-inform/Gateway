@@ -1,9 +1,12 @@
 package eu.coinform.gateway.module;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -12,6 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.function.Function;
 
@@ -51,6 +55,21 @@ public class ModuleRequest extends HttpPost {
 
     @Async("asyncExecutor")
     public void makeRequest() throws ModuleRequestException {
+        if (log.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            for (Header header : getAllHeaders()) {
+                sb.append(header.toString());
+                sb.append("\n");
+            }
+            log.debug("Sending HTTP request: {}", toString());
+            log.debug("headers: {}", sb.substring(0, sb.length()-1));
+            try {
+                log.debug("content: {}", CharStreams
+                        .toString(new InputStreamReader(getEntity().getContent(), Charsets.UTF_8)));
+            } catch (IOException ex) {
+                log.debug("failing to write content: {}", ex.getMessage());
+            }
+        }
         sendRequest();
     }
 
