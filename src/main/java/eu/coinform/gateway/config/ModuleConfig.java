@@ -1,8 +1,6 @@
 package eu.coinform.gateway.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import eu.coinform.gateway.module.*;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
