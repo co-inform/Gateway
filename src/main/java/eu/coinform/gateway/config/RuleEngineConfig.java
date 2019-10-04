@@ -22,6 +22,6 @@ public class RuleEngineConfig {
                           @Value("${gateway.ruleengine.config}") String config) {
         URL url = Resources.getResource(config);
         log.debug("the path to the rule engine config file: {}", url.getPath());
-        return RuleEngineFactory.newInstance(engine, new rule.engine.RuleEngineConfig(url.getPath()));
+        return RuleEngineFactory.newInstance(engine, new rule.engine.RuleEngineConfig(url));
     }
 }
