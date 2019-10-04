@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.config.MisinfoMeContent;
 import eu.coinform.gateway.model.QueryObject;
 import eu.coinform.gateway.model.Tweet;
+import eu.coinform.gateway.model.TwitterInterface;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.function.Function;
 
 @Slf4j
-public class MisInfoMe extends Module {
+public class MisInfoMe extends Module implements TwitterInterface {
 
 
     @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}")
@@ -44,7 +45,7 @@ public class MisInfoMe extends Module {
         return request;
     };
 
-    public Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
+    private Function<TwitterUser, ModuleRequest> twitterUserFunction = (twitterUser) -> {
         ModuleRequest request = null;
         try {
             MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
@@ -65,17 +66,17 @@ public class MisInfoMe extends Module {
     };
 
     @Override
-    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> function, T paramater) {
-        return requestFunction(function,paramater);
+    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> function, T parameter) {
+        return requestFunction(function,parameter);
     }
 
     @Override
-    public Function<Tweet, ModuleRequest> tweetFunction() {
+    public Function<Tweet, ModuleRequest> tweetRequest() {
         return tweet;
     }
 
     @Override
-    public Function<TwitterUser, ModuleRequest> twitterUserFunction() {
+    public Function<TwitterUser, ModuleRequest> twitterUserRequest() {
         return twitterUserFunction;
     }
 }

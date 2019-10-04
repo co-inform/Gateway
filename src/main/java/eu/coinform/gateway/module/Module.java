@@ -1,14 +1,13 @@
 package eu.coinform.gateway.module;
 
 import eu.coinform.gateway.model.QueryObject;
-import eu.coinform.gateway.model.TwitterInterface;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.util.function.Function;
 
 @ToString
-public abstract class Module implements TwitterInterface {
+public abstract class Module {//implements TwitterInterface {
 
     @Getter
     private String name;

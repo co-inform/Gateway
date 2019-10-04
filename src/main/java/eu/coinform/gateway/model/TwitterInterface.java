@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 public interface TwitterInterface {
 
-    Function<Tweet, ModuleRequest> tweetFunction();
-    Function<TwitterUser, ModuleRequest> twitterUserFunction();
+    Function<Tweet, ModuleRequest> tweetRequest();
+    Function<TwitterUser, ModuleRequest> twitterUserRequest();
 
 }
