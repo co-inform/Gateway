@@ -2,14 +2,14 @@ package eu.coinform.gateway.config;
 
 import eu.coinform.gateway.module.ModuleRequestContent;
 
-public class MisinfoMeContent extends ModuleRequestContent {
+public class ContentAnalysisContent extends ModuleRequestContent {
 
-    public MisinfoMeContent(String callbackBaseUrl) {
+    public ContentAnalysisContent(String callbackBaseUrl) {
         super(callbackBaseUrl);
     }
 
     @Override
-    public String toString() {
+    public String toString(){
         return super.toString();
     }
 }
