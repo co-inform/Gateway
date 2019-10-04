@@ -2,24 +2,18 @@ package eu.coinform.gateway.module.misinfome;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.config.MisinfoMeContent;
-import eu.coinform.gateway.model.QueryObject;
-import eu.coinform.gateway.model.Tweet;
-import eu.coinform.gateway.model.TwitterInterface;
-import eu.coinform.gateway.model.TwitterUser;
+import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
+import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
+import eu.coinform.gateway.module.iface.TwitterUserReqeuestInterface;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.function.Function;
 
 @Slf4j
-public class MisInfoMe extends Module implements TwitterInterface {
-
-
-    @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}")
-    private String callbackBaseUrl;
+public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserReqeuestInterface {
 
     public MisInfoMe(String name, String scheme, String url, String baseEndpoint, int port){
         super(name,scheme,url,baseEndpoint,port);
