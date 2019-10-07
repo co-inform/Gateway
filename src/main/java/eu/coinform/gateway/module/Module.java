@@ -1,11 +1,6 @@
 package eu.coinform.gateway.module;
 
 import eu.coinform.gateway.model.QueryObject;
-<<<<<<< HEAD
-import eu.coinform.gateway.model.Tweet;
-import eu.coinform.gateway.model.TwitterUser;
-=======
->>>>>>> origin/master
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,19 +37,11 @@ public abstract class Module {
         this.baseEndpoint = baseEndpoint;
     }
 
-<<<<<<< HEAD
 
     // T is the Object that is queried ie a tweet or TwitterUser
-    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter){
-        return moduleFunction.apply(parameter);
-    }
-
-
-=======
-    abstract public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> function, T parameter);
+    abstract public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter);
 
     protected <T extends QueryObject> ModuleRequest requestFunction(Function<T, ModuleRequest> function, T parameter){
         return function.apply(parameter);
     }
->>>>>>> origin/master
 }
