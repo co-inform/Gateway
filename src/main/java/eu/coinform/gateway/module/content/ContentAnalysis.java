@@ -68,7 +68,7 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
     }
 
     @Override
-    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> function, T parameter) {
-        return requestFunction(function, parameter);
+    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter) {
+        return requestFunction(moduleFunction, parameter);
     }
 }
