@@ -37,7 +37,11 @@ public abstract class Module {
         this.baseEndpoint = baseEndpoint;
     }
 
-    abstract public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> function, T parameter);
+
+    // T is the Object that is queried ie a tweet or TwitterUser
+    public abstract <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter);
+
+
 
     protected <T extends QueryObject> ModuleRequest requestFunction(Function<T, ModuleRequest> function, T parameter){
         return function.apply(parameter);

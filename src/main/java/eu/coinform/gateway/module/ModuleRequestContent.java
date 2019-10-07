@@ -13,6 +13,7 @@ public abstract class ModuleRequestContent {
     public ModuleRequestContent(String callbackBaseUrl) {
           this.transactionId = UUID.randomUUID().toString();
           this.callbackUrl = callbackBaseUrl + transactionId;
+          this.callbackBaseUrl = callbackBaseUrl;
     }
 
     @JsonIgnore
@@ -22,5 +23,9 @@ public abstract class ModuleRequestContent {
     @JsonProperty("callback_url")
     @Getter
     final private String callbackUrl;
+
+    @JsonIgnore
+    @Getter
+    final private String callbackBaseUrl;
 
 }

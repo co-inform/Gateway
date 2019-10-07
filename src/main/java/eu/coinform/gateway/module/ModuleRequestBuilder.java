@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -137,7 +136,7 @@ public class ModuleRequestBuilder {
         for (Map.Entry<String, String> header: headers.entrySet()) {
             httpRequest.setHeader(header.getKey(), header.getValue());
         }
-        httpRequest.setMaxAttempts(maxAttempts);
+    	httpRequest.setMaxAttempts(maxAttempts);
         httpRequest.setResponseHandler(responseHandler);
         httpRequest.setTransactionId(transactionId);
         httpRequest.setQueryId(queryId);
