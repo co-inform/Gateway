@@ -18,10 +18,7 @@ import java.util.ResourceBundle;
 public class RuleEngineConfig {
 
     @Bean
-    public RuleEngine ruleEngine(@Value("${gateway.ruleengine.engine}") String engine,
-                          @Value("${gateway.ruleengine.config}") String config) {
-        URL url = Resources.getResource(config);
-        log.debug("the path to the rule engine config file: {}", url.getPath());
-        return RuleEngineFactory.newInstance(engine, new rule.engine.RuleEngineConfig(url));
+    public RuleEngine ruleEngine(@Value("${gateway.ruleengine.engine}") String engine) {
+        return RuleEngineFactory.newInstance(engine);
     }
 }
