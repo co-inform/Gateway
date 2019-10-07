@@ -37,7 +37,7 @@ public abstract class Module {
         this.baseEndpoint = baseEndpoint;
     }
 
-    abstract public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> function, T parameter);
+    abstract public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter);
 
     protected <T extends QueryObject> ModuleRequest requestFunction(Function<T, ModuleRequest> function, T parameter){
         return function.apply(parameter);
