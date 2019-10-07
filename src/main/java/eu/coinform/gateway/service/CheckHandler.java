@@ -23,7 +23,7 @@ public class CheckHandler {
     @Autowired
     RedisHandler redisHandler;
 
-    @Async("asyncExecutor")
+    @Async("endpointExecutor")
     public void twitterUserConsumer(TwitterUser twitterUser) {
         log.debug("handle review object: {}", twitterUser);
 
@@ -36,7 +36,7 @@ public class CheckHandler {
         }
     }
 
-    @Async("asyncExecutor")
+    @Async("endpointExecutor")
     public void tweetConsumer(Tweet tweet) {
         log.debug("handle tweet object: {}", tweet);
         for (Module module: moduleMap) {

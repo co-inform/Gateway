@@ -12,14 +12,24 @@ import java.util.concurrent.Executor;
 public class AsyncConfig {
 
     //todo: get settings from the properties file
-
-    @Bean(name = "asyncExecutor")
-    public Executor asyncExecutor() {
+    @Bean(name = "redisExecutor")
+    public Executor redisExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(Runtime.getRuntime().availableProcessors());
+        executor.setCorePoolSize(4);
         executor.setMaxPoolSize(50);
         executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("AsyncTread-");
+        executor.setThreadNamePrefix("RedisAsyncTread-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "endpointExecutor")
+    public Executor endpointExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("EndpointAsyncTread-");
         executor.initialize();
         return executor;
     }

@@ -30,7 +30,7 @@ public class ResponseHandler {
 
     //todo: Build the policy engine connection
 
-    @Async("asyncExecutor")
+    @Async("endpointExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
         //todo: Aggregate and send the responses to the policy engine
         log.debug("Response {} to {}: {}", moduleTransaction.getTransactionId(), moduleTransaction.getModule(), moduleTransaction.toString());
@@ -42,13 +42,6 @@ public class ResponseHandler {
                     new ConcurrentHashMap<>(redisHandler.getModuleResponses(queryId).join())
                  );
 
-        try {
-            Thread.sleep(responseAggregator.getAggregateTimeout() + 50);
-        } catch (InterruptedException ex) {
-            log.error("response consumer thread interrupted: {}", ex.getMessage());
-        }
-
-        //todo: at the moment the response aggregator is only processing things when a new module response is added.
         //todo: this side-stepps the policy engine and put the responses directly to the QueryResponse cache.
         responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
             LinkedHashMap<String, Object> responseField = new LinkedHashMap<>();

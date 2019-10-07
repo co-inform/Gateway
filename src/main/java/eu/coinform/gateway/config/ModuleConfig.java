@@ -28,6 +28,7 @@ public class ModuleConfig {
         return new MisInfoMe(name, scheme, url, baseEndpoint, port);
     }
 
+    /*
     @Bean
     @Qualifier("contentanalysis")
     public Module contentanalysisModule(@Value("${contentanalysis.name}") String name,
@@ -37,4 +38,5 @@ public class ModuleConfig {
                                   @Value("${contentanalysis.server.port}") int port) {
         return new ContentAnalysis(name, scheme, url, baseEndpoint, port);
     }
+     */
 }
