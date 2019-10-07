@@ -47,10 +47,11 @@ public class CheckController {
 
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         CompletableFuture<QueryResponse> queryResponseFuture;
-        queryResponseFuture = redisHandler.getQueryResponse(queryObject.getQueryId()).exceptionally((throwable ->
-                    redisHandler.setQueryResponse(queryObject.getQueryId(),
-                        new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join()
-            ));
+        queryResponseFuture = redisHandler.getQueryResponse(queryObject.getQueryId()).exceptionally((throwable -> {
+            QueryResponse queryResponse = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null);
+            redisHandler.setQueryResponse(queryObject.getQueryId(), queryResponse);
+            return queryResponse;
+        }));
         QueryResponse queryResponse = queryResponseFuture.join();
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.

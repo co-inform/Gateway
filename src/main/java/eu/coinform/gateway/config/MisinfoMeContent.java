@@ -4,10 +4,7 @@ import eu.coinform.gateway.module.ModuleRequestContent;
 
 public class MisinfoMeContent extends ModuleRequestContent {
 
-
-
-
-    MisinfoMeContent(String callbackBaseUrl) {
+    public MisinfoMeContent(String callbackBaseUrl) {
         super(callbackBaseUrl);
     }
 
