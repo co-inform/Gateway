@@ -21,7 +21,7 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class ResponseAggregator {
-    // todo: Rewrite it to cache on a Memcached server instead of local map.
+    // todo: Rewrite it to cache on a Redis/Memcached server instead of local map.
     // Making it possible for multiple spring server instances to run in parallel
 
     final private ConcurrentMap<String, ConcurrentHashMap<String, ModuleResponse>> responseMap;
