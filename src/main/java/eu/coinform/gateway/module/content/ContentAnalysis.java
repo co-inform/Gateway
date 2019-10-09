@@ -2,14 +2,15 @@ package eu.coinform.gateway.module.content;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.config.ContentAnalysisContent;
-import eu.coinform.gateway.model.QueryObject;
 import eu.coinform.gateway.model.Tweet;
+import eu.coinform.gateway.module.Module;
+import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
-import eu.coinform.gateway.module.ModuleRequest;
-import eu.coinform.gateway.module.Module;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 @Slf4j
@@ -18,57 +19,55 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
     //todo: Not done yet. host url needs setting in application-docker.properties
     //todo: needs refactoring? for the two different types of requests that are done
 
+    private List<Function<Tweet, ModuleRequest>> funcList = new ArrayList<>();
+
     public ContentAnalysis(String name, String scheme, String url, String baseEndpoint, int port) {
         super(name, scheme, url, baseEndpoint, port);
-    }
 
-    private Function<Tweet, ModuleRequest> stance = (tweet) -> {
-        ModuleRequest request = null;
-        ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
+        funcList.add((tweet) -> {
+            ModuleRequest request = null;
+            ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
 
-        log.debug("send post with content: {}", content.toString());
+            log.debug("send post with content: {}", content.toString());
 
-        try {
-            request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                    .setPath("/post/stance")
-                    .setContent(content)
-                    .setHeader("accept","application/json")
-                    .build();
-        } catch (ModuleRequestBuilderException | JsonProcessingException e){
-            log.error("{} threw {}", methodName.apply(StackWalker.getInstance()), e.getMessage());
-        }
+            try {
+                request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
+                        .setPath("/post/stance")
+                        .setContent(content)
+                        .setHeader("accept","application/json")
+                        .build();
+            } catch (ModuleRequestBuilderException | JsonProcessingException e){
+                log.error("{} threw {}", methodName.apply(StackWalker.getInstance()), e.getMessage());
+            }
 
-        return request;
-    };
+            return request;
+        });
 
-    private Function<Tweet, ModuleRequest> veracity = (tweet) -> {
+        funcList.add((tweet) -> {
 
-        ModuleRequest request = null;
-        ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
+            ModuleRequest request = null;
+            ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
 
-        log.debug("send post with content: {}", content.toString());
+            log.debug("send post with content: {}", content.toString());
 
-        try {
-            request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                    .setPath("/post/veracity")
-                    .setContent(content)
-                    .setHeader("accept","application/json")
-                    .build();
+            try {
+                request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
+                        .setPath("/post/veracity")
+                        .setContent(content)
+                        .setHeader("accept","application/json")
+                        .build();
 
-        } catch (ModuleRequestBuilderException | JsonProcessingException e){
-            log.error("{} threw {}", methodName.apply(StackWalker.getInstance()), e.getMessage());
-        }
+            } catch (ModuleRequestBuilderException | JsonProcessingException e){
+                log.error("{} threw {}", methodName.apply(StackWalker.getInstance()), e.getMessage());
+            }
 
-        return request;
-    };
-
-    @Override
-    public Function<Tweet, ModuleRequest> tweetRequest() {
-        return stance;
+            return request;
+        });
     }
 
     @Override
-    public <T extends QueryObject> ModuleRequest moduleRequestFunction(Function<T, ModuleRequest> moduleFunction, T parameter) {
-        return requestFunction(moduleFunction, parameter);
+    public List<Function<Tweet, ModuleRequest>> tweetRequest() {
+        return funcList;
     }
+
 }

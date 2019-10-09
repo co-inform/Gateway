@@ -19,7 +19,7 @@ import java.util.List;
 public class CheckHandler {
 
     @Autowired
-    List<Module> moduleMap;
+    List<Module> moduleList;
     @Autowired
     RedisHandler redisHandler;
 
@@ -27,11 +27,17 @@ public class CheckHandler {
     public void twitterUserConsumer(TwitterUser twitterUser) {
         log.debug("handle review object: {}", twitterUser);
 
-        for (Module module: moduleMap) {
+        for (Module module: moduleList) {
             if(module instanceof TwitterUserReqeuestInterface){
-                module.moduleRequestFunction(((TwitterUserReqeuestInterface)module)
-                        .twitterUserRequest(), twitterUser)
-                        .makeRequest();
+                ((TwitterUserReqeuestInterface) module)
+                        .twitterUserRequest()
+                        .forEach((func) -> {
+                            ModuleRequest moduleRequest = func.apply(twitterUser);
+                            redisHandler.setModuleTransaction(new ModuleTransaction(moduleRequest.getTransactionId(),
+                                    module.getName(),
+                                    moduleRequest.getQueryId()));
+                            moduleRequest.makeRequest();
+                        });
             }
         }
     }
@@ -39,15 +45,18 @@ public class CheckHandler {
     @Async("endpointExecutor")
     public void tweetConsumer(Tweet tweet) {
         log.debug("handle tweet object: {}", tweet);
-        for (Module module: moduleMap) {
+        for (Module module: moduleList) {
             log.debug("handle for module: {} -> {}", module.getName(), module);
-            if (module instanceof TwitterTweetRequestInterface) {
-                ModuleRequest moduleRequest = module.moduleRequestFunction(((TwitterTweetRequestInterface) module).tweetRequest(), tweet);
-                redisHandler.setModuleTransaction(new ModuleTransaction(moduleRequest.getTransactionId(),
-                        module.getName(),
-                        moduleRequest.getQueryId()));
-                moduleRequest.makeRequest();
-
+            if(module instanceof TwitterTweetRequestInterface){
+                ((TwitterTweetRequestInterface) module)
+                        .tweetRequest()
+                        .forEach((func) -> {
+                            ModuleRequest moduleRequest = func.apply(tweet);
+                            redisHandler.setModuleTransaction(new ModuleTransaction(moduleRequest.getTransactionId(),
+                                    module.getName(),
+                                    moduleRequest.getQueryId()));
+                            moduleRequest.makeRequest();
+                        });
             }
         }
     }
