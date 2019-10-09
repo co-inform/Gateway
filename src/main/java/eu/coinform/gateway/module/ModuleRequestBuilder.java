@@ -34,7 +34,7 @@ public class ModuleRequestBuilder {
     private int port;
     private String path;
     private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
-    private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse -> {
+    private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse)-> {
         if (log.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             for (Header header : httpResponse.getAllHeaders()) {
@@ -51,7 +51,7 @@ public class ModuleRequestBuilder {
             }
         }
         return httpResponse;
-    });
+    };
     private ObjectMapper objectMapper;
     private String transactionId;
     private String queryId;
