@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -46,13 +45,11 @@ public class CheckController {
     }
 
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
-        CompletableFuture<QueryResponse> queryResponseFuture;
-        queryResponseFuture = redisHandler.getQueryResponse(queryObject.getQueryId()).exceptionally((throwable -> {
-            QueryResponse queryResponse = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null);
-            redisHandler.setQueryResponse(queryObject.getQueryId(), queryResponse);
-            return queryResponse;
-        }));
-        QueryResponse queryResponse = queryResponseFuture.join();
+        long start = System.currentTimeMillis();
+        log.debug("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
+        QueryResponse queryResponse= redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
+                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join();
+        log.debug("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
             // Like if the cache is older than some threshold it is handled as a new query.
@@ -60,6 +57,7 @@ public class CheckController {
             return assembler.toResource(queryResponse);
         }
         queryObjectConsumer.accept(queryObject);
+        log.debug("{}: query sent of to hander", System.currentTimeMillis() - start);
         return assembler.toResource(queryResponse);
     }
 

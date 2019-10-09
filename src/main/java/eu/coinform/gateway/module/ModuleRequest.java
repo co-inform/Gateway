@@ -53,7 +53,7 @@ public class ModuleRequest extends HttpPost {
         throw new ModuleRequestException(String.format("Could not complete moduleRequest, failed after %d tries. Last exception: %s", maxAttempts, ex.getMessage()), exceptions);
     }
 
-    @Async("asyncExecutor")
+    @Async("redisExecutor")
     public void makeRequest() throws ModuleRequestException {
         if (log.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();

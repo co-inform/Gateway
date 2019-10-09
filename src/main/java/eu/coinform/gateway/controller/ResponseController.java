@@ -29,7 +29,6 @@ public class ResponseController {
     @PostMapping("/module/response/{transaction_id}")
     ResponseEntity<?> postResponse(@PathVariable(value = "transaction_id", required = true) String transaction_id,
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
-
         log.debug("Response received with transaction_id: {}", transaction_id);
         CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
         CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getModuleTransaction(transaction_id);
