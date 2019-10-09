@@ -3,7 +3,6 @@ package eu.coinform.gateway.service;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
-import eu.coinform.gateway.module.Module;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -17,14 +16,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ResponseHandler {
 
     final private RedisHandler redisHandler;
-    final private Map<String, Module> moduleMap;
     final private ResponseAggregator responseAggregator;
 
     public ResponseHandler(RedisHandler redisHandler,
-                           Map<String, Module> moduleMap,
                            ResponseAggregator responseAggregator) {
         this.redisHandler = redisHandler;
-        this.moduleMap = moduleMap;
         this.responseAggregator = responseAggregator;
     }
 
