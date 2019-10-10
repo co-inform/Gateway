@@ -84,7 +84,7 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
     /**
      * Implementation of the function defined in the {@link TwitterTweetRequestInterface}. Returns the list of functional
      * objects to be called for each tweet for the particular module
-     * @return tweetFuncList which is a {@link List}{@literal <Function<Tweet ModuleRequest>>}
+     * @return tweetFuncList which is a {@link List}{@literal <Function<Tweet, ModuleRequest>>}
      */
     @Override
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
