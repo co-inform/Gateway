@@ -28,6 +28,8 @@ public abstract class Module {
      * The name of the module
      * -- GETTER --
      * Get the name of the Module
+     *
+     * @return The name
      */
     @Getter
     private String name;
@@ -35,6 +37,8 @@ public abstract class Module {
      * The url of the module
      * -- GETTER --
      * Get the url of the Module
+     *
+     * @return The url
      */
     @Getter
     private String url;
@@ -42,6 +46,8 @@ public abstract class Module {
      * If the module is not deployed at the root of the url but at some endpoint. This is that base endpoint
      * -- GETTER --
      * Get the base endpoint of the Module
+     *
+     * @return The base endpoint
      */
     @Getter
     private String baseEndpoint;
@@ -49,6 +55,8 @@ public abstract class Module {
      * The scheme of the module, ie http, https
      * -- GETTER --
      * Get the scheme of the Module
+     *
+     * @return The scheme
      */
     @Getter
     private String scheme;
@@ -56,6 +64,8 @@ public abstract class Module {
      * The port of the module
      * -- GETTER --
      * Get the port of the Module
+     *
+     * @return The port
      */
     @Getter
     private int port;
@@ -64,6 +74,8 @@ public abstract class Module {
      * moduleRequestFactory is the factory creating different requests for the module
      * -- GETTER --
      * Get the {@link ModuleRequestFactory} of the module
+     *
+     * @return the moduleRequestFactory
      */
     @Getter
     private ModuleRequestFactory moduleRequestFactory;
