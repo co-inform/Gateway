@@ -77,7 +77,7 @@ public class ModuleRequestBuilder {
     /**
      * Constructor for the ModuleRequestBuilder class. Takes two parameters
      * @param queryId queryId is the id returned to the plugin upon a query from it
-     * @param objectMapper objectMapper is a mapper responsible for mapping objects -> json -> objects
+     * @param objectMapper objectMapper is a mapper responsible for mapping {@literal objects -> json -> objects}
      */
     public ModuleRequestBuilder(String queryId ,ObjectMapper objectMapper) {
         this.queryId = queryId;
@@ -91,7 +91,7 @@ public class ModuleRequestBuilder {
      * http header "Content-type" to application/json and sets the variable transactionId to what the content holds
      * @param content content to be mapped
      * @return returns this
-     * @throws JsonProcessingException
+     * @throws JsonProcessingException if the objectMapper cannot convert object to JSON
      */
     public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
         headers.put("Content-type", "application/json");

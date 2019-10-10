@@ -8,7 +8,7 @@ import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
-import eu.coinform.gateway.module.iface.TwitterUserReqeuestInterface;
+import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -17,15 +17,15 @@ import java.util.function.Function;
 
 
 /**
- * THe MisInfoMe module extends Modules and implements the interfaces TwitterTweetRequestInterface and TwitterUserRequestInterface
+ * THe MisInfoMe module extends Modules and implements the interfaces {@link TwitterTweetRequestInterface} and {@link TwitterUserRequestInterface}
  */
 @Slf4j
-public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserReqeuestInterface {
+public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserRequestInterface {
 
     /**
      * The constructor of the MisInfoMe module. Sets up the module and also needs to implement the Functional objects
      * and store them in tweetFuncList or twitteruserFuncList. These functional objects are the actual setup for the
-     * requests made to the moduel API's.
+     * requests made to the module API's.
      *
      * @param name name of the module
      * @param scheme scheme of the api for the module, ie http/https
@@ -82,9 +82,9 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
     }
 
     /**
-     * Implementation of the function defined in the TwitterTweetRequestInterface. Returns the list of functional
+     * Implementation of the function defined in the {@link TwitterTweetRequestInterface}. Returns the list of functional
      * objects to be called for each tweet for the particular module
-     * @return tweetFuncList which is a List<Function<Tweet, ModuleRequest>>
+     * @return tweetFuncList which is a {@link List}{@literal <Function<Tweet ModuleRequest>>}
      */
     @Override
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
@@ -92,9 +92,9 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
     }
 
     /**
-     * Implementation of the function defined in the TwitterUserRequestInterface. Returns the list of functional
+     * Implementation of the function defined in the {@link TwitterUserRequestInterface}. Returns the list of functional
      * objects to be called for each tweet for the particular module
-     * @return twitteruserFuncList which is a List<Function<TwitterUser, ModuleRequest>>
+     * @return twitteruserFuncList which is a {@link List}{@literal <Function<TwitterUser, ModuleRequest>>}
      */
     @Override
     public List<Function<TwitterUser, ModuleRequest>> twitterUserRequest() {

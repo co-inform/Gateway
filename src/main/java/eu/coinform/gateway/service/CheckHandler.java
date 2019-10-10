@@ -6,7 +6,7 @@ import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
-import eu.coinform.gateway.module.iface.TwitterUserReqeuestInterface;
+import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -43,8 +43,8 @@ public class CheckHandler {
         log.debug("handle review object: {}", twitterUser);
 
         for (Module module: moduleList) {
-            if(module instanceof TwitterUserReqeuestInterface){
-                ((TwitterUserReqeuestInterface) module)
+            if(module instanceof TwitterUserRequestInterface){
+                ((TwitterUserRequestInterface) module)
                         .twitterUserRequest() // call the implemented method to get a list of Functional objects
                         .forEach((func) -> {
                             ModuleRequest moduleRequest = func.apply(twitterUser); // call every object in turn

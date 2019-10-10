@@ -29,9 +29,9 @@ public class ModuleRequestFactory {
     }
 
     /**
-     * getRequestBuilder() takes a queryId and instantiates a ModuleRequestBuilder with
-     * @param queryId
-     * @return
+     * getRequestBuilder() takes a queryId and instantiates a {@link ModuleRequestBuilder} with
+     * @param queryId the queryId to create and get a {@link ModuleRequestBuilder} for
+     * @return an instance of a {@link ModuleRequestBuilder}
      */
     public ModuleRequestBuilder getRequestBuilder(String queryId) {
         ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(queryId, objectMapper);

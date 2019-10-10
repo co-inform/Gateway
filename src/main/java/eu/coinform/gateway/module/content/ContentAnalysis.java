@@ -82,9 +82,9 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
     }
 
     /**
-     * Implementation of the function defined in the TwitterTweetRequestInterface. Returns the list of functional
+     * Implementation of the function defined in the {@link TwitterTweetRequestInterface}. Returns the list of functional
      * objects to be called for each tweet for the particular module
-     * @return tweetFuncList which is a List<Function<Tweet, ModuleRequest>>
+     * @return tweetFuncList which is a {@link List}{@literal <Function<Tweet, ModuleRequest>>}
      */
     @Override
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
