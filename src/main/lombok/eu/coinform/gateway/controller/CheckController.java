@@ -76,7 +76,6 @@ public class CheckController {
 
     /**
      * The 'response/{query_id}' endpoint. It gives back a {@link QueryResponse} with the answer or progress of an earlier query.
-     * @throws {@link NoSuchQueryIdException} When it doesn't exist a query with the specified query_id
      * @param query_id The query_id that identifies the earlier query
      * @return A {@link QueryResponse} containing the answer or at least progress of the query.
      */

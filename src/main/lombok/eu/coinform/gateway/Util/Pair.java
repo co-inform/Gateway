@@ -20,7 +20,6 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
      * -- GETTER --
      * Get the key
      *
-     * @return the value
      */
     @Getter
     private K key;
@@ -28,7 +27,6 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
      * -- GETTER --
      * Get the value
      *
-     * @return the value
      */
     @Getter
     private V value;

@@ -31,7 +31,6 @@ public class ResponseController {
 
     /**
      * The endpoint where the modules post their responses on queries to them
-     * @throws {@link eu.coinform.gateway.model.NoSuchTransactionIdException} when there is no query to a module with such an id.
      * @param transaction_id The unique id of the individual query to the module.
      * @param moduleResponse The response on the query posted to the module
      * @return http response code 200
