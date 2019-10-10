@@ -1,7 +1,7 @@
 package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleResponse;
-import eu.coinform.gateway.Util.Pair;
+import eu.coinform.gateway.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

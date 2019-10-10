@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 
 /**
- * THe MisInfoMe module extends Modules and implements the interfaces {@link TwitterTweetRequestInterface} and {@link TwitterUserRequestInterface}
+ * THe MisInfoMe module extends {@link Module} and implements the interfaces {@link TwitterTweetRequestInterface} and {@link TwitterUserRequestInterface}
  */
 @Slf4j
 public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserRequestInterface {

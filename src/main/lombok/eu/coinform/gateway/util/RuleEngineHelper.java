@@ -1,11 +1,8 @@
-package eu.coinform.gateway.Util;
+package eu.coinform.gateway.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
-import eu.coinform.gateway.cache.ModuleTransaction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
