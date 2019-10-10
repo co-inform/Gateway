@@ -21,7 +21,7 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class ResponseAggregator {
-    // todo: Rewrite it to cache on a Memcached server instead of local map.
+    // todo: Rewrite it to cache on a Redis/Memcached server instead of local map.
     // Making it possible for multiple spring server instances to run in parallel
 
     final private ConcurrentMap<String, ConcurrentHashMap<String, ModuleResponse>> responseMap;
@@ -53,7 +53,7 @@ public class ResponseAggregator {
         while (lock.tryLock()) {
             Pair<Long, String> oldestQueryId;
 
-            while (!expireQueue.isEmpty() && (System.currentTimeMillis() - expireQueue.peek().getKey()) > aggregateTimeout) {
+            while (!expireQueue.isEmpty() && (System.currentTimeMillis() - expireQueue.peek().getKey()) >= aggregateTimeout) {
                 oldestQueryId = expireQueue.poll();
                 ConcurrentMap<String, ModuleResponse> moduleResponses = responseMap.get(oldestQueryId.getValue());
                 responseMap.remove(oldestQueryId.getValue(), moduleResponses);
@@ -63,11 +63,14 @@ public class ResponseAggregator {
                 aggregatedResponsesProcesses.accept(oldestQueryId.getValue(), moduleResponses);
             }
             lock.unlock();
-            if (expireQueue.isEmpty()) {
-                return;
+            long oldestStart;
+            try {
+                oldestStart = expireQueue.peek().getKey();
+            } catch (NullPointerException ex) {
+                return; //return if the queue is empty
             }
             try {
-                Thread.sleep(aggregateTimeout - Math.abs(System.currentTimeMillis() - expireQueue.peek().getKey()));
+                Thread.sleep( Math.max(aggregateTimeout - (System.currentTimeMillis() - oldestStart), 0));
             } catch (InterruptedException ex) {
                 log.debug("wait interupted: {}", ex.getMessage());
             }
