@@ -19,14 +19,14 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
     /**
      * -- GETTER --
      * Get the key
-     *
+     * @return the key
      */
     @Getter
     private K key;
     /**
      * -- GETTER --
      * Get the value
-     *
+     * @return the value
      */
     @Getter
     private V value;
