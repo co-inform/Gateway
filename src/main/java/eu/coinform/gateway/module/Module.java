@@ -1,9 +1,12 @@
 package eu.coinform.gateway.module;
 
+import eu.coinform.gateway.model.Tweet;
+import eu.coinform.gateway.model.TwitterUser;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -21,6 +24,18 @@ public abstract class Module {
      */
     @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}")
     protected String callbackBaseUrl;
+
+    /**
+     * tweetFuncList holds the Functional objects that are called whenever a new tweet has been posted to the API
+     * The actual adding of Functions and instantiation of the list is performed by the extending classes.
+     */
+    protected List<Function<Tweet, ModuleRequest>> tweetFuncList;
+
+    /**
+     * twitterUserFuncList holds the Functional objects that are called whenever a new TwitterUser has been posted to
+     * the API. The actual adding of Functions and instantiation of the list is performed by the extending classes.
+     */
+    protected List<Function<TwitterUser, ModuleRequest>> twitterUserFuncList;
 
     @Getter
     private String name;
