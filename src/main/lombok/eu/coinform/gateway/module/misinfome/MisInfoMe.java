@@ -22,6 +22,9 @@ import java.util.function.Function;
 @Slf4j
 public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserRequestInterface {
 
+    List<Function<Tweet, ModuleRequest>> tweetFuncList;
+    List<Function<TwitterUser, ModuleRequest>> twitterUserFuncList;
+
     /**
      * The constructor of the MisInfoMe module. Sets up the module and also needs to implement the Functional objects
      * and store them in tweetFuncList or twitteruserFuncList. These functional objects are the actual setup for the
@@ -82,9 +85,7 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
     }
 
     /**
-     * Implementation of the function defined in the {@link TwitterTweetRequestInterface}. Returns the list of functional
-     * objects to be called for each tweet for the particular module
-     * @return tweetFuncList which is a {@link List}{@literal <Function<Tweet ModuleRequest>>}
+     * {@inheritDoc}
      */
     @Override
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
@@ -92,9 +93,7 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
     }
 
     /**
-     * Implementation of the function defined in the {@link TwitterUserRequestInterface}. Returns the list of functional
-     * objects to be called for each tweet for the particular module
-     * @return twitteruserFuncList which is a {@link List}{@literal <Function<TwitterUser, ModuleRequest>>}
+     * {@inheritDoc}
      */
     @Override
     public List<Function<TwitterUser, ModuleRequest>> twitterUserRequest() {

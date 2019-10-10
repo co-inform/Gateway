@@ -25,18 +25,6 @@ public abstract class Module {
     protected String callbackBaseUrl;
 
     /**
-     * tweetFuncList holds the Functional objects that are called whenever a new tweet has been posted to the API
-     * The actual adding of Functions and instantiation of the list is performed by the extending classes.
-     */
-    protected List<Function<Tweet, ModuleRequest>> tweetFuncList;
-
-    /**
-     * twitterUserFuncList holds the Functional objects that are called whenever a new TwitterUser has been posted to
-     * the API. The actual adding of Functions and instantiation of the list is performed by the extending classes.
-     */
-    protected List<Function<TwitterUser, ModuleRequest>> twitterUserFuncList;
-
-    /**
      * The name of the module
      * -- GETTER --
      * Get the name of the Module
