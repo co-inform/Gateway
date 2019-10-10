@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * This is the implementation of the Module class specifically used by the MisinfoMe Module.
+ * See {@link Module} for further information.
+ */
 @Slf4j
 public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserReqeuestInterface {
 

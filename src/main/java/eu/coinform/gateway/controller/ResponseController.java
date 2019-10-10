@@ -12,6 +12,9 @@ import javax.validation.Valid;
 import java.util.concurrent.CompletableFuture;
 
 
+/**
+ * The REST Controller defining the endpoints facing towards the modules
+ */
 @RestController
 @Slf4j
 public class ResponseController {
@@ -26,6 +29,13 @@ public class ResponseController {
         this.redisHandler = redisHandler;
     }
 
+    /**
+     * The endpoint where the modules post their responses on queries to them
+     * @throws {@link eu.coinform.gateway.model.NoSuchTransactionIdException} when there is no query to a module with such an id.
+     * @param transaction_id The unique id of the individual query to the module.
+     * @param moduleResponse The response on the query posted to the module
+     * @return http response code 200
+     */
     @PostMapping("/module/response/{transaction_id}")
     ResponseEntity<?> postResponse(@PathVariable(value = "transaction_id", required = true) String transaction_id,
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {

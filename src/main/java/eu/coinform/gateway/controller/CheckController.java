@@ -15,6 +15,9 @@ import java.util.function.Consumer;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+/**
+ * The REST Controller defining the endpoints facing towards the users
+ */
 @RestController
 @Slf4j
 public class CheckController {
@@ -32,12 +35,22 @@ public class CheckController {
         this.checkHandler = checkHandler;
     }
 
+    /**
+     * The '/twitter/user' endpoint, querying for information about a twitter user.
+     * @param twitterUser The twitter user the query is about
+     * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
+     */
     @PostMapping("/twitter/user")
     public Resource<QueryResponse> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
         return queryEndpoint(twitterUser,
                (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
     }
 
+    /**
+     * The 'twitter/tweet' endpoint, querying for information about a tweet.
+     * @param tweet The tweet the query is about.
+     * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
+     */
     @PostMapping("/twitter/tweet")
     public Resource<QueryResponse> twitterTweet(@Valid @RequestBody Tweet tweet) {
         return queryEndpoint(tweet,
@@ -61,11 +74,17 @@ public class CheckController {
         return assembler.toResource(queryResponse);
     }
 
+    /**
+     * The 'response/{query_id}' endpoint. It gives back a {@link QueryResponse} with the answer or progress of an earlier query.
+     * @throws {@link NoSuchQueryIdException} When it doesn't exist a query with the specified query_id
+     * @param query_id The query_id that identifies the earlier query
+     * @return A {@link QueryResponse} containing the answer or at least progress of the query.
+     */
     @GetMapping("/response/{query_id}")
-    public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String id) {
-        QueryResponse queryResponse = redisHandler.getQueryResponse(id).join();
+    public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
+        QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         return new Resource<>(queryResponse,
-                linkTo(methodOn(CheckController.class).findById(id)).withSelfRel());
+                linkTo(methodOn(CheckController.class).findById(query_id)).withSelfRel());
     }
 }
 

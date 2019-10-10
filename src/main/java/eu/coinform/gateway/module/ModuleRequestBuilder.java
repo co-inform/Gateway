@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Builds a {@link ModuleRequest} class
+ */
 @Slf4j
 public class ModuleRequestBuilder {
 
@@ -57,6 +60,11 @@ public class ModuleRequestBuilder {
     private String queryId;
     private Map<String, String> queries;
 
+    /**
+     * Creates a builder for a {@link ModuleRequest}
+     * @param queryId The 'query_id' of the query
+     * @param objectMapper The Jackson Databind object mapper
+     */
     public ModuleRequestBuilder(String queryId ,ObjectMapper objectMapper) {
         this.queryId = queryId;
         this.objectMapper = objectMapper;
@@ -64,6 +72,12 @@ public class ModuleRequestBuilder {
         queries = new HashMap<>();
     }
 
+    /**
+     * Set the content of the request
+     * @param content the content
+     * @return The {@link ModuleRequestBuilder} reference
+     * @throws JsonProcessingException
+     */
     public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
         headers.put("Content-type", "application/json");
         transactionId = content.getTransactionId();
@@ -71,51 +85,103 @@ public class ModuleRequestBuilder {
         return this;
     }
 
+    /**
+     * Set a header
+     * @param key The key of the header to set
+     * @param value The value of the header to set
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setHeader(String key, String value) {
         headers.put(key, value);
         return this;
     }
 
+    /**
+     * Set the url
+     * @param url The url
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setUrl(String url) {
         this.url = url;
         return this;
     }
 
+    /**
+     * Set the base Endpoint
+     * @param baseEndpoint the base of the endpoint path
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setBaseEndpoint(String baseEndpoint) {
         this.baseEndpoint = baseEndpoint;
         return this;
     }
 
+    /**
+     * Set the port
+     * @param port The port
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setPort(int port) {
         this.port = port;
         return this;
     }
 
+    /**
+     * Set the endpoint path
+     * @param path The endpoint path
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setPath(String path) {
         this.path = path;
         return this;
     }
 
+    /**
+     * Set the scheme, ie http, https
+     * @param scheme the scheme
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setScheme(String scheme) {
         this.scheme = scheme;
         return this;
     }
 
+    /**
+     * Set max attempts to send the request
+     * @param maxAttempts The number of attempts
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
         return this;
     }
 
+    /**
+     * Set the function to handle the response from a finished http request
+     * @param responseHandler http response handler
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder setResponseHandler(Function<HttpResponse, HttpResponse> responseHandler) {
         this.responseHandler = responseHandler;
         return this;
     }
 
+    /**
+     * Adds a query to the request
+     * @param key The key of the query
+     * @param value The value of the query
+     * @return The {@link ModuleRequestBuilder} reference
+     */
     public ModuleRequestBuilder addQuery(String key, String value) {
         queries.put(key, value);
         return this;
     }
 
+    /**
+     * Builds a {@link ModuleRequest} from the settings of the {@link ModuleRequestBuilder}
+     * @return A {@link ModuleRequest} with the specified settings
+     * @throws ModuleRequestBuilderException If any of the input is missing or incorrect
+     */
     public ModuleRequest build() throws ModuleRequestBuilderException{
         StringBuilder sb = new StringBuilder();
         queries.forEach((key, value) ->
