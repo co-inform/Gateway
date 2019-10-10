@@ -13,7 +13,6 @@ import java.util.function.Function;
  * Module base class for all different Modules. Holds basic information that is used by all modules
  *
  */
-
 @ToString
 public abstract class Module {
 
@@ -26,36 +25,51 @@ public abstract class Module {
     protected String callbackBaseUrl;
 
     /**
-     * tweetFuncList holds the Functional objects that are called whenever a new tweet has been posted to the API
-     * The actual adding of Functions and instantiation of the list is performed by the extending classes.
+     * The name of the module
+     * -- GETTER --
+     * Get the name of the Module
      */
-    protected List<Function<Tweet, ModuleRequest>> tweetFuncList;
-
-    /**
-     * twitterUserFuncList holds the Functional objects that are called whenever a new TwitterUser has been posted to
-     * the API. The actual adding of Functions and instantiation of the list is performed by the extending classes.
-     */
-    protected List<Function<TwitterUser, ModuleRequest>> twitterUserFuncList;
-
     @Getter
     private String name;
+    /**
+     * The url of the module
+     * -- GETTER --
+     * Get the url of the Module
+     */
     @Getter
     private String url;
+    /**
+     * If the module is not deployed at the root of the url but at some endpoint. This is that base endpoint
+     * -- GETTER --
+     * Get the base endpoint of the Module
+     */
     @Getter
     private String baseEndpoint;
+    /**
+     * The scheme of the module, ie http, https
+     * -- GETTER --
+     * Get the scheme of the Module
+     */
     @Getter
     private String scheme;
+    /**
+     * The port of the module
+     * -- GETTER --
+     * Get the port of the Module
+     */
     @Getter
     private int port;
-    @Getter
 
     /**
-     * moduleRequestFactory is the factory creating different requests for the mopdule
+     * moduleRequestFactory is the factory creating different requests for the module
+     * -- GETTER --
+     * Get the {@link ModuleRequestFactory} of the module
      */
+    @Getter
     private ModuleRequestFactory moduleRequestFactory;
 
     /**
-     * Module constructor setting the different parameters for thje modules. Called by the extending class
+     * Module constructor setting the different parameters for this module. Called by the extending class
      * @param name is the name of the Module
      * @param scheme is the protocol to use for this moudles api ie https/http
      * @param url is the actual url of the module ie www.example.com
