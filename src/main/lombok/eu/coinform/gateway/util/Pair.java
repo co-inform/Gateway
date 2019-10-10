@@ -1,4 +1,4 @@
-package eu.coinform.gateway.Util;
+package eu.coinform.gateway.util;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
