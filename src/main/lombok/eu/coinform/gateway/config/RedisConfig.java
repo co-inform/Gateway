@@ -35,7 +35,8 @@ public class RedisConfig {
     /**
      * Set up the redis template with String keys and values
      *
-     * @return redisTemplate
+     * @param connectionFactory a {@link RedisConnectionFactory} for the template
+     * @return {@link RedisTemplate} for the Redis Cache
      */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {

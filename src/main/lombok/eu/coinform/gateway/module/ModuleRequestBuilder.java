@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Builds a {@link ModuleRequest} class
+ * ModuleRequestBuilder is a builder class responsible for building ModuleRequests
  */
 @Slf4j
 public class ModuleRequestBuilder {
@@ -37,6 +37,11 @@ public class ModuleRequestBuilder {
     private int port;
     private String path;
     private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
+
+    /**
+     * responseHandler is a default implementation of handling a httpResponse which basically means loggin for debug
+     * purposes
+     */
     private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse)-> {
         if (log.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
@@ -55,15 +60,24 @@ public class ModuleRequestBuilder {
         }
         return httpResponse;
     };
+
     private ObjectMapper objectMapper;
+
+    /**
+     * transactionId is the id every module gets as an ID for every request made for a specific request
+     */
     private String transactionId;
+
+    /**
+     * queryId is the id returned to the plugin for every request it ask the gateway
+     */
     private String queryId;
     private Map<String, String> queries;
 
     /**
-     * Creates a builder for a {@link ModuleRequest}
-     * @param queryId The 'query_id' of the query
-     * @param objectMapper The Jackson Databind object mapper
+     * Constructor for the ModuleRequestBuilder class. Takes two parameters
+     * @param queryId queryId is the id returned to the plugin upon a query from it
+     * @param objectMapper objectMapper is a mapper responsible for mapping {@literal objects -> json -> objects}
      */
     public ModuleRequestBuilder(String queryId ,ObjectMapper objectMapper) {
         this.queryId = queryId;
@@ -73,10 +87,11 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set the content of the request
-     * @param content the content
-     * @return The {@link ModuleRequestBuilder} reference
-     * @throws JsonProcessingException
+     * setContent takes a ModuleRequestContent object and maps it to HttpEntity as the content to be POSTed. Set the
+     * http header "Content-type" to application/json and sets the variable transactionId to what the content holds
+     * @param content content to be mapped
+     * @return returns this
+     * @throws JsonProcessingException if the objectMapper cannot convert object to JSON
      */
     public ModuleRequestBuilder setContent(ModuleRequestContent content) throws JsonProcessingException {
         headers.put("Content-type", "application/json");
@@ -86,10 +101,10 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set a header
-     * @param key The key of the header to set
-     * @param value The value of the header to set
-     * @return The {@link ModuleRequestBuilder} reference
+     * setHeader takes two Strings and puts them into the headers map which is later turned into actual Http headers
+     * @param key the http header Key, ie "Content-type"
+     * @param value the http header value, ie "application/json"
+     * @return returns this
      */
     public ModuleRequestBuilder setHeader(String key, String value) {
         headers.put(key, value);
@@ -97,9 +112,9 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set the url
-     * @param url The url
-     * @return The {@link ModuleRequestBuilder} reference
+     * setUrl sets the url for the module to be called
+     * @param url actual url for the server hosting the api ie "www.example.com"
+     * @return returns this
      */
     public ModuleRequestBuilder setUrl(String url) {
         this.url = url;
@@ -107,19 +122,20 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set the base Endpoint
-     * @param baseEndpoint the base of the endpoint path
-     * @return The {@link ModuleRequestBuilder} reference
+     * setBaseEndpoint sets the endpoint on the server hosting the api
+     * @param baseEndpoint actual endpoint where the api resides, ie "/api/v1"
+     * @return returns this
      */
+
     public ModuleRequestBuilder setBaseEndpoint(String baseEndpoint) {
         this.baseEndpoint = baseEndpoint;
         return this;
     }
 
     /**
-     * Set the port
-     * @param port The port
-     * @return The {@link ModuleRequestBuilder} reference
+     * setPort sets the port on the server where the actual api is hosted
+     * @param port port as an int, ie 443
+     * @return returns this
      */
     public ModuleRequestBuilder setPort(int port) {
         this.port = port;
@@ -127,9 +143,9 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set the endpoint path
-     * @param path The endpoint path
-     * @return The {@link ModuleRequestBuilder} reference
+     * setPath sets the path to the resource on the server
+     * @param path a path as a String, ie "/tweet"
+     * @return returns this
      */
     public ModuleRequestBuilder setPath(String path) {
         this.path = path;
@@ -137,9 +153,9 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set the scheme, ie http, https
-     * @param scheme the scheme
-     * @return The {@link ModuleRequestBuilder} reference
+     * setScheme sets the scheme of the server hosting the api
+     * @param scheme a String holding the scheme, ie "https"
+     * @return returns this
      */
     public ModuleRequestBuilder setScheme(String scheme) {
         this.scheme = scheme;
@@ -147,9 +163,9 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set max attempts to send the request
-     * @param maxAttempts The number of attempts
-     * @return The {@link ModuleRequestBuilder} reference
+     * sets maximum number of attempts allowed for this particular request
+     * @param maxAttempts an int holding the max no of attempts, ie 3
+     * @return returns this
      */
     public ModuleRequestBuilder setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
@@ -157,9 +173,9 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Set the function to handle the response from a finished http request
-     * @param responseHandler http response handler
-     * @return The {@link ModuleRequestBuilder} reference
+     * sets the reponsehandler for this request
+     * @param responseHandler a Functional object taking a HttpResponse and returning a HttpResponse
+     * @return returns this
      */
     public ModuleRequestBuilder setResponseHandler(Function<HttpResponse, HttpResponse> responseHandler) {
         this.responseHandler = responseHandler;
@@ -167,10 +183,10 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Adds a query to the request
-     * @param key The key of the query
-     * @param value The value of the query
-     * @return The {@link ModuleRequestBuilder} reference
+     * adds a query to the particular request. Querys are added to the url, ie http://www.example.com/?key=value
+     * @param key the query key as a string, ie "tweet"
+     * @param value the query value as a string, ie "hello"
+     * @return returns this
      */
     public ModuleRequestBuilder addQuery(String key, String value) {
         queries.put(key, value);
@@ -178,9 +194,9 @@ public class ModuleRequestBuilder {
     }
 
     /**
-     * Builds a {@link ModuleRequest} from the settings of the {@link ModuleRequestBuilder}
-     * @return A {@link ModuleRequest} with the specified settings
-     * @throws ModuleRequestBuilderException If any of the input is missing or incorrect
+     * build() actually builds the request and returns the finished product
+     * @return returns the build request
+     * @throws ModuleRequestBuilderException if the URI was not possible to create or the content of the request is empty.
      */
     public ModuleRequest build() throws ModuleRequestBuilderException{
         StringBuilder sb = new StringBuilder();

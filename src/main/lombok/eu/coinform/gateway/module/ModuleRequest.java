@@ -141,7 +141,6 @@ public class ModuleRequest extends HttpPost {
      * getMethod() returns the method name, in this case POST
      * @return POST
      */
-
     @Override
     public String getMethod() {
         return HttpPost.METHOD_NAME;

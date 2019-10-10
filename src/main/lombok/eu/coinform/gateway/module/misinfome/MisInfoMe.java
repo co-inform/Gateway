@@ -8,26 +8,36 @@ import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
-import eu.coinform.gateway.module.iface.TwitterUserReqeuestInterface;
+import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+
 /**
- * This is the implementation of the Module class specifically used by the MisinfoMe Module.
- * See {@link Module} for further information.
+ * THe MisInfoMe module extends Modules and implements the interfaces {@link TwitterTweetRequestInterface} and {@link TwitterUserRequestInterface}
  */
 @Slf4j
-public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserReqeuestInterface {
+public class MisInfoMe extends Module implements TwitterTweetRequestInterface, TwitterUserRequestInterface {
 
-    private List<Function<Tweet, ModuleRequest>> tweetFuncList = new ArrayList<>();
-    private List<Function<TwitterUser, ModuleRequest>> twitteruserFuncList = new ArrayList<>();
-
+    /**
+     * The constructor of the MisInfoMe module. Sets up the module and also needs to implement the Functional objects
+     * and store them in tweetFuncList or twitteruserFuncList. These functional objects are the actual setup for the
+     * requests made to the module API's.
+     *
+     * @param name name of the module
+     * @param scheme scheme of the api for the module, ie http/https
+     * @param url url of the server ie www.example.com
+     * @param baseEndpoint is the endpoint where the API "starts" ie /api/v1
+     * @param port port of the server where the API can be called
+     */
     public MisInfoMe(String name, String scheme, String url, String baseEndpoint, int port){
         super(name,scheme,url,baseEndpoint,port);
 
+        tweetFuncList = new ArrayList<>();
+        // Adding functional object for a tweet to the tweetFuncList
         tweetFuncList.add((tweet) -> {
             ModuleRequest request = null;
             MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
@@ -48,8 +58,9 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
             return request;
         });
 
-        twitteruserFuncList.add((twitterUser) -> {
-
+        twitterUserFuncList = new ArrayList<>();
+        // Adding functional object to the twitterUserFuncList
+        twitterUserFuncList.add((twitterUser) -> {
             ModuleRequest request = null;
             try {
                 MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
@@ -70,13 +81,23 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
         });
     }
 
+    /**
+     * Implementation of the function defined in the {@link TwitterTweetRequestInterface}. Returns the list of functional
+     * objects to be called for each tweet for the particular module
+     * @return tweetFuncList which is a {@link List}{@literal <Function<Tweet ModuleRequest>>}
+     */
     @Override
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
         return tweetFuncList;
     }
 
+    /**
+     * Implementation of the function defined in the {@link TwitterUserRequestInterface}. Returns the list of functional
+     * objects to be called for each tweet for the particular module
+     * @return twitteruserFuncList which is a {@link List}{@literal <Function<TwitterUser, ModuleRequest>>}
+     */
     @Override
     public List<Function<TwitterUser, ModuleRequest>> twitterUserRequest() {
-        return twitteruserFuncList;
+        return twitterUserFuncList;
     }
 }
