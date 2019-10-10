@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Redishandler is the main class handling the Redis cache.
+ */
 @Service
 @Slf4j
 public class RedisHandler {
@@ -22,10 +25,23 @@ public class RedisHandler {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * Constructor taking and setting a RedisTemplate<String, Object>
+     *
+     * @param redisTemplate the redistemplate to be set for this handler
+     */
     RedisHandler(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * getQueryResponse() takes a String as parameter holding a queryId that is used to get the QueryResponse from the
+     * cache
+     *
+     * @param queryId String holding the queryId to query the cache for
+     * @return returns a CpmpletableFuture<QueryResponse>
+     * @throws NoSuchQueryIdException when the queryId returns no QueryResponse
+     */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> getQueryResponse(String queryId) throws NoSuchQueryIdException {
         QueryResponse queryResponse = (QueryResponse) redisTemplate.opsForValue().get(queryId);
@@ -35,6 +51,15 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(queryResponse);
     }
 
+    /**
+     * getOrSetIfAbsentQueryResponse() gets the QueryResponse from the cache that corresponds to the queryId. If the
+     * queryId returns no QueryResponse a default QueryResponse object is set in the cache and returned
+     *
+     * @param queryId String holding the queryId to query the cache for
+     * @param defaultResponse a default QueryRepsonse object to use if queryId returns no object
+     * @return the QueryResponse stored in the cache or the default object if the queryId returns nothing as a
+     * CompletableFuture<QueryResponse>
+     */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
         long start = System.currentTimeMillis();
@@ -49,6 +74,14 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(queryResponse);
     }
 
+    /**
+     * setQueryResponse() takes two parameters. A string holding a key and a QueryResponse. The method sets the key
+     * for the QueryResponse in the RedisCache
+     *
+     * @param key the key to use for the particular QueryReponse
+     * @param queryResponse the QueryResponse top store in the cache
+     * @return returns a CompletableFuture<QueryResponse> holding the QueryReponse stored in the RedisCahce
+     */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
         redisTemplate.opsForValue().set(key, queryResponse);
@@ -56,12 +89,27 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(queryResponse);
     }
 
+    /**
+     * setIfAbsentQueryResponse() takes two parameters, a String holding a key and a QueryResponse to store in the
+     * RedisCache
+     *
+     * @param key the key to use for the particular QueryReponse
+     * @param queryResponse the QueryResponse top store in the cache
+     * @return a CompletableFuture<Boolean> holding the truthiness of the successfullness of the operation of storing
+     * the QueryResponse in the cache
+     */
     @Async("redisExecutor")
     public CompletableFuture<Boolean> setIfAbsentQueryResponse(String key, QueryResponse queryResponse) {
         Boolean set = redisTemplate.opsForValue().setIfAbsent(key, queryResponse);
         return CompletableFuture.completedFuture(set);
     }
 
+    /**
+     *
+     * @param key
+     * @param queryResponse
+     * @return
+     */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setAndGetQueryResponse(String key, QueryResponse queryResponse) {
         QueryResponse oldQueryResponse = (QueryResponse) redisTemplate.opsForValue().getAndSet(key, queryResponse);

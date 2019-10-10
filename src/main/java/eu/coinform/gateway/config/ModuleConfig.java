@@ -1,7 +1,6 @@
 package eu.coinform.gateway.config;
 
 import eu.coinform.gateway.module.Module;
-import eu.coinform.gateway.module.content.ContentAnalysis;
 import eu.coinform.gateway.module.misinfome.MisInfoMe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,10 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Slf4j
 public class ModuleConfig {
-
-    //todo: remove?
-//    @Value("${gateway.scheme}://${gateway.url}${gateway.callback.endpoint}")
-//    private String callbackBaseUrl;
 
     @Bean
     @Qualifier("misinfome")

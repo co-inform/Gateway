@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Checkhandler is the class responsible for consuming the received objects from the plugin and making the requests
+ * CheckHandler is the class responsible for consuming the received objects from the plugin and making the requests
  */
 @Service
 @Slf4j
@@ -58,7 +58,7 @@ public class CheckHandler {
     }
 
     /**
-     * The method responisble for performeing the requests to all the modules that needs to take a Tweet
+     * The method responsible for performing the requests to all the modules that needs to take a Tweet
      *
      * @param tweet a Tweet object received from the plugin
      */
