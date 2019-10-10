@@ -35,11 +35,11 @@ public class RedisHandler {
     }
 
     /**
-     * getQueryResponse() takes a String as parameter holding a queryId that is used to get the QueryResponse from the
+     * getQueryResponse() takes a String as parameter holding a queryId that is used to get the {@link QueryResponse} from the
      * cache
      *
      * @param queryId String holding the queryId to query the cache for
-     * @return returns a CpmpletableFuture<QueryResponse>
+     * @return returns a {@literal CpmpletableFuture<QueryResponse>}
      * @throws NoSuchQueryIdException when the queryId returns no QueryResponse
      */
     @Async("redisExecutor")
@@ -52,13 +52,13 @@ public class RedisHandler {
     }
 
     /**
-     * getOrSetIfAbsentQueryResponse() gets the QueryResponse from the cache that corresponds to the queryId. If the
-     * queryId returns no QueryResponse a default QueryResponse object is set in the cache and returned
+     * getOrSetIfAbsentQueryResponse() gets the {@link QueryResponse} from the cache that corresponds to the queryId. If the
+     * queryId returns no {@link QueryResponse} a default {@link QueryResponse} object is set in the cache and returned
      *
      * @param queryId String holding the queryId to query the cache for
      * @param defaultResponse a default QueryRepsonse object to use if queryId returns no object
      * @return the QueryResponse stored in the cache or the default object if the queryId returns nothing as a
-     * CompletableFuture<QueryResponse>
+     * {@literal CompletableFuture<QueryResponse>}
      */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
@@ -75,12 +75,12 @@ public class RedisHandler {
     }
 
     /**
-     * setQueryResponse() takes two parameters. A string holding a key and a QueryResponse. The method sets the key
+     * setQueryResponse() takes two parameters. A {@link String} holding a key and a {@link QueryResponse}. The method sets the key
      * for the QueryResponse in the RedisCache
      *
      * @param key the key to use for the particular QueryReponse
      * @param queryResponse the QueryResponse top store in the cache
-     * @return returns a CompletableFuture<QueryResponse> holding the QueryReponse stored in the RedisCahce
+     * @return returns a {@literal CompletableFuture<QueryResponse>} holding the QueryReponse stored in the RedisCahce
      */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
@@ -90,12 +90,12 @@ public class RedisHandler {
     }
 
     /**
-     * setIfAbsentQueryResponse() takes two parameters, a String holding a key and a QueryResponse to store in the
+     * setIfAbsentQueryResponse() takes two parameters, a {@link String} holding a key and a {@link QueryResponse} to store in the
      * RedisCache
      *
      * @param key the key to use for the particular QueryReponse
      * @param queryResponse the QueryResponse top store in the cache
-     * @return a CompletableFuture<Boolean> holding the truthiness of the successfullness of the operation of storing
+     * @return a {@literal CompletableFuture<Boolean>} holding the truthiness of the successfullness of the operation of storing
      * the QueryResponse in the cache
      */
     @Async("redisExecutor")
@@ -105,10 +105,12 @@ public class RedisHandler {
     }
 
     /**
+     * setAndGetQueryResponse() takes two parameters, a String holding a key for the particular {@link QueryResponse} and a
+     * {@link QueryResponse} to store in the RedisCache
      *
-     * @param key
-     * @param queryResponse
-     * @return
+     * @param key the key to stoire in the cache with the QueryResponse
+     * @param queryResponse the QueryResponse to store in the cache wioth the key
+     * @return a {@literal CompletableFuture<QueryResponse>} holding the QueryResponse stored in the cache
      */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setAndGetQueryResponse(String key, QueryResponse queryResponse) {
@@ -116,6 +118,14 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(oldQueryResponse);
     }
 
+    /**
+     * getModuleResponse() takes a String holding a transactionId which is particular to a certain transaction with a
+     * particular module.
+     *
+     * @param transactionId the transactionId with a aprticular Module
+     * @return a {@literal CompletableFuture<ModuleResponse>}
+     * @throws NoSuchTransactionIdException if no ModuleTransaction where found for that particular transactionId
+     */
     @Async("redisExecutor")
     public CompletableFuture<ModuleResponse> getModuleResponse(String transactionId) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = (ModuleTransaction) redisTemplate.opsForValue().get(transactionId);
@@ -129,6 +139,14 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(moduleResponse);
     }
 
+    /**
+     * setModuleResponse(String, ModuleResponse) sets the response for a specific transactionId.
+     *
+     * @param transactionId a String holding the transactionId
+     * @param moduleResponse a {@link ModuleResponse} holding the response to store in the Redis cahce
+     * @return returns a {@literal CompletableFuture<ModuleResponse>}
+     * @throws NoSuchTransactionIdException if the parameter ModuleTransaction == null
+     */
     @Async("redisExecutor")
     public CompletableFuture<ModuleResponse> setModuleResponse(String transactionId, ModuleResponse moduleResponse) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = (ModuleTransaction) redisTemplate.opsForValue().get(transactionId);
@@ -143,6 +161,12 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(moduleResponse);
     }
 
+    /**
+     * getModuileResponses(String) gets the responses available for the certain queryId
+     *
+     * @param queryId String holding the queryId
+     * @return returns a {@literal CompletableFuture<Map<String, ModuleResponse>>}
+     */
     @Async("redisExecutor")
     public CompletableFuture<Map<String, ModuleResponse>> getModuleResponses(String queryId) {
         HashOperations<String, String, ModuleResponse> hashOperations = redisTemplate.opsForHash();
@@ -150,6 +174,13 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(responses);
     }
 
+    /**
+     * getModuleTransaction(String) gets the ModuleTransaction for a certain transactionId.
+     *
+     * @param transactionId String holding the transactionId
+     * @return a {@literal CompletableFuture<ModuleTransaction>}
+     * @throws NoSuchTransactionIdException when there is no {@link ModuleTransaction} in the Redis cache for the passed transactionId
+     */
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> getModuleTransaction(String transactionId) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = (ModuleTransaction) redisTemplate.opsForValue().get(transactionId);
@@ -159,6 +190,13 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(moduleTransaction);
     }
 
+    /**
+     * setModuleTransaction(ModuleTransaction) sets the {@link ModuleTransaction} for the ModuleTransactions specific
+     * transactionId
+     *
+     * @param moduleTransaction a {@link ModuleTransaction}
+     * @return the ModuleTransaction passed as a parameter is returned as a {@literal CompletableFuture<ModuleTransaction>}
+     */
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
         log.debug("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
