@@ -5,6 +5,7 @@ import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
+import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -22,6 +24,10 @@ import java.util.concurrent.CompletableFuture;
 public class RedisHandler {
 
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
+    private static final String AGGREGATOR_QUEUE_KEY = "AQK";
+    private static final String AGGREGATOR_QUEUE_LOCK = "AQK_LOCK";
+    private static final String QUEUED_RESPONSE_COUNTER = "QRC";
+    private static final String HANDLED_RESPONSE_COUNTER = "HRC";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -207,5 +213,53 @@ public class RedisHandler {
         log.trace("was previously absent: {}", isAbsent);
 
         return CompletableFuture.completedFuture(moduleTransaction);
+    }
+
+    /**
+     * Push an time stamp and 'query_id' pair to the {@link ResponseAggregator} queue.
+     * @param timeQueryIdPair Pair of time stamp and 'query_id'
+     * @return The length of the queue after the operation
+     */
+    @Async("redisExecutor")
+    public CompletableFuture<Long> expireQueuePush(Pair<Long, String> timeQueryIdPair) {
+         Long ret = redisTemplate.opsForList().rightPush(AGGREGATOR_QUEUE_KEY, timeQueryIdPair);
+         return CompletableFuture.completedFuture(ret);
+    }
+
+    /**
+     * Trys to grab the {@link ResponseAggregator} queue's lock and pull the first element.
+     * @return null if queue was locked or empty, the time stamp, 'query_id' pair.
+     */
+    @SuppressWarnings("unchecked")
+    @Async("redisExecutor")
+    public CompletableFuture<Pair<Long, String>> expireQueueTryPull() {
+        String lock = UUID.randomUUID().toString();
+        if (!redisTemplate.opsForValue().setIfAbsent(AGGREGATOR_QUEUE_LOCK, lock)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        Pair<Long, String> ret = (Pair<Long, String>) redisTemplate.opsForList().leftPop(AGGREGATOR_QUEUE_KEY);
+        redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
+        return CompletableFuture.completedFuture(ret);
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Long> getQueuedResponseCounter(String queryId) {
+        return CompletableFuture.completedFuture((Long) redisTemplate.opsForHash().get(queryId, QUEUED_RESPONSE_COUNTER));
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Long> incrementQueuedResponseCounter(String queryId) {
+        return CompletableFuture.completedFuture(redisTemplate.opsForHash().increment(queryId, QUEUED_RESPONSE_COUNTER, 1));
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Long> getHandledResponseCounter(String queryId) {
+        return CompletableFuture.completedFuture((Long) redisTemplate.opsForHash().get(queryId, HANDLED_RESPONSE_COUNTER));
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Boolean> setHandledResponseCounter(String queryId, Long number) {
+        redisTemplate.opsForHash().put(queryId, HANDLED_RESPONSE_COUNTER, number);
+        return CompletableFuture.completedFuture(true);
     }
 }

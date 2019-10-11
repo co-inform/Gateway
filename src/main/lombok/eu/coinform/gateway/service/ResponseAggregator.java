@@ -8,13 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 /**
  * ResponseAggregator aggregates responses from different {@link eu.coinform.gateway.module.Module} into one response
@@ -23,26 +18,22 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class ResponseAggregator {
-    // todo: Rewrite it to cache on a Redis/Memcached server instead of local map.
     // Making it possible for multiple spring server instances to run in parallel
-
-    final private ConcurrentMap<String, ConcurrentHashMap<String, ModuleResponse>> responseMap;
-    final private ConcurrentLinkedQueue<Pair<Long, String>> expireQueue;
-    final private Lock lock;
 
     @Getter
     private long aggregateTimeout;
+    private RedisHandler redisHandler;
+    final private Object counterLock = new Object();
 
     /**
      * Constructor taking the aggregateTimeout as a string.
      *
      * @param aggregateTimeoutString String representing a Long that is the aggregate timeout for a Response
      */
-    public ResponseAggregator(@Value("${gateway.aggregate.timeout}") String aggregateTimeoutString) {
-        responseMap = new ConcurrentHashMap<>();
-        expireQueue = new ConcurrentLinkedQueue<>();
+    public ResponseAggregator(@Value("${gateway.aggregate.timeout}") String aggregateTimeoutString,
+                              RedisHandler redisHandler) {
         aggregateTimeout = Long.parseLong(aggregateTimeoutString);
-        lock = new ReentrantLock();
+        this.redisHandler = redisHandler;
     }
 
     /**
@@ -50,19 +41,12 @@ public class ResponseAggregator {
      * to the Queue
      *
      * @param queryId a String holding the queryId for the specific response
-     * @param moduleName a String holding the name of the module for the specific response
-     * @param moduleResponse a {@link ModuleResponse} holding the response
-     * @param populateAggregator a {@link Function} object holding the aggregator for the response
      */
-    public void addResponse(String queryId,
-                            String moduleName,
-                            ModuleResponse moduleResponse,
-                            Function<String, ConcurrentHashMap<String, ModuleResponse>> populateAggregator) {
-        responseMap.putIfAbsent(queryId, populateAggregator.apply(queryId));
-        ConcurrentHashMap<String, ModuleResponse> nameToResponseMap = responseMap.get(queryId);
-        nameToResponseMap.put(moduleName, moduleResponse);
-        responseMap.put(queryId, nameToResponseMap);
-        expireQueue.add(new Pair<>(System.currentTimeMillis(), queryId));
+    public void addResponse(String queryId) {
+        redisHandler.expireQueuePush(Pair.of(System.currentTimeMillis(), queryId));
+        synchronized (counterLock) {
+            redisHandler.incrementQueuedResponseCounter(queryId).join();
+        }
     }
 
     /**
@@ -72,30 +56,32 @@ public class ResponseAggregator {
      * @param aggregatedResponsesProcesses a {@link BiConsumer} that takes a String and a {@literal Map<String, ModuleResponse>} for processing the repsonses
      */
     public void processAggregatedResponses(BiConsumer<String, Map<String, ModuleResponse>> aggregatedResponsesProcesses) {
-        while (lock.tryLock()) {
-            Pair<Long, String> oldestQueryId;
+        Pair<Long, String> timeQueryIdPair = redisHandler.expireQueueTryPull().join();
+        while (timeQueryIdPair != null && (System.currentTimeMillis() - timeQueryIdPair.getKey()) >= aggregateTimeout) {
 
-            while (!expireQueue.isEmpty() && (System.currentTimeMillis() - expireQueue.peek().getKey()) >= aggregateTimeout) {
-                oldestQueryId = expireQueue.poll();
-                ConcurrentMap<String, ModuleResponse> moduleResponses = responseMap.get(oldestQueryId.getValue());
-                responseMap.remove(oldestQueryId.getValue(), moduleResponses);
-                if (moduleResponses == null) {
-                    continue;
+            Long qrc;
+            Long hrc;
+            synchronized (counterLock) {
+                qrc = redisHandler.getQueuedResponseCounter(timeQueryIdPair.getValue()).join();
+                hrc = redisHandler.getHandledResponseCounter(timeQueryIdPair.getValue()).join();
+            }
+            if (qrc != null && hrc == null || qrc != null && qrc.compareTo(hrc) > 0) { // more queued than handled
+                Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(timeQueryIdPair.getValue()).join();
+                aggregatedResponsesProcesses.accept(timeQueryIdPair.getValue(), moduleResponses);
+                synchronized (counterLock) {
+                    redisHandler.setHandledResponseCounter(timeQueryIdPair.getValue(),qrc).join();
                 }
-                aggregatedResponsesProcesses.accept(oldestQueryId.getValue(), moduleResponses);
-            }
-            lock.unlock();
-            long oldestStart;
-            try {
-                oldestStart = expireQueue.peek().getKey();
-            } catch (NullPointerException ex) {
-                return; //return if the queue is empty
-            }
-            try {
-                Thread.sleep( Math.max(aggregateTimeout - (System.currentTimeMillis() - oldestStart), 0));
-            } catch (InterruptedException ex) {
-                log.debug("wait interupted: {}", ex.getMessage());
-            }
+            } // If queued and handled are equal then the latest responses have already been aggregated. And nothing should be done.
+            // queued should never be lower than handled, since long is to big to overflow and only queued is ever incremented and handled is only set to an old queued value.
+            timeQueryIdPair = redisHandler.expireQueueTryPull().join();
+        }
+        if (timeQueryIdPair == null) {
+            return;
+        }
+        try {
+            Thread.sleep( Math.max(aggregateTimeout - (System.currentTimeMillis() - timeQueryIdPair.getKey()), 0));
+        } catch (InterruptedException ex) {
+            log.debug("wait interupted: {}", ex.getMessage());
         }
     }
 }
