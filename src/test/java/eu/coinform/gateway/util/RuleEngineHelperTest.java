@@ -2,6 +2,7 @@ package eu.coinform.gateway.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.coinform.gateway.cache.ModuleResponse;
@@ -89,6 +90,21 @@ public class RuleEngineHelperTest {
     }
 
     @Test
+    public void testResponseParserObjectNull() throws IOException, JSONException {
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree("{\"response\": null}")).flatten();
+
+        RuleEngineHelper.flatResponseMap(mapper.readValue("{\"response\": null}", ModuleResponse.class), result, KEY+".response");
+
+        log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
+        log.debug("result: {}", mapper.writeValueAsString(result));
+
+        JSONAssert.assertNotEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
+    }
+
+
+    @Test
     public void testResponseParserWithArrays() throws IOException, JSONException {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
         Map<String, Object> result = new LinkedHashMap<>();
@@ -103,7 +119,17 @@ public class RuleEngineHelperTest {
         JSONAssert.assertEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
     }
 
-    // from https://stackoverflow.com/questions/58008267/flattening-a-3-level-nested-json-string-in-java
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void testResponseParserWithoutResponse() throws IOException {
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+        Map<String, Object> result = new LinkedHashMap<>();
+        String jsonString =" {\"arr\": [\"test\", \"hello\"]}";
+        Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree(jsonString)).flatten();
+
+        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response");
+    }
+
+    // Unashamedly nicked from https://stackoverflow.com/questions/58008267/flattening-a-3-level-nested-json-string-in-java
     class JsonFlattener {
 
         private final Map<String, JsonNode> json = new LinkedHashMap<>();
