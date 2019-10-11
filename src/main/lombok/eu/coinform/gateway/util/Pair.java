@@ -43,6 +43,15 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
         this.value = inV;
     }
 
+    /**
+     * Static method for creating a Pair on the fly
+     *
+     * @param inK the type passed in must not be null
+     * @param inV the type passed in must not be null
+     * @param <K> the type passed in must implement serializable
+     * @param <V> the type passed in must implement serializable
+     * @return a Pair of the parameters passed in
+     */
     static public <K extends Serializable, V extends Serializable> Pair<K,V> of(@NotNull K inK, @NotNull V inV){
         return new Pair<>(inK,inV);
     }
