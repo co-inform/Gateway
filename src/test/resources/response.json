@@ -1,0 +1,29 @@
+{
+  "response": {
+    "credibility": {
+      "value": 0.0,
+      "confidence": 0.0
+    },
+    "profile_as_source_credibility": {
+      "credibility": {
+        "value": 0,
+        "confidence": 0
+      }
+    },
+    "sources_credibility": {
+      "credibility": {
+        "value": 0.0,
+        "confidence": 0.0
+      },
+      "assessments": []
+    },
+    "urls_credibility": {
+      "credibility": {
+        "value": 0.0,
+        "confidence": 0.0
+      },
+      "assessments": []
+    },
+    "itemReviewed": 1179376807981850624
+  }
+}

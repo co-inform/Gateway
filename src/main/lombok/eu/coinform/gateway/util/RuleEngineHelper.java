@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RuleEngineHelper {
+public final class RuleEngineHelper {
+
+    private RuleEngineHelper(){}
 
     /**
      * Populates a map with a flattening of the ModuleResponse.
@@ -36,7 +38,7 @@ public class RuleEngineHelper {
                 } else if (entry.getValue() instanceof ArrayList) {
                     new ResponseParserArray((ArrayList<Object>) entry.getValue(),
                             flatMap,
-                            String.format("%s%s", keyBase, entry.getKey().toLowerCase()));
+                            String.format("%s%s.", keyBase, entry.getKey().toLowerCase()));
                 } else {
                     flatMap.put(String.format("%s%s", keyBase, entry.getKey().toLowerCase()), entry.getValue());
                 }
@@ -57,13 +59,13 @@ public class RuleEngineHelper {
                 if (jsonArray.get(i) instanceof LinkedHashMap) {
                     new ResponseParserObject((LinkedHashMap<String, Object>) jsonArray.get(i),
                             flatMap,
-                            String.format("%s[%d].", keyBase, i));
+                            String.format("%s.%d.", keyBase, i));
                 } else if (jsonArray.get(i) instanceof ArrayList) {
                     new ResponseParserArray((ArrayList<Object>) jsonArray.get(i),
                             flatMap,
-                            String.format("%s[%d]", keyBase, i));
+                            String.format("%s.%d.", keyBase, i));
                 } else {
-                    flatMap.put(String.format("%s[%d]", keyBase, i), jsonArray.get(i));
+                    flatMap.put(String.format("%s%d", keyBase, i), jsonArray.get(i));
                 }
             }
         }
