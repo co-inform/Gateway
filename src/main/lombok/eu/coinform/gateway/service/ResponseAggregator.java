@@ -34,6 +34,7 @@ public class ResponseAggregator {
                               RedisHandler redisHandler) {
         aggregateTimeout = Long.parseLong(aggregateTimeoutString);
         this.redisHandler = redisHandler;
+        redisHandler.resetAggregatorQueueLock();
     }
 
     /**
@@ -57,31 +58,36 @@ public class ResponseAggregator {
      */
     public void processAggregatedResponses(BiConsumer<String, Map<String, ModuleResponse>> aggregatedResponsesProcesses) {
         Pair<Long, String> timeQueryIdPair = redisHandler.expireQueueTryPull().join();
-        while (timeQueryIdPair != null && (System.currentTimeMillis() - timeQueryIdPair.getKey()) >= aggregateTimeout) {
+        log.trace("timeQueryPair: {}", timeQueryIdPair);
+        while (true) {
+            while (timeQueryIdPair != null && (System.currentTimeMillis() - timeQueryIdPair.getKey()) >= aggregateTimeout) {
 
-            Long qrc;
-            Long hrc;
-            synchronized (counterLock) {
-                qrc = redisHandler.getQueuedResponseCounter(timeQueryIdPair.getValue()).join();
-                hrc = redisHandler.getHandledResponseCounter(timeQueryIdPair.getValue()).join();
-            }
-            if (qrc != null && hrc == null || qrc != null && qrc.compareTo(hrc) > 0) { // more queued than handled
-                Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(timeQueryIdPair.getValue()).join();
-                aggregatedResponsesProcesses.accept(timeQueryIdPair.getValue(), moduleResponses);
+                Integer qrc;
+                Integer hrc;
                 synchronized (counterLock) {
-                    redisHandler.setHandledResponseCounter(timeQueryIdPair.getValue(),qrc).join();
+                    qrc = redisHandler.getQueuedResponseCounter(timeQueryIdPair.getValue()).join();
+                    hrc = redisHandler.getHandledResponseCounter(timeQueryIdPair.getValue()).join();
+                    log.trace("qrc: {}, hrc: {}", qrc, hrc);
                 }
-            } // If queued and handled are equal then the latest responses have already been aggregated. And nothing should be done.
-            // queued should never be lower than handled, since long is to big to overflow and only queued is ever incremented and handled is only set to an old queued value.
-            timeQueryIdPair = redisHandler.expireQueueTryPull().join();
-        }
-        if (timeQueryIdPair == null) {
-            return;
-        }
-        try {
-            Thread.sleep( Math.max(aggregateTimeout - (System.currentTimeMillis() - timeQueryIdPair.getKey()), 0));
-        } catch (InterruptedException ex) {
-            log.debug("wait interupted: {}", ex.getMessage());
+                if (qrc != null && hrc == null || qrc != null && qrc.compareTo(hrc) > 0) { // more queued than handled
+                    Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(timeQueryIdPair.getValue()).join();
+                    aggregatedResponsesProcesses.accept(timeQueryIdPair.getValue(), moduleResponses);
+                    synchronized (counterLock) {
+                        redisHandler.setHandledResponseCounter(timeQueryIdPair.getValue(), qrc.longValue()).join();
+                    }
+                } // If queued and handled are equal then the latest responses have already been aggregated. And nothing should be done.
+                // queued should never be lower than handled, since long is to big to overflow and only queued is ever incremented and handled is only set to an old queued value.
+                timeQueryIdPair = redisHandler.expireQueueTryPull().join();
+                log.trace("timeQueryPair: {}", timeQueryIdPair);
+            }
+            if (timeQueryIdPair == null) {
+                return;
+            }
+            try {
+                Thread.sleep(Math.max(aggregateTimeout - (System.currentTimeMillis() - timeQueryIdPair.getKey()), 0));
+            } catch (InterruptedException ex) {
+                log.error("wait interupted: {}", ex.getMessage());
+            }
         }
     }
 }

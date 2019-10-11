@@ -7,11 +7,13 @@ import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -26,8 +28,8 @@ public class RedisHandler {
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
     private static final String AGGREGATOR_QUEUE_KEY = "AQK";
     private static final String AGGREGATOR_QUEUE_LOCK = "AQK_LOCK";
-    private static final String QUEUED_RESPONSE_COUNTER = "QRC";
-    private static final String HANDLED_RESPONSE_COUNTER = "HRC";
+    private static final String QUEUED_RESPONSE_COUNTER_PREFIX = "QRC_";
+    private static final String HANDLED_RESPONSE_COUNTER_PREFIX = "HRC_";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -222,6 +224,7 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<Long> expireQueuePush(Pair<Long, String> timeQueryIdPair) {
+        log.trace("expireQueuePush {}", timeQueryIdPair);
          Long ret = redisTemplate.opsForList().rightPush(AGGREGATOR_QUEUE_KEY, timeQueryIdPair);
          return CompletableFuture.completedFuture(ret);
     }
@@ -233,7 +236,9 @@ public class RedisHandler {
     @SuppressWarnings("unchecked")
     @Async("redisExecutor")
     public CompletableFuture<Pair<Long, String>> expireQueueTryPull() {
+        log.trace("expireQueueTryPull");
         String lock = UUID.randomUUID().toString();
+        log.trace("lock: {}", redisTemplate.opsForValue().get(AGGREGATOR_QUEUE_LOCK));
         if (!redisTemplate.opsForValue().setIfAbsent(AGGREGATOR_QUEUE_LOCK, lock)) {
             return CompletableFuture.completedFuture(null);
         }
@@ -243,23 +248,36 @@ public class RedisHandler {
     }
 
     @Async("redisExecutor")
-    public CompletableFuture<Long> getQueuedResponseCounter(String queryId) {
-        return CompletableFuture.completedFuture((Long) redisTemplate.opsForHash().get(queryId, QUEUED_RESPONSE_COUNTER));
+    public CompletableFuture<Boolean> resetAggregatorQueueLock() {
+        log.trace("reset AggregatorQueue lock");
+        redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
+        return CompletableFuture.completedFuture(Boolean.TRUE);
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Integer> getQueuedResponseCounter(String queryId) {
+        log.trace("getQueuedResponseCounter {}", queryId);
+        return CompletableFuture.completedFuture((Integer) redisTemplate.opsForValue().get(String.format("%s%s",QUEUED_RESPONSE_COUNTER_PREFIX, queryId)));
     }
 
     @Async("redisExecutor")
     public CompletableFuture<Long> incrementQueuedResponseCounter(String queryId) {
-        return CompletableFuture.completedFuture(redisTemplate.opsForHash().increment(queryId, QUEUED_RESPONSE_COUNTER, 1));
+        log.trace("incrementQueuedResponseCounter {}", queryId);
+        //HashOperations<String, String, Long> opsForHash = redisTemplate.opsForHash();
+        //log.debug("value at qrc: {}", opsForHash.get(queryId, QUEUED_RESPONSE_COUNTER));
+        return CompletableFuture.completedFuture(redisTemplate.opsForValue().increment(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId)));
     }
 
     @Async("redisExecutor")
-    public CompletableFuture<Long> getHandledResponseCounter(String queryId) {
-        return CompletableFuture.completedFuture((Long) redisTemplate.opsForHash().get(queryId, HANDLED_RESPONSE_COUNTER));
+    public CompletableFuture<Integer> getHandledResponseCounter(String queryId) {
+        log.trace("getHandledResponseCounter {}", queryId);
+        return CompletableFuture.completedFuture((Integer) redisTemplate.opsForValue().get(String.format("%s%s",HANDLED_RESPONSE_COUNTER_PREFIX, queryId)));
     }
 
     @Async("redisExecutor")
     public CompletableFuture<Boolean> setHandledResponseCounter(String queryId, Long number) {
-        redisTemplate.opsForHash().put(queryId, HANDLED_RESPONSE_COUNTER, number);
+        log.trace("setHandledResponseCounter {} {}", queryId, number);
+        redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number);
         return CompletableFuture.completedFuture(true);
     }
 }
