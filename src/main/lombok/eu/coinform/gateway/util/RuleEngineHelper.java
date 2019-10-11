@@ -21,6 +21,7 @@ public class RuleEngineHelper {
 
     private static class ResponseParserObject {
 
+        @SuppressWarnings("unchecked") // jacksson data bind will return LinkedHashMap
         ResponseParserObject(LinkedHashMap<String, Object> jsonObject, Map<String, Object> flatMap, String keyBase) {
 
             if(jsonObject == null) {
@@ -45,6 +46,7 @@ public class RuleEngineHelper {
 
     private static class ResponseParserArray {
 
+        @SuppressWarnings("unchecked") // jacksson data bind will return LinkedHashMap
         ResponseParserArray(ArrayList<Object> jsonArray, Map<String, Object> flatMap, String keyBase) {
 
             if(jsonArray == null) {
