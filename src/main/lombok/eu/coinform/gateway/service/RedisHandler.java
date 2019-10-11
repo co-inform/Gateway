@@ -62,14 +62,17 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
-        long start = System.currentTimeMillis();
-        log.debug("{}: before get QueryResponse", System.currentTimeMillis()-start);
+        long start = 0;
+        if (log.isTraceEnabled()) {
+            start = System.currentTimeMillis();
+            log.trace("{}: before get QueryResponse", System.currentTimeMillis()-start);
+        }
         QueryResponse queryResponse = (QueryResponse) redisTemplate.opsForValue().get(queryId);
-        log.debug("{}: after get QueryResponse, got {}", System.currentTimeMillis()-start, queryResponse);
+        log.trace("{}: after get QueryResponse, got {}", System.currentTimeMillis()-start, queryResponse);
         if (queryResponse == null) {
             queryResponse = defaultResponse;
             setIfAbsentQueryResponse(queryId, defaultResponse);
-            log.debug("{}: after set QueryResponse since it was null", System.currentTimeMillis()-start);
+            log.trace("{}: after set QueryResponse since it was null", System.currentTimeMillis()-start);
         }
         return CompletableFuture.completedFuture(queryResponse);
     }
@@ -85,7 +88,7 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
         redisTemplate.opsForValue().set(key, queryResponse);
-        log.debug("query response, {} -> {}",key, queryResponse);
+        log.trace("query response, {} -> {}",key, queryResponse);
         return CompletableFuture.completedFuture(queryResponse);
     }
 
@@ -199,8 +202,10 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
-        log.debug("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
-        log.debug("setIfAbsent: {}", redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction));
+        log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
+        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction);
+        log.trace("was previously absent: {}", isAbsent);
+
         return CompletableFuture.completedFuture(moduleTransaction);
     }
 }

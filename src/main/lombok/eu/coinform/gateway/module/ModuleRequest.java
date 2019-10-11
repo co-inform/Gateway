@@ -135,19 +135,20 @@ public class ModuleRequest extends HttpPost {
      */
     @Async("redisExecutor")
     public void makeRequest() throws ModuleRequestException {
-        if (log.isDebugEnabled()) {
+        log.debug("making request to: {} \n query_id: '{}', transaction_id: '{}'", this.getURI().toString(), queryId, transactionId);
+        if (log.isTraceEnabled()) {
             StringBuilder sb = new StringBuilder();
             for (Header header : getAllHeaders()) {
                 sb.append(header.toString());
                 sb.append("\n");
             }
-            log.debug("Sending HTTP request: {}", toString());
-            log.debug("headers: {}", sb.substring(0, sb.length()-1));
+            log.trace("Sending HTTP request: {}", toString());
+            log.trace("headers: {}", sb.substring(0, sb.length()-1));
             try {
-                log.debug("content: {}", CharStreams
+                log.trace("content: {}", CharStreams
                         .toString(new InputStreamReader(getEntity().getContent(), Charsets.UTF_8)));
             } catch (IOException ex) {
-                log.debug("failing to write content: {}", ex.getMessage());
+                log.trace("failing to write content: {}", ex.getMessage());
             }
         }
         sendRequest();
