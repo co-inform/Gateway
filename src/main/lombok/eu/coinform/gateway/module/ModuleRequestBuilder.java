@@ -43,19 +43,20 @@ public class ModuleRequestBuilder {
      * purposes
      */
     private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse)-> {
-        if (log.isDebugEnabled()) {
+        log.debug("request got response {}", httpResponse.getStatusLine());
+        if (log.isTraceEnabled()) {
             StringBuilder sb = new StringBuilder();
             for (Header header : httpResponse.getAllHeaders()) {
                 sb.append(header.toString());
                 sb.append("\n");
             }
-            log.debug("request '{}' got responce: {}", toString(), httpResponse.toString());
-            log.debug("headers: {}", sb.substring(0, sb.length()-1));
+            log.trace("request '{}' got responce: {}", toString(), httpResponse.toString());
+            log.trace("headers: {}", sb.substring(0, sb.length()-1));
             try {
-                log.debug("content: {}", CharStreams
+                log.trace("content: {}", CharStreams
                         .toString(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8)));
             } catch (IOException ex) {
-                log.debug("failing to write content: {}", ex.getMessage());
+                log.trace("failing to write content: {}", ex.getMessage());
             }
         }
         return httpResponse;

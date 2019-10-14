@@ -58,11 +58,12 @@ public class CheckController {
     }
 
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
+        log.debug("query received with query_id '{}'", queryObject.getQueryId());
         long start = System.currentTimeMillis();
-        log.debug("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
+        log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
         QueryResponse queryResponse= redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
                 new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join();
-        log.debug("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
+        log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
             // Like if the cache is older than some threshold it is handled as a new query.
@@ -70,7 +71,7 @@ public class CheckController {
             return assembler.toResource(queryResponse);
         }
         queryObjectConsumer.accept(queryObject);
-        log.debug("{}: query sent of to hander", System.currentTimeMillis() - start);
+        log.trace("{}: query sent of to hander", System.currentTimeMillis() - start);
         return assembler.toResource(queryResponse);
     }
 
@@ -81,6 +82,7 @@ public class CheckController {
      */
     @GetMapping("/response/{query_id}")
     public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
+        log.debug("query for response reveived with query_id '{}'", query_id);
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         return new Resource<>(queryResponse,
                 linkTo(methodOn(CheckController.class).findById(query_id)).withSelfRel());

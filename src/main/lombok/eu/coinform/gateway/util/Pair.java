@@ -2,6 +2,7 @@ package eu.coinform.gateway.util;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
@@ -21,7 +22,12 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
      * Get the key
      *
      * @return The key
+     * -- SETTER --
+     * Set the key
+     *
+     * @param key The key
      */
+    @Setter
     @Getter
     private K key;
     /**
@@ -29,7 +35,12 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
      * Get the value
      *
      * @return The value
+     * -- SETTER --
+     * Set the value
+     *
+     * @param value The value
      */
+    @Setter
     @Getter
     private V value;
 
@@ -38,10 +49,15 @@ public class Pair<K extends Serializable, V extends Serializable> implements Ser
      * @param inK The key
      * @param inV The value
      */
-    public Pair(@NotNull final K inK, @NotNull final V inV){
+    public Pair(@NotNull K inK, @NotNull V inV){
         this.key = inK;
         this.value = inV;
     }
+
+    /**
+     * Creates an empty key-value Pair
+     */
+    public Pair(){}
 
     /**
      * Static method for creating a Pair on the fly

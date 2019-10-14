@@ -40,7 +40,7 @@ public class CheckHandler {
      */
     @Async("endpointExecutor")
     public void twitterUserConsumer(TwitterUser twitterUser) {
-        log.debug("handle review object: {}", twitterUser);
+        log.trace("handle review object: {}", twitterUser);
 
         for (Module module: moduleList) {
             if(module instanceof TwitterUserRequestInterface){
@@ -64,9 +64,9 @@ public class CheckHandler {
      */
     @Async("endpointExecutor")
     public void tweetConsumer(Tweet tweet) {
-        log.debug("handle tweet object: {}", tweet);
+        log.trace("handle tweet object: {}", tweet);
         for (Module module: moduleList) {
-            log.debug("handle for module: {} -> {}", module.getName(), module);
+            log.trace("handle for module: {} -> {}", module.getName(), module);
             if(module instanceof TwitterTweetRequestInterface){
                 ((TwitterTweetRequestInterface) module)
                         .tweetRequest() // call the implemented method to get a list of Functional objects

@@ -5,13 +5,17 @@ import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
+import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -22,6 +26,10 @@ import java.util.concurrent.CompletableFuture;
 public class RedisHandler {
 
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
+    private static final String AGGREGATOR_QUEUE_KEY = "AQK";
+    private static final String AGGREGATOR_QUEUE_LOCK = "AQK_LOCK";
+    private static final String QUEUED_RESPONSE_COUNTER_PREFIX = "QRC_";
+    private static final String HANDLED_RESPONSE_COUNTER_PREFIX = "HRC_";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -62,14 +70,17 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
-        long start = System.currentTimeMillis();
-        log.debug("{}: before get QueryResponse", System.currentTimeMillis()-start);
+        long start = 0;
+        if (log.isTraceEnabled()) {
+            start = System.currentTimeMillis();
+            log.trace("{}: before get QueryResponse", System.currentTimeMillis()-start);
+        }
         QueryResponse queryResponse = (QueryResponse) redisTemplate.opsForValue().get(queryId);
-        log.debug("{}: after get QueryResponse, got {}", System.currentTimeMillis()-start, queryResponse);
+        log.trace("{}: after get QueryResponse, got {}", System.currentTimeMillis()-start, queryResponse);
         if (queryResponse == null) {
             queryResponse = defaultResponse;
             setIfAbsentQueryResponse(queryId, defaultResponse);
-            log.debug("{}: after set QueryResponse since it was null", System.currentTimeMillis()-start);
+            log.trace("{}: after set QueryResponse since it was null", System.currentTimeMillis()-start);
         }
         return CompletableFuture.completedFuture(queryResponse);
     }
@@ -85,7 +96,7 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
         redisTemplate.opsForValue().set(key, queryResponse);
-        log.debug("query response, {} -> {}",key, queryResponse);
+        log.trace("query response, {} -> {}",key, queryResponse);
         return CompletableFuture.completedFuture(queryResponse);
     }
 
@@ -199,8 +210,74 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
-        log.debug("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
-        log.debug("setIfAbsent: {}", redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction));
+        log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
+        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction);
+        log.trace("was previously absent: {}", isAbsent);
+
         return CompletableFuture.completedFuture(moduleTransaction);
+    }
+
+    /**
+     * Push an time stamp and 'query_id' pair to the {@link ResponseAggregator} queue.
+     * @param timeQueryIdPair Pair of time stamp and 'query_id'
+     * @return The length of the queue after the operation
+     */
+    @Async("redisExecutor")
+    public CompletableFuture<Long> expireQueuePush(Pair<Long, String> timeQueryIdPair) {
+        log.trace("expireQueuePush {}", timeQueryIdPair);
+         Long ret = redisTemplate.opsForList().rightPush(AGGREGATOR_QUEUE_KEY, timeQueryIdPair);
+         return CompletableFuture.completedFuture(ret);
+    }
+
+    /**
+     * Trys to grab the {@link ResponseAggregator} queue's lock and pull the first element.
+     * @return null if queue was locked or empty, the time stamp, 'query_id' pair.
+     */
+    @SuppressWarnings("unchecked")
+    @Async("redisExecutor")
+    public CompletableFuture<Pair<Long, String>> expireQueueTryPull() {
+        log.trace("expireQueueTryPull");
+        String lock = UUID.randomUUID().toString();
+        log.trace("lock: {}", redisTemplate.opsForValue().get(AGGREGATOR_QUEUE_LOCK));
+        if (!redisTemplate.opsForValue().setIfAbsent(AGGREGATOR_QUEUE_LOCK, lock)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        Pair<Long, String> ret = (Pair<Long, String>) redisTemplate.opsForList().leftPop(AGGREGATOR_QUEUE_KEY);
+        redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
+        return CompletableFuture.completedFuture(ret);
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Boolean> resetAggregatorQueueLock() {
+        log.trace("reset AggregatorQueue lock");
+        redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
+        return CompletableFuture.completedFuture(Boolean.TRUE);
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Integer> getQueuedResponseCounter(String queryId) {
+        log.trace("getQueuedResponseCounter {}", queryId);
+        return CompletableFuture.completedFuture((Integer) redisTemplate.opsForValue().get(String.format("%s%s",QUEUED_RESPONSE_COUNTER_PREFIX, queryId)));
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Long> incrementQueuedResponseCounter(String queryId) {
+        log.trace("incrementQueuedResponseCounter {}", queryId);
+        //HashOperations<String, String, Long> opsForHash = redisTemplate.opsForHash();
+        //log.debug("value at qrc: {}", opsForHash.get(queryId, QUEUED_RESPONSE_COUNTER));
+        return CompletableFuture.completedFuture(redisTemplate.opsForValue().increment(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId)));
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Integer> getHandledResponseCounter(String queryId) {
+        log.trace("getHandledResponseCounter {}", queryId);
+        return CompletableFuture.completedFuture((Integer) redisTemplate.opsForValue().get(String.format("%s%s",HANDLED_RESPONSE_COUNTER_PREFIX, queryId)));
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Boolean> setHandledResponseCounter(String queryId, Long number) {
+        log.trace("setHandledResponseCounter {} {}", queryId, number);
+        redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number);
+        return CompletableFuture.completedFuture(true);
     }
 }

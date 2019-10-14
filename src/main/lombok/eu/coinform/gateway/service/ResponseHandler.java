@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -29,16 +28,11 @@ public class ResponseHandler {
     @Async("endpointExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
         //todo: Aggregate and send the responses to the policy engine
-        log.debug("Response {} to {}: {}", moduleTransaction.getTransactionId(), moduleTransaction.getModule(), moduleTransaction.toString());
+        log.debug("Response from {} to query '{}'", moduleTransaction.getModule(), moduleTransaction.getQueryId());
 
-        responseAggregator.addResponse(moduleTransaction.getQueryId(),
-                moduleTransaction.getModule(),
-                moduleResponse,
-                (queryId) ->
-                    new ConcurrentHashMap<>(redisHandler.getModuleResponses(queryId).join())
-                 );
+        responseAggregator.addResponse(moduleTransaction.getQueryId());
 
-        //todo: this side-stepps the policy engine and put the responses directly to the QueryResponse cache.
+        //todo: this side-steps the policy engine and put the responses directly to the QueryResponse cache.
         responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
             LinkedHashMap<String, Object> responseField = new LinkedHashMap<>();
             for (Map.Entry<String, ModuleResponse> response: moduleResponses.entrySet()) {
