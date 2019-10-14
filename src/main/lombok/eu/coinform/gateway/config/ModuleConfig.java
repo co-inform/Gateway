@@ -34,4 +34,17 @@ public class ModuleConfig {
         return new ContentAnalysis(name, scheme, url, baseEndpoint, port);
     }
      */
+
+    /*
+    @Bean
+    @Qualifier("claimcredibility")
+    public Module claimcredibilityModule(@Value("${claimcredibility.name}") String name,
+                                         @Value("${claimcredibility.server.scheme}") String scheme,
+                                         @Value("${claimcredibility.server.url}") String url,
+                                         @Value("${claimcredibility.server.base_endpoint}") String baseEndpoint,
+                                         @Value("${claimcredibility.server.port}") int port) {
+        return new ClaimCredibility(name, scheme, url, baseEndpoint, port);
+    }
+    */
+
 }

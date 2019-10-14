@@ -21,7 +21,7 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
 
     //todo: Not done yet. host url needs setting in application-docker.properties
 
-    List<Function<Tweet, ModuleRequest>> tweetFuncList;
+    private List<Function<Tweet, ModuleRequest>> tweetFuncList;
 
     /**
      * The constructor of the ContentAnalysis class. Sets up the module and also needs to implement the Functional

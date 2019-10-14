@@ -99,7 +99,9 @@ public class RuleEngineHelperTest {
 
         log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
-
+        //todo: might have to change RuleEngineHelper to comply to how null is handled accordign to JSON spec
+        // https://stackoverflow.com/questions/21120999/representing-null-in-json and
+        // http://www.json.org/
         JSONAssert.assertNotEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
     }
 
@@ -119,6 +121,21 @@ public class RuleEngineHelperTest {
         JSONAssert.assertEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
     }
 
+    @Test
+    public void testResponseParserWithEmptyArray() throws IOException, JSONException {
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+        Map<String, Object> result = new LinkedHashMap<>();
+        String jsonString ="{\"response\": {\"arr\": []}}";
+        Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree(jsonString)).flatten();
+
+        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response");
+
+        log.debug("jsonMap: {}", mapper.writeValueAsString(jsonMap));
+        log.debug("result: {}", mapper.writeValueAsString(result));
+
+        JSONAssert.assertEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
+    }
+
     @Test(expected = UnrecognizedPropertyException.class)
     public void testResponseParserWithoutResponse() throws IOException {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
@@ -130,6 +147,7 @@ public class RuleEngineHelperTest {
     }
 
     // Unashamedly nicked from https://stackoverflow.com/questions/58008267/flattening-a-3-level-nested-json-string-in-java
+    // slightly modified...
     class JsonFlattener {
 
         private final Map<String, JsonNode> json = new LinkedHashMap<>();
