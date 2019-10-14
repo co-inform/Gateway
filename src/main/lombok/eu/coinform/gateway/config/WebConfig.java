@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/response/**")
                 .allowedOrigins("https://twitter.com");
         // added below as in Slack. dont know if correct though. Have added a second *
-        // but not pushed to docker yet
+        // but not pushed to docker yet. Changed to above...
         /*registry.addMapping("chrome://**")
                 .allowedOrigins("https://twitter,com");
         registry.addMapping("chrome-extension://**")
