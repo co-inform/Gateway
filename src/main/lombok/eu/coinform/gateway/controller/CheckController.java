@@ -73,7 +73,7 @@ public class CheckController {
             // Like if the cache is older than some threshold it is handled as a new query.
             // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
             return assembler.toResource(queryResponse);
-        } else if (responsePair.getKey()) {
+        } else if (!responsePair.getKey()) {
             queryObjectConsumer.accept(queryObject);
             log.trace("{}: query sent of to hander", System.currentTimeMillis() - start);
         }
