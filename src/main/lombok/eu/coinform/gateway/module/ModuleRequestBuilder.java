@@ -204,10 +204,11 @@ public class ModuleRequestBuilder {
         queries.forEach((key, value) ->
                 sb.append(UriUtils.encodeQuery(key, StandardCharsets.UTF_8))
                 .append("=")
-                .append(UriUtils.encodeQuery(value, StandardCharsets.UTF_8)));
+                .append(UriUtils.encodeQuery(value, StandardCharsets.UTF_8))
+                .append("&"));
         URI uri;
         try {
-            uri = new URI(scheme,null, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.toString(), null);
+            uri = new URI(scheme,null, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
         } catch (URISyntaxException ex) {
             throw new ModuleRequestBuilderException("Could not create a valid URI " + ex.getMessage());
         }

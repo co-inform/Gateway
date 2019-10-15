@@ -71,8 +71,8 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
                         .setPath("/credibility/users")
                         .setContent(content)
                         .setHeader("accept", "application/json")
-                        .addQuery("screen_name", twitterUser.getScreenName())
                         .addQuery("callback_url", content.getCallbackUrl())
+                        .addQuery("screen_name", twitterUser.getScreenName())
                         .build();
             } catch (JsonProcessingException ex) {
                 log.error("The twitter user object could not be parsed, {}", twitterUser);
