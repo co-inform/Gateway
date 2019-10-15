@@ -15,21 +15,21 @@ import java.nio.charset.StandardCharsets;
 @ToString
 public class TwitterUser implements QueryObject {
     /**
-     * The 'twitter_id'
+     * The 'user_id'
      * -- SETTER --
-     * Set the 'twitter_id'
+     * Set the 'user_id'
      *
-     * @param twitterId the 'twitter_id'
+     * @param userId the 'user_id'
      * -- GETTER --
-     * Get the 'twitter_id'
+     * Get the 'user_id'
      *
-     * @return the 'twitter_id'
+     * @return the 'user_id'
      */
     @Setter
     @Getter
-    @NotEmpty(message = "There must be a specified property twitter_id with the twitter user_id")
-    @JsonProperty("twitter_id")
-    private String twitterId;
+    @NotEmpty(message = "There must be a specified property user_id with the twitter user_id")
+    @JsonProperty("user_id")
+    private String userId;
     /**
      * The 'screen_name'
      * -- Getter --

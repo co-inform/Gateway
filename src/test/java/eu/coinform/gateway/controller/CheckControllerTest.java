@@ -62,7 +62,7 @@ public class CheckControllerTest {
     public void setupTests(){
         JacksonTester.initFields(this, mapper);
         twitterUser.setScreenName(screenName);
-        twitterUser.setTwitterId(userId);
+        twitterUser.setUserId(userId);
         log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
         tweet.setTweetText("Hejbaberiba");
