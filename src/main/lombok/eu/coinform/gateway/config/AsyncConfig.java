@@ -16,8 +16,8 @@ public class AsyncConfig {
     public Executor redisExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(50);
-        executor.setQueueCapacity(100);
+        executor.setMaxPoolSize(100);
+        executor.setQueueCapacity(1000);
         executor.setThreadNamePrefix("RedisAsyncTread-");
         executor.initialize();
         return executor;
@@ -27,8 +27,8 @@ public class AsyncConfig {
     public Executor endpointExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(50);
-        executor.setQueueCapacity(100);
+        executor.setMaxPoolSize(100);
+        executor.setQueueCapacity(1000);
         executor.setThreadNamePrefix("EndpointAsyncTread-");
         executor.initialize();
         return executor;
