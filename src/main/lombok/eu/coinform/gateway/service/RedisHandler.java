@@ -65,11 +65,12 @@ public class RedisHandler {
      *
      * @param queryId String holding the queryId to query the cache for
      * @param defaultResponse a default QueryRepsonse object to use if queryId returns no object
-     * @return the QueryResponse stored in the cache or the default object if the queryId returns nothing as a
-     * {@literal CompletableFuture<QueryResponse>}
+     * @return A pair of whether the cache where previously empty and the QueryResponse stored in the cache or the default object if the queryId returns nothing as a
+     * {@literal CompletableFuture<Pair<Boolean, QueryResponse>>}
      */
     @Async("redisExecutor")
-    public CompletableFuture<QueryResponse> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
+    public CompletableFuture<Pair<Boolean, QueryResponse>> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
+        Boolean existant = Boolean.TRUE;
         long start = 0;
         if (log.isTraceEnabled()) {
             start = System.currentTimeMillis();
@@ -78,11 +79,12 @@ public class RedisHandler {
         QueryResponse queryResponse = (QueryResponse) redisTemplate.opsForValue().get(queryId);
         log.trace("{}: after get QueryResponse, got {}", System.currentTimeMillis()-start, queryResponse);
         if (queryResponse == null) {
+            existant = Boolean.FALSE;
             queryResponse = defaultResponse;
             setIfAbsentQueryResponse(queryId, defaultResponse);
             log.trace("{}: after set QueryResponse since it was null", System.currentTimeMillis()-start);
         }
-        return CompletableFuture.completedFuture(queryResponse);
+        return CompletableFuture.completedFuture(Pair.of(existant, queryResponse));
     }
 
     /**

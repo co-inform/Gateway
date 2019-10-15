@@ -4,6 +4,7 @@ import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
+import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -63,17 +64,19 @@ public class CheckController {
         log.debug("query received with query_id '{}'", queryObject.getQueryId());
         long start = System.currentTimeMillis();
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
-        QueryResponse queryResponse= redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
+        Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
                 new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join();
+        QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
             // Like if the cache is older than some threshold it is handled as a new query.
             // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
             return assembler.toResource(queryResponse);
+        } else if (responsePair.getKey()) {
+            queryObjectConsumer.accept(queryObject);
+            log.trace("{}: query sent of to hander", System.currentTimeMillis() - start);
         }
-        queryObjectConsumer.accept(queryObject);
-        log.trace("{}: query sent of to hander", System.currentTimeMillis() - start);
         return assembler.toResource(queryResponse);
     }
 
