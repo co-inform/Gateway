@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 
 /**
@@ -24,6 +26,7 @@ public class ResponseAggregator {
     private long aggregateTimeout;
     private RedisHandler redisHandler;
     final private Object counterLock = new Object();
+    final private Lock lock = new ReentrantLock();
 
     /**
      * Constructor taking the aggregateTimeout as a string.
@@ -57,6 +60,17 @@ public class ResponseAggregator {
      * @param aggregatedResponsesProcesses a {@link BiConsumer} that takes a String and a {@literal Map<String, ModuleResponse>} for processing the repsonses
      */
     public void processAggregatedResponses(BiConsumer<String, Map<String, ModuleResponse>> aggregatedResponsesProcesses) {
+
+        if (!lock.tryLock()) {
+            return;
+        }
+
+        try {
+            Thread.sleep(aggregateTimeout/2);
+        } catch (InterruptedException ex) {
+            log.error("wait interupted: {}", ex.getMessage());
+        }
+
         Pair<Long, String> timeQueryIdPair = redisHandler.expireQueueTryPull().join();
         log.trace("timeQueryPair: {}", timeQueryIdPair);
         while (true) {
@@ -67,8 +81,8 @@ public class ResponseAggregator {
                 synchronized (counterLock) {
                     qrc = redisHandler.getQueuedResponseCounter(timeQueryIdPair.getValue()).join();
                     hrc = redisHandler.getHandledResponseCounter(timeQueryIdPair.getValue()).join();
-                    log.trace("qrc: {}, hrc: {}", qrc, hrc);
                 }
+                log.trace("qrc: {}, hrc: {}", qrc, hrc);
                 if (qrc != null && hrc == null || qrc != null && qrc.compareTo(hrc) > 0) { // more queued than handled
                     Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(timeQueryIdPair.getValue()).join();
                     aggregatedResponsesProcesses.accept(timeQueryIdPair.getValue(), moduleResponses);
@@ -81,6 +95,7 @@ public class ResponseAggregator {
                 log.trace("timeQueryPair: {}", timeQueryIdPair);
             }
             if (timeQueryIdPair == null) {
+                lock.unlock();
                 return;
             }
             try {

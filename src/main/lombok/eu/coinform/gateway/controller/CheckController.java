@@ -40,6 +40,7 @@ public class CheckController {
      * @param twitterUser The twitter user the query is about
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
+    @CrossOrigin(origins = "*")
     @PostMapping("/twitter/user")
     public Resource<QueryResponse> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
         return queryEndpoint(twitterUser,
@@ -51,6 +52,7 @@ public class CheckController {
      * @param tweet The tweet the query is about.
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
+    @CrossOrigin(origins = "*")
     @PostMapping("/twitter/tweet")
     public Resource<QueryResponse> twitterTweet(@Valid @RequestBody Tweet tweet) {
         return queryEndpoint(tweet,
@@ -80,6 +82,7 @@ public class CheckController {
      * @param query_id The query_id that identifies the earlier query
      * @return A {@link QueryResponse} containing the answer or at least progress of the query.
      */
+    @CrossOrigin(origins = "*")
     @GetMapping("/response/{query_id}")
     public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
         log.debug("query for response reveived with query_id '{}'", query_id);

@@ -224,9 +224,9 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<Long> expireQueuePush(Pair<Long, String> timeQueryIdPair) {
-        log.trace("expireQueuePush {}", timeQueryIdPair);
-         Long ret = redisTemplate.opsForList().rightPush(AGGREGATOR_QUEUE_KEY, timeQueryIdPair);
-         return CompletableFuture.completedFuture(ret);
+        Long ret = redisTemplate.opsForList().rightPush(AGGREGATOR_QUEUE_KEY, timeQueryIdPair);
+        log.trace("expireQueuePush {}, {}", ret, timeQueryIdPair);
+        return CompletableFuture.completedFuture(ret);
     }
 
     /**
@@ -239,11 +239,14 @@ public class RedisHandler {
         log.trace("expireQueueTryPull");
         String lock = UUID.randomUUID().toString();
         log.trace("lock: {}", redisTemplate.opsForValue().get(AGGREGATOR_QUEUE_LOCK));
-        if (!redisTemplate.opsForValue().setIfAbsent(AGGREGATOR_QUEUE_LOCK, lock)) {
+        Boolean hasLock = redisTemplate.opsForValue().setIfAbsent(AGGREGATOR_QUEUE_LOCK, lock);
+        log.trace("hasLock: {}", hasLock);
+        if (!hasLock) {
             return CompletableFuture.completedFuture(null);
         }
         Pair<Long, String> ret = (Pair<Long, String>) redisTemplate.opsForList().leftPop(AGGREGATOR_QUEUE_KEY);
         redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
+
         return CompletableFuture.completedFuture(ret);
     }
 
