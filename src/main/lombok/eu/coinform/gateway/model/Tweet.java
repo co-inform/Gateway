@@ -55,6 +55,23 @@ public class Tweet implements QueryObject {
     private String tweetText;
 
     /**
+     * The 'tweet_author'
+     * -- SETTTER --
+     * Set the 'tweet_author'
+     *
+     * @param tweetAuthor set the 'tweet_author'
+     * -- GETTER --
+     * Get the 'tweet_author'
+     *
+     * @return the 'tweet_author'
+     */
+    @Getter
+    @Setter
+    @NotEmpty(message = "no tweet_author specified")
+    @JsonProperty("tweet_author")
+    private String tweetAuthor;
+
+    /**
      * Set the 'tweet_id'
      *
      * @param tweetId set the 'tweet_id'
