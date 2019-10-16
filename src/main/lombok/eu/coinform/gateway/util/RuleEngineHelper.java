@@ -27,6 +27,7 @@ public final class RuleEngineHelper {
         ResponseParserObject(LinkedHashMap<String, Object> jsonObject, Map<String, Object> flatMap, String keyBase) {
 
             if(jsonObject == null) {
+                flatMap.put(keyBase.substring(0, keyBase.length() - 1), null);
                 return;
             }
 
@@ -52,6 +53,7 @@ public final class RuleEngineHelper {
         ResponseParserArray(ArrayList<Object> jsonArray, Map<String, Object> flatMap, String keyBase) {
 
             if(jsonArray == null) {
+                flatMap.put(keyBase.substring(0, keyBase.length() - 1), null);
                 return;
             }
 

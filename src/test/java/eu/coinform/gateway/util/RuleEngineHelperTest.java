@@ -102,7 +102,7 @@ public class RuleEngineHelperTest {
         //todo: might have to change RuleEngineHelper to comply to how null is handled accordign to JSON spec
         // https://stackoverflow.com/questions/21120999/representing-null-in-json and
         // http://www.json.org/
-        JSONAssert.assertNotEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(mapper.writeValueAsString(jsonMap),mapper.writeValueAsString(result), JSONCompareMode.STRICT);
     }
 
 
