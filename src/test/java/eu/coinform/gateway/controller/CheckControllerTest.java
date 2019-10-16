@@ -66,6 +66,7 @@ public class CheckControllerTest {
         log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
         tweet.setTweetText("Hejbaberiba");
+        tweet.setTweetAuthor("fakeDonaldTrump");
         log.debug("Tweet {}", tweet.toString());
 
         try {
