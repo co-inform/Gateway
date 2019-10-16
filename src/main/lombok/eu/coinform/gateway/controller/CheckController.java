@@ -42,7 +42,8 @@ public class CheckController {
      * @param twitterUser The twitter user the query is about
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
-    @CrossOrigin(origins = "https://twitter.com, chrome://**, chrome-extension://**")
+    //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
+    @CrossOrigin(origins = "*")
     @PostMapping("/twitter/user")
     public Resource<QueryResponse> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
         return queryEndpoint(twitterUser,
@@ -51,7 +52,7 @@ public class CheckController {
 
     @RequestMapping(value= "/twitter/user", method=RequestMethod.OPTIONS)
     public void corsHeadersTwitterUser(HttpServletResponse response) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
+        response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
@@ -62,16 +63,18 @@ public class CheckController {
      * @param tweet The tweet the query is about.
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
-    @CrossOrigin(origins = "https://twitter.com, chrome://**, chrome-extension://**")
+    //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
+    @CrossOrigin(origins = "*")
     @PostMapping("/twitter/tweet")
     public Resource<QueryResponse> twitterTweet(@Valid @RequestBody Tweet tweet) {
         return queryEndpoint(tweet,
                 (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet));
     }
 
+    //@CrossOrigin("*")
     @RequestMapping(value= "/twitter/tweet", method=RequestMethod.OPTIONS)
     public void corsHeadersTweet(HttpServletResponse response) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
+        response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
@@ -103,7 +106,8 @@ public class CheckController {
      * @param query_id The query_id that identifies the earlier query
      * @return A {@link QueryResponse} containing the answer or at least progress of the query.
      */
-    @CrossOrigin(origins = "https://twitter.com, chrome://**, chrome-extension://**")
+    //@CrossOrigin(origins = "https://twitter.com, chrome-extension://kodmajniflhcofdbnfjpkgimbmkpgend")
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.GET)
     public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
         log.debug("query for response reveived with query_id '{}'", query_id);
@@ -112,9 +116,11 @@ public class CheckController {
                 linkTo(methodOn(CheckController.class).findById(query_id)).withSelfRel());
     }
 
+    //@CrossOrigin("*")
     @RequestMapping(value= "/response/{query_id}", method=RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response, @PathVariable(value = "query_id", required = true) String query_id) {
         //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
+        response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
