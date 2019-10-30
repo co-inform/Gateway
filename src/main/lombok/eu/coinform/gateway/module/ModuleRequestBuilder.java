@@ -19,7 +19,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * ModuleRequestBuilder is a builder class responsible for building ModuleRequests
@@ -42,7 +42,8 @@ public class ModuleRequestBuilder {
      * responseHandler is a default implementation of handling a httpResponse which basically means loggin for debug
      * purposes
      */
-    private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse)-> {
+    /*
+    private BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler = (moduleRequest, httpResponse)-> {
         log.debug("request got response {}", httpResponse.getStatusLine());
         if (log.isTraceEnabled()) {
             StringBuilder sb = new StringBuilder();
@@ -61,6 +62,8 @@ public class ModuleRequestBuilder {
         }
         return httpResponse;
     };
+     */
+    private BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler;
 
     private ObjectMapper objectMapper;
 
@@ -178,7 +181,7 @@ public class ModuleRequestBuilder {
      * @param responseHandler a Functional object taking a HttpResponse and returning a HttpResponse
      * @return returns this
      */
-    public ModuleRequestBuilder setResponseHandler(Function<HttpResponse, HttpResponse> responseHandler) {
+    public ModuleRequestBuilder setResponseHandler(BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler) {
         this.responseHandler = responseHandler;
         return this;
     }
