@@ -102,7 +102,7 @@ public abstract class Module {
      * @param standardResponseHandler is the standard response handler function
      */
     public Module(String name, String scheme, String url, String baseEndpoint, int port, BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
-        this.moduleRequestFactory = new ModuleRequestFactory(scheme, url, baseEndpoint, port, standardResponseHandler);
+        this.moduleRequestFactory = new ModuleRequestFactory(this);
         this.name = name;
         this.scheme = scheme;
         this.url = url;

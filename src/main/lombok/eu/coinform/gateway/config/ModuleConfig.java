@@ -2,9 +2,11 @@ package eu.coinform.gateway.config;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.misinfome.MisInfoMe;
+import eu.coinform.gateway.service.RedisHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -58,7 +60,7 @@ public class ModuleConfig {
     */
 
     @Bean
-    public BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler() {
+    public BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler(RedisHandler redisHandler) {
         return ((moduleRequest, httpResponse) -> {
             log.debug("request got response {}", httpResponse.getStatusLine());
             if (log.isTraceEnabled()) {
@@ -76,6 +78,8 @@ public class ModuleConfig {
                     log.trace("failing to write content: {}", ex.getMessage());
                 }
             }
+            QueryResponse queryResponse = redisHandler.getQueryResponse(moduleRequest.getQueryId()).join();
+            queryResponse.getModule_response_code().put(moduleRequest.getModule().getName(), httpResponse.getStatusLine().getStatusCode());
             return httpResponse;
         });
     }

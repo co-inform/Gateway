@@ -37,6 +37,7 @@ public class ModuleRequestBuilder {
     private int port;
     private String path;
     private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
+    private Module module;
 
     /**
      * responseHandler is a default implementation of handling a httpResponse which basically means loggin for debug
@@ -198,6 +199,16 @@ public class ModuleRequestBuilder {
     }
 
     /**
+     * sets the module for this request
+     * @param module the module
+     * @return returns this
+     */
+    public ModuleRequestBuilder setModule(Module module) {
+        this.module = module;
+        return this;
+    }
+
+    /**
      * build() actually builds the request and returns the finished product
      * @return returns the build request
      * @throws ModuleRequestBuilderException if the URI was not possible to create or the content of the request is empty.
@@ -227,6 +238,7 @@ public class ModuleRequestBuilder {
         httpRequest.setResponseHandler(responseHandler);
         httpRequest.setTransactionId(transactionId);
         httpRequest.setQueryId(queryId);
+        httpRequest.setModule(module);
         return httpRequest;
     }
 }

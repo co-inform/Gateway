@@ -10,28 +10,16 @@ import java.util.function.BiFunction;
  */
 
 public class ModuleRequestFactory {
-    private String scheme;
-    private String url;
-    private int port;
-    private String baseEndpoint;
+    private Module module;
     private ObjectMapper objectMapper = new ObjectMapper();
-    private BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler;
 
     /**
-     * Constructoru taking 4 parameters
-     * @param scheme scheme is the scheme uused for the module, ie http/https
-     * @param url url is the url for the host api, ie www.example.com
-     * @param baseEndpoint baseEndpoint is the baseEndPoint for the api, ie /api/v1
-     * @param port port is an int holding the port for the api, ie 443
-     * @param standardResponseHandler is the standard response handler function
+     * Constructoru
+     * @param module Set the module
      */
 
-    ModuleRequestFactory(String scheme, String url, String baseEndpoint, int port, BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
-        this.scheme = scheme;
-        this.url = url;
-        this.port = port;
-        this.baseEndpoint = baseEndpoint;
-        this.standardResponseHandler = standardResponseHandler;
+    ModuleRequestFactory(Module module) {
+        this.module = module;
     }
 
     /**
@@ -41,11 +29,12 @@ public class ModuleRequestFactory {
      */
     public ModuleRequestBuilder getRequestBuilder(String queryId) {
         ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(queryId, objectMapper);
-        requestBuilder.setScheme(scheme)
-                .setUrl(url)
-                .setBaseEndpoint(baseEndpoint)
-                .setPort(port)
-                .setResponseHandler(standardResponseHandler);
+        requestBuilder.setScheme(module.getScheme())
+                .setUrl(module.getUrl())
+                .setBaseEndpoint(module.getBaseEndpoint())
+                .setPort(module.getPort())
+                .setResponseHandler(module.getStandardResponseHandler())
+                .setModule(module);
         return requestBuilder;
     }
 }

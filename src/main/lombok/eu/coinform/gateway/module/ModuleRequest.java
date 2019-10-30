@@ -101,6 +101,21 @@ public class ModuleRequest extends HttpPost {
     private String queryId;
 
     /**
+     * The module the request is querying
+     * -- GETTER --
+     * Get the module
+     *
+     * @return The module
+     * -- SETTER --
+     * Set the module
+     *
+     * @param module The 'module'
+     */
+    @Getter
+    @Setter
+    private Module module;
+
+    /**
      *  The class constructor. Takes one parameter that is passed on to the super class
      * @param uri a URI for the request
      */
