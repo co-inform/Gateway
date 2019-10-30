@@ -1,7 +1,6 @@
 package eu.coinform.gateway.module.misinfome;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.coinform.gateway.config.MisinfoMeContent;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;

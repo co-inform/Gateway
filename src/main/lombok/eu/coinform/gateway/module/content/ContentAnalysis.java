@@ -1,7 +1,6 @@
 package eu.coinform.gateway.module.content;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.coinform.gateway.config.ContentAnalysisContent;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
