@@ -5,9 +5,11 @@ import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -28,9 +30,10 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
      * @param url url of the server ie www.example.com
      * @param baseEndpoint is the endpoint where the API "starts" ie /api/v1
      * @param port port of the server where the API can be called
+     * @param standardResponseHandler the standard response handler function
      */
-    public ClaimCredibility(String name, String scheme, String url, String baseEndpoint, int port) {
-        super(name, scheme, url, baseEndpoint, port);
+    public ClaimCredibility(String name, String scheme, String url, String baseEndpoint, int port, BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
+        super(name, scheme, url, baseEndpoint, port, standardResponseHandler);
 
         tweetFuncList = new ArrayList<>();
         // todo: implement functions for requesting to the ClaimCredibility module

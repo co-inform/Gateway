@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -86,7 +87,7 @@ public class CheckController {
         long start = System.currentTimeMillis();
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
         Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
-                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join();
+                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {

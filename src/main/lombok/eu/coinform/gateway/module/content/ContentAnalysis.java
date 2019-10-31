@@ -1,16 +1,17 @@
 package eu.coinform.gateway.module.content;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.coinform.gateway.config.ContentAnalysisContent;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -33,9 +34,10 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
      * @param url url of the server ie www.example.com
      * @param baseEndpoint is the endpoint where the API "starts" ie /api/v1
      * @param port port of the server where the API can be called
+     * @param standardResponseHandler the standard response handler function
      */
-    public ContentAnalysis(String name, String scheme, String url, String baseEndpoint, int port) {
-        super(name, scheme, url, baseEndpoint, port);
+    public ContentAnalysis(String name, String scheme, String url, String baseEndpoint, int port, BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
+        super(name, scheme, url, baseEndpoint, port, standardResponseHandler);
 
         // tweetFuncList is defined in the Module class
         tweetFuncList = new ArrayList<>();

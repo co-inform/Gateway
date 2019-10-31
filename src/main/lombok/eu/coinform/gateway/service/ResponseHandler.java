@@ -34,11 +34,13 @@ public class ResponseHandler {
 
         //todo: this side-steps the policy engine and put the responses directly to the QueryResponse cache.
         responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
-            LinkedHashMap<String, Object> responseField = new LinkedHashMap<>();
+            QueryResponse qr = redisHandler.getQueryResponse(queryId).join();
+            qr.setStatus(QueryResponse.Status.done);
+            LinkedHashMap<String, Object> responseField = qr.getResponse();
             for (Map.Entry<String, ModuleResponse> response: moduleResponses.entrySet()) {
                 responseField.put(response.getKey(), response.getValue());
             }
-            redisHandler.setQueryResponse(queryId, new QueryResponse(queryId, QueryResponse.Status.done, responseField));
+            redisHandler.setQueryResponse(queryId, qr);
         });
     }
 
