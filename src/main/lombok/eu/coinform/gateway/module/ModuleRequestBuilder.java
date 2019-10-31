@@ -19,7 +19,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * ModuleRequestBuilder is a builder class responsible for building ModuleRequests
@@ -37,12 +37,14 @@ public class ModuleRequestBuilder {
     private int port;
     private String path;
     private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
+    private Module module;
 
     /**
      * responseHandler is a default implementation of handling a httpResponse which basically means loggin for debug
      * purposes
      */
-    private Function<HttpResponse, HttpResponse> responseHandler = (httpResponse)-> {
+    /*
+    private BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler = (moduleRequest, httpResponse)-> {
         log.debug("request got response {}", httpResponse.getStatusLine());
         if (log.isTraceEnabled()) {
             StringBuilder sb = new StringBuilder();
@@ -61,6 +63,8 @@ public class ModuleRequestBuilder {
         }
         return httpResponse;
     };
+     */
+    private BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler;
 
     private ObjectMapper objectMapper;
 
@@ -178,7 +182,7 @@ public class ModuleRequestBuilder {
      * @param responseHandler a Functional object taking a HttpResponse and returning a HttpResponse
      * @return returns this
      */
-    public ModuleRequestBuilder setResponseHandler(Function<HttpResponse, HttpResponse> responseHandler) {
+    public ModuleRequestBuilder setResponseHandler(BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler) {
         this.responseHandler = responseHandler;
         return this;
     }
@@ -191,6 +195,16 @@ public class ModuleRequestBuilder {
      */
     public ModuleRequestBuilder addQuery(String key, String value) {
         queries.put(key, value);
+        return this;
+    }
+
+    /**
+     * sets the module for this request
+     * @param module the module
+     * @return returns this
+     */
+    public ModuleRequestBuilder setModule(Module module) {
+        this.module = module;
         return this;
     }
 
@@ -224,6 +238,7 @@ public class ModuleRequestBuilder {
         httpRequest.setResponseHandler(responseHandler);
         httpRequest.setTransactionId(transactionId);
         httpRequest.setQueryId(queryId);
+        httpRequest.setModule(module);
         return httpRequest;
     }
 }

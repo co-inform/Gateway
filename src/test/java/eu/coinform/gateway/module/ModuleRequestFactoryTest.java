@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class ModuleRequestFactoryTest {
 
+    Module module;
     ModuleRequestFactory moduleRequestFactory;
     ModuleRequestBuilder moduleRequestBuilder;
     ModuleRequest moduleRequest;
@@ -22,7 +23,13 @@ public class ModuleRequestFactoryTest {
 
     @Before
     public void setup(){
-        moduleRequestFactory = new ModuleRequestFactory("http", "www.example.com", "", 80);
+        module = new Module("test", "http", "www.example.com", "", 80, (a, b) -> b) {
+            @Override
+            public ModuleRequestFactory getModuleRequestFactory() {
+                return super.getModuleRequestFactory();
+            }
+        };
+        moduleRequestFactory = new ModuleRequestFactory(module);
         moduleRequestBuilder = moduleRequestFactory.getRequestBuilder(uuid);
         mrcImplementation = new MRCImplementation("/modules/response/");
     }
@@ -64,7 +71,13 @@ public class ModuleRequestFactoryTest {
     @Test
     public void getRequestBuilderMalformedUIRITest(){
 
-        moduleRequestFactory = new ModuleRequestFactory("http", "[www.example.com]", "", 80);
+        module = new Module("test", "http", "www.example.com", "", 80, (a, b) -> b) {
+            @Override
+            public ModuleRequestFactory getModuleRequestFactory() {
+                return super.getModuleRequestFactory();
+            }
+        };
+        moduleRequestFactory = new ModuleRequestFactory(module);
         assertThat(moduleRequestFactory).isNotNull();
 
         moduleRequestBuilder = moduleRequestFactory.getRequestBuilder(uuid);
