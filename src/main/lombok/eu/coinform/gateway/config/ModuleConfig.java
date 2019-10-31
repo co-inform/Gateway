@@ -60,7 +60,7 @@ public class ModuleConfig {
     */
 
     @Bean
-    public BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler(RedisHandler redisHandler) {
+    public BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler(RedisHandler redisHandler) {
         return ((moduleRequest, httpResponse) -> {
             log.debug("request got response {}", httpResponse.getStatusLine());
             if (log.isTraceEnabled()) {
