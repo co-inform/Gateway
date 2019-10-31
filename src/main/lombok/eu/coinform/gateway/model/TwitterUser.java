@@ -29,7 +29,7 @@ public class TwitterUser implements QueryObject {
     /*
     @Setter
     @Getter
-    @NotEmpty(message = "There must be a specified property user_id with the twitter user_id")
+    @NotNull(message = "There must be a specified property user_id with the twitter user_id")
     @JsonProperty("user_id")
     private Long userId;
     */

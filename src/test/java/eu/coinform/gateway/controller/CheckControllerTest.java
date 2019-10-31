@@ -40,8 +40,8 @@ public class CheckControllerTest {
 
     private ObjectMapper mapper = new ObjectMapper();
     private String jsonTU, jsonTW;
-    private final String tweetId = "1176610391058722816";
-    private final String userId = "25073877";
+    private final Long tweetId = 1189715310766645254L;
+    //private final Long userId = 25073877L;
     private final String screenName = "realDonaldTrump";
     private final String idUrl = "/response/%s";
     private final String tweetUrl = "/twitter/tweet";
@@ -63,7 +63,7 @@ public class CheckControllerTest {
     public void setupTests(){
         JacksonTester.initFields(this, mapper);
         twitterUser.setScreenName(screenName);
-        twitterUser.setUserId(userId);
+        //twitterUser.setUserId(userId);
         log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
         tweet.setTweetText("Hejbaberiba");

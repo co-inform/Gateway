@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -33,7 +34,7 @@ public class Tweet implements QueryObject {
      * @return the 'tweet_id'
      */
     @Getter
-    @NotEmpty(message = "no tweet_id specified")
+    @NotNull(message = "no tweet_id specified")
     @JsonProperty("tweet_id")
     private Long tweetId;
 
