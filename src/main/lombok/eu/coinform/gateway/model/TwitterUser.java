@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 @NoArgsConstructor
 @ToString
 public class TwitterUser implements QueryObject {
+    /*
     /**
      * The 'user_id'
      * -- SETTER --
@@ -25,11 +26,13 @@ public class TwitterUser implements QueryObject {
      *
      * @return the 'user_id'
      */
+    /*
     @Setter
     @Getter
-    @NotEmpty(message = "There must be a specified property user_id with the twitter user_id")
+    @NotNull(message = "There must be a specified property user_id with the twitter user_id")
     @JsonProperty("user_id")
-    private String userId;
+    private Long userId;
+    */
     /**
      * The 'screen_name'
      * -- Getter --
