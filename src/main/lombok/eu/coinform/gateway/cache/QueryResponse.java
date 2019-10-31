@@ -45,13 +45,17 @@ public class QueryResponse implements Serializable {
     private Status status;
     /**
      * The response to give to the users why query the gateway.
-     * @param response The response to set
      * -- GETTER --
      * Get the response
      *
      * @return The latest response or null if no response is produced yet
+     * -- SETTER --
+     * Set the response
+     *
+     * @param response The response to set
      */
     @Getter
+    @Setter
     private LinkedHashMap<String, Object> response = new LinkedHashMap<>();
     /**
      * The request code from the module on the http request

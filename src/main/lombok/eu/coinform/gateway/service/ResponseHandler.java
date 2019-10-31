@@ -36,6 +36,9 @@ public class ResponseHandler {
         responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
             QueryResponse qr = redisHandler.getQueryResponse(queryId).join();
             qr.setStatus(QueryResponse.Status.done);
+            if (qr.getResponse() == null) {
+                qr.setResponse(new LinkedHashMap<>());
+            }
             LinkedHashMap<String, Object> responseField = qr.getResponse();
             for (Map.Entry<String, ModuleResponse> response: moduleResponses.entrySet()) {
                 responseField.put(response.getKey(), response.getValue());
