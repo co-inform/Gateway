@@ -83,7 +83,7 @@ public class CheckController {
 
 
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
-        log.debug("query received with query_id '{}'", queryObject.getQueryId());
+        log.trace("query received with query_id '{}'", queryObject.getQueryId());
         long start = System.currentTimeMillis();
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
         Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
@@ -111,7 +111,7 @@ public class CheckController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.GET)
     public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
-        log.debug("query for response reveived with query_id '{}'", query_id);
+        log.trace("query for response reveived with query_id '{}'", query_id);
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         return new Resource<>(queryResponse,
                 linkTo(methodOn(CheckController.class).findById(query_id)).withSelfRel());
