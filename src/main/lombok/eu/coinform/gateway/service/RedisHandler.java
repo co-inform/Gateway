@@ -176,18 +176,19 @@ public class RedisHandler {
     }
 
     /**
-     * getModuleTransaction(String) gets the ModuleTransaction for a certain transactionId.
+     * getModuleTransaction(String) gets the ModuleTransaction for a certain transactionId and deletes it from the cache.
      *
      * @param transactionId String holding the transactionId
      * @return a {@literal CompletableFuture<ModuleTransaction>}
      * @throws NoSuchTransactionIdException when there is no {@link ModuleTransaction} in the Redis cache for the passed transactionId
      */
     @Async("redisExecutor")
-    public CompletableFuture<ModuleTransaction> getModuleTransaction(String transactionId) throws NoSuchTransactionIdException {
+    public CompletableFuture<ModuleTransaction> getAndDeleteModuleTransaction(String transactionId) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = (ModuleTransaction) redisTemplate.opsForValue().get(transactionId);
         if (moduleTransaction == null) {
             throw new NoSuchTransactionIdException(transactionId);
         }
+        redisTemplate.delete(transactionId);
         return CompletableFuture.completedFuture(moduleTransaction);
     }
 
