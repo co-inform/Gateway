@@ -46,7 +46,7 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
         tweetFuncList.add((tweet) -> {
             ModuleRequest request = null;
             MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
-            log.debug("send post with content: {}", content.toString());
+            log.debug("send post Misinfome tweet, query_id: {}", tweet.getQueryId());
             try {
                 request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/credibility/tweets/"+tweet.getTweetId())
@@ -69,6 +69,7 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
             ModuleRequest request = null;
             try {
                 MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
+                log.debug("send post Misinfome twitter_user, query_id: {}", twitterUser.getQueryId());
                 request = getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
                         .setPath("/credibility/users")
                         .setContent(content)

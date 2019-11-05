@@ -62,14 +62,13 @@ public class ModuleConfig {
     @Bean
     public BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler(RedisHandler redisHandler) {
         return ((moduleRequest, httpResponse) -> {
-            log.debug("request got response {}", httpResponse.getStatusLine());
+            log.debug("request with query_id '{}' got response {}", moduleRequest.getQueryId(), httpResponse.getStatusLine());
             if (log.isTraceEnabled()) {
                 StringBuilder sb = new StringBuilder();
                 for (Header header : httpResponse.getAllHeaders()) {
                     sb.append(header.toString());
                     sb.append("\n");
                 }
-                log.trace("request '{}' got responce: {}", toString(), httpResponse.toString());
                 log.trace("headers: {}", sb.substring(0, sb.length()-1));
                 try {
                     log.trace("content: {}", CharStreams

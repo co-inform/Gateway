@@ -40,7 +40,7 @@ public class CheckControllerTest {
 
     private ObjectMapper mapper = new ObjectMapper();
     private String jsonTU, jsonTW;
-    private final Long tweetId = 1189715310766645254L;
+    private final String tweetId = "1189715310766645254";
     //private final Long userId = 25073877L;
     private final String screenName = "realDonaldTrump";
     private final String idUrl = "/response/%s";
