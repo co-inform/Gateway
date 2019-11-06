@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+@Slf4j
 public class TweetEvaluation implements Evaluation {
 
     public TweetEvaluation() {
@@ -20,26 +22,17 @@ public class TweetEvaluation implements Evaluation {
     @Getter
     @Setter
     @JsonProperty("tweet_id")
-    @NotEmpty(message = "no tweet_id specified")
-    private String tweetId;
+    @NotNull(message = "no tweet_id specified")
+    private Long tweetId;
 
     @Setter
     @Getter
     @NotNull(message = "no evaluation object")
+    @eu.coinform.gateway.model.Validation.Evaluation
     private LinkedHashMap<String, Object> evaluation;
 
     @Getter
     @JsonIgnore
     private String evaluationId;
 
-    @AssertTrue(message = "the evaluation object must contain a correct label, url and comment")
-    public boolean evaluationContains() {
-        String[] fields = {"label", "url", "comment"};
-        for (String field : fields) {
-            if (!evaluation.containsKey(field) || !(evaluation.get(field) instanceof String) || ((String) evaluation.get(field)).isBlank() ) {
-                return false;
-            }
-        }
-        return true;
-    }
 }

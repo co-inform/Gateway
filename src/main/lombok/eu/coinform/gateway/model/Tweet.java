@@ -34,9 +34,9 @@ public class Tweet implements QueryObject {
      * @return the 'tweet_id'
      */
     @Getter
-    @NotEmpty(message = "no tweet_id specified")
+    @NotNull(message = "no tweet_id specified")
     @JsonProperty("tweet_id")
-    private String tweetId;
+    private Long tweetId;
 
     /**
      * The 'tweet_text'
@@ -79,7 +79,7 @@ public class Tweet implements QueryObject {
      */
     @SuppressWarnings("UnstableApiUsage")
     @JsonProperty("tweet_id")
-    public void setTweetId(String tweetId) {
+    public void setTweetId(Long tweetId) {
         this.tweetId = tweetId;
         this.queryId = Hashing.sha256().hashString(tweetId.toString(), StandardCharsets.UTF_8).toString();
     }
