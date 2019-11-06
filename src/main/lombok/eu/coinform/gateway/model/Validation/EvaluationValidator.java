@@ -20,7 +20,7 @@ public class EvaluationValidator implements ConstraintValidator<Evaluation, Link
             }
             if (field.equals("label")) {
                 try {
-                    AccuracyLabel.valueOf((String) evaluation.get("label"));
+                    AccuracyLabel.parseString((String) evaluation.get("label"));
                 } catch (IllegalArgumentException e) {
                     return false;
                 }
