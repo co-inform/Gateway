@@ -33,6 +33,6 @@ public class TweetEvaluation implements Evaluation {
 
     @Getter
     @JsonIgnore
-    private String evaluationId;
+    final private String evaluationId;
 
 }
