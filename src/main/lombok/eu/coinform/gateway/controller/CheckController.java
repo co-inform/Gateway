@@ -127,5 +127,21 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
+    public Resource<EvaluationResponse> evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+
+        //todo: actually do something with the incoming tweet evaluations
+        return new Resource<>(new EvaluationResponse(tweetEvaluation.getEvaluationId()));
+    }
+
+    @RequestMapping(value= "/twitter/evaluate", method=RequestMethod.OPTIONS)
+    public void corsHeadersEvaluate(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
 }
 
