@@ -51,7 +51,7 @@ public class CheckController {
                (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
     }
 
-    @RequestMapping(value= "/twitter/user", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/twitter/user", method = RequestMethod.OPTIONS)
     public void corsHeadersTwitterUser(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -73,7 +73,7 @@ public class CheckController {
     }
 
     //@CrossOrigin("*")
-    @RequestMapping(value= "/twitter/tweet", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/twitter/tweet", method = RequestMethod.OPTIONS)
     public void corsHeadersTweet(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -118,7 +118,7 @@ public class CheckController {
     }
 
     //@CrossOrigin("*")
-    @RequestMapping(value= "/response/{query_id}", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/response/{query_id}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response, @PathVariable(value = "query_id", required = true) String query_id) {
         //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
@@ -135,7 +135,7 @@ public class CheckController {
         return new Resource<>(new EvaluationResponse(tweetEvaluation.getEvaluationId()));
     }
 
-    @RequestMapping(value= "/twitter/evaluate", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)
     public void corsHeadersEvaluate(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
