@@ -40,7 +40,7 @@ public class ResponseController {
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
         log.debug("Response received with transaction_id: {}", transaction_id);
         CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
-        CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getModuleTransaction(transaction_id);
+        CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getAndDeleteModuleTransaction(transaction_id);
         responseHandler.responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());
         return ResponseEntity.ok().build();
     };

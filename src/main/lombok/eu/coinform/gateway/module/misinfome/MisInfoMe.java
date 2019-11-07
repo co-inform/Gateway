@@ -1,7 +1,6 @@
 package eu.coinform.gateway.module.misinfome;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.coinform.gateway.config.MisinfoMeContent;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
@@ -10,9 +9,11 @@ import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
@@ -35,16 +36,17 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
      * @param url url of the server ie www.example.com
      * @param baseEndpoint is the endpoint where the API "starts" ie /api/v1
      * @param port port of the server where the API can be called
+     * @param standardResponseHandler is the standard response handler function
      */
-    public MisInfoMe(String name, String scheme, String url, String baseEndpoint, int port){
-        super(name,scheme,url,baseEndpoint,port);
+    public MisInfoMe(String name, String scheme, String url, String baseEndpoint, int port, BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler){
+        super(name,scheme,url,baseEndpoint,port, standardResponseHandler);
 
         tweetFuncList = new ArrayList<>();
         // Adding functional object for a tweet to the tweetFuncList
         tweetFuncList.add((tweet) -> {
             ModuleRequest request = null;
             MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
-            log.debug("send post with content: {}", content.toString());
+            log.debug("send post Misinfome tweet, query_id: {}", tweet.getQueryId());
             try {
                 request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/credibility/tweets/"+tweet.getTweetId())
@@ -67,6 +69,7 @@ public class MisInfoMe extends Module implements TwitterTweetRequestInterface, T
             ModuleRequest request = null;
             try {
                 MisinfoMeContent content = new MisinfoMeContent(callbackBaseUrl);
+                log.debug("send post Misinfome twitter_user, query_id: {}", twitterUser.getQueryId());
                 request = getModuleRequestFactory().getRequestBuilder(twitterUser.getQueryId())
                         .setPath("/credibility/users")
                         .setContent(content)

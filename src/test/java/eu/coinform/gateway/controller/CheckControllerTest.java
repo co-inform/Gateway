@@ -23,6 +23,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.LinkedHashMap;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,8 +40,8 @@ public class CheckControllerTest {
 
     private ObjectMapper mapper = new ObjectMapper();
     private String jsonTU, jsonTW;
-    private final String tweetId = "1176610391058722816";
-    private final String userId = "25073877";
+    private final Long tweetId = 1189715310766645254L;
+    //private final Long userId = 25073877L;
     private final String screenName = "realDonaldTrump";
     private final String idUrl = "/response/%s";
     private final String tweetUrl = "/twitter/tweet";
@@ -62,7 +63,7 @@ public class CheckControllerTest {
     public void setupTests(){
         JacksonTester.initFields(this, mapper);
         twitterUser.setScreenName(screenName);
-        twitterUser.setUserId(userId);
+        //twitterUser.setUserId(userId);
         log.debug("setupTests: {}", twitterUser.toString());
         tweet.setTweetId(tweetId);
         tweet.setTweetText("Hejbaberiba");
@@ -89,7 +90,7 @@ public class CheckControllerTest {
     public void twitterUser() throws Exception{
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Twitteruser: " + twitterUser.toString());
@@ -119,7 +120,7 @@ public class CheckControllerTest {
     public void twitterTweet() throws Exception{
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Tweet: {}",tweet.toString());
@@ -148,7 +149,7 @@ public class CheckControllerTest {
     public void malformedTwitterUser() throws Exception {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("TwitterUser: {}", twitterUser.toString());
@@ -171,7 +172,7 @@ public class CheckControllerTest {
     public void malformedTwitterTweet() throws Exception {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("TwitterTweet: {}", tweet.toString());
@@ -194,7 +195,7 @@ public class CheckControllerTest {
     public void successfullIdGet() throws Exception{
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         String url = String.format(idUrl, tweet.getQueryId());
@@ -218,7 +219,7 @@ public class CheckControllerTest {
     public void nullIdGet() throws Exception {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         String url = String.format(idUrl, "");
@@ -244,7 +245,7 @@ public class CheckControllerTest {
 
         tweet.setTweetText(null);
         jsonTW = mapper.writeValueAsString(tweet);
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
         Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Tweet: {}",tweet.toString());

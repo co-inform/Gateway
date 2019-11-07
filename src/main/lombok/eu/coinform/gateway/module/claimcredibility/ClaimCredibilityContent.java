@@ -1,4 +1,4 @@
-package eu.coinform.gateway.config;
+package eu.coinform.gateway.module.claimcredibility;
 
 import eu.coinform.gateway.module.ModuleRequestContent;
 

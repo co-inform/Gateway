@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.Async;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * ModuleRequest is the class implemented to perform the actual requests. It extends HttpPost since the
@@ -69,7 +69,7 @@ public class ModuleRequest extends HttpPost {
      */
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    private Function<HttpResponse, HttpResponse> responseHandler;
+    private BiFunction<ModuleRequest, HttpResponse, HttpResponse> responseHandler;
 
     /**
      * An id identifying the actual transaction of a certain request to a module.
@@ -99,6 +99,21 @@ public class ModuleRequest extends HttpPost {
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private String queryId;
+
+    /**
+     * The module the request is querying
+     * -- GETTER --
+     * Get the module
+     *
+     * @return The module
+     * -- SETTER --
+     * Set the module
+     *
+     * @param module The 'module'
+     */
+    @Getter
+    @Setter
+    private Module module;
 
     /**
      *  The class constructor. Takes one parameter that is passed on to the super class
@@ -170,7 +185,7 @@ public class ModuleRequest extends HttpPost {
         } catch (IOException ex) {
             httpResponse = moduleRequestException(ex, "connection problem");
         }
-        httpResponse = getResponseHandler().apply(httpResponse);
+        httpResponse = getResponseHandler().apply(this, httpResponse);
         return httpResponse;
     }
 

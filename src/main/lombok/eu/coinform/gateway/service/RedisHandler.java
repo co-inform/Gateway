@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Redishandler is the main class handling the Redis cache.
@@ -95,7 +96,7 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
-        redisTemplate.opsForValue().set(key, queryResponse);
+        redisTemplate.opsForValue().set(key, queryResponse, 1, TimeUnit.DAYS);
         log.trace("query response, {} -> {}",key, queryResponse);
         return CompletableFuture.completedFuture(queryResponse);
     }
@@ -111,22 +112,8 @@ public class RedisHandler {
      */
     @Async("redisExecutor")
     public CompletableFuture<Boolean> setIfAbsentQueryResponse(String key, QueryResponse queryResponse) {
-        Boolean set = redisTemplate.opsForValue().setIfAbsent(key, queryResponse);
+        Boolean set = redisTemplate.opsForValue().setIfAbsent(key, queryResponse, 1, TimeUnit.DAYS);
         return CompletableFuture.completedFuture(set);
-    }
-
-    /**
-     * setAndGetQueryResponse() takes two parameters, a String holding a key for the particular {@link QueryResponse} and a
-     * {@link QueryResponse} to store in the RedisCache
-     *
-     * @param key the key to stoire in the cache with the QueryResponse
-     * @param queryResponse the QueryResponse to store in the cache wioth the key
-     * @return a {@literal CompletableFuture<QueryResponse>} holding the QueryResponse stored in the cache
-     */
-    @Async("redisExecutor")
-    public CompletableFuture<QueryResponse> setAndGetQueryResponse(String key, QueryResponse queryResponse) {
-        QueryResponse oldQueryResponse = (QueryResponse) redisTemplate.opsForValue().getAndSet(key, queryResponse);
-        return CompletableFuture.completedFuture(oldQueryResponse);
     }
 
     /**
@@ -169,6 +156,7 @@ public class RedisHandler {
                 String.format("%s%s",MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()),
                 moduleTransaction.getModule(),
                 moduleResponse);
+        redisTemplate.expire(String.format("%s%s", MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()), 1, TimeUnit.DAYS);
         return CompletableFuture.completedFuture(moduleResponse);
     }
 
@@ -186,18 +174,19 @@ public class RedisHandler {
     }
 
     /**
-     * getModuleTransaction(String) gets the ModuleTransaction for a certain transactionId.
+     * getModuleTransaction(String) gets the ModuleTransaction for a certain transactionId and deletes it from the cache.
      *
      * @param transactionId String holding the transactionId
      * @return a {@literal CompletableFuture<ModuleTransaction>}
      * @throws NoSuchTransactionIdException when there is no {@link ModuleTransaction} in the Redis cache for the passed transactionId
      */
     @Async("redisExecutor")
-    public CompletableFuture<ModuleTransaction> getModuleTransaction(String transactionId) throws NoSuchTransactionIdException {
+    public CompletableFuture<ModuleTransaction> getAndDeleteModuleTransaction(String transactionId) throws NoSuchTransactionIdException {
         ModuleTransaction moduleTransaction = (ModuleTransaction) redisTemplate.opsForValue().get(transactionId);
         if (moduleTransaction == null) {
             throw new NoSuchTransactionIdException(transactionId);
         }
+        redisTemplate.delete(transactionId);
         return CompletableFuture.completedFuture(moduleTransaction);
     }
 
@@ -211,7 +200,7 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
         log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
-        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction);
+        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.DAYS);
         log.trace("was previously absent: {}", isAbsent);
 
         return CompletableFuture.completedFuture(moduleTransaction);
@@ -266,9 +255,9 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<Long> incrementQueuedResponseCounter(String queryId) {
         log.trace("incrementQueuedResponseCounter {}", queryId);
-        //HashOperations<String, String, Long> opsForHash = redisTemplate.opsForHash();
-        //log.debug("value at qrc: {}", opsForHash.get(queryId, QUEUED_RESPONSE_COUNTER));
-        return CompletableFuture.completedFuture(redisTemplate.opsForValue().increment(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId)));
+        Long ret = redisTemplate.opsForValue().increment(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId));
+        redisTemplate.expire(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId), 1, TimeUnit.DAYS);
+        return CompletableFuture.completedFuture(ret);
     }
 
     @Async("redisExecutor")
@@ -280,7 +269,7 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<Boolean> setHandledResponseCounter(String queryId, Long number) {
         log.trace("setHandledResponseCounter {} {}", queryId, number);
-        redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number);
+        redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number, 1, TimeUnit.DAYS);
         return CompletableFuture.completedFuture(true);
     }
 }

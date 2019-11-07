@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -50,7 +51,7 @@ public class CheckController {
                (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
     }
 
-    @RequestMapping(value= "/twitter/user", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/twitter/user", method = RequestMethod.OPTIONS)
     public void corsHeadersTwitterUser(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -72,7 +73,7 @@ public class CheckController {
     }
 
     //@CrossOrigin("*")
-    @RequestMapping(value= "/twitter/tweet", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/twitter/tweet", method = RequestMethod.OPTIONS)
     public void corsHeadersTweet(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -82,11 +83,11 @@ public class CheckController {
 
 
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
-        log.debug("query received with query_id '{}'", queryObject.getQueryId());
+        log.trace("query received with query_id '{}'", queryObject.getQueryId());
         long start = System.currentTimeMillis();
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
         Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
-                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null)).join();
+                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
@@ -110,16 +111,32 @@ public class CheckController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.GET)
     public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
-        log.debug("query for response reveived with query_id '{}'", query_id);
+        log.trace("query for response reveived with query_id '{}'", query_id);
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         return new Resource<>(queryResponse,
                 linkTo(methodOn(CheckController.class).findById(query_id)).withSelfRel());
     }
 
     //@CrossOrigin("*")
-    @RequestMapping(value= "/response/{query_id}", method=RequestMethod.OPTIONS)
+    @RequestMapping(value = "/response/{query_id}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response, @PathVariable(value = "query_id", required = true) String query_id) {
         //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
+    public Resource<EvaluationResponse> evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+
+        //todo: actually do something with the incoming tweet evaluations
+        return new Resource<>(new EvaluationResponse(tweetEvaluation.getEvaluationId()));
+    }
+
+    @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)
+    public void corsHeadersEvaluate(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");

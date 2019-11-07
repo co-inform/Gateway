@@ -1,4 +1,4 @@
-package eu.coinform.gateway.config;
+package eu.coinform.gateway.module.misinfome;
 
 import eu.coinform.gateway.module.ModuleRequestContent;
 
