@@ -16,15 +16,16 @@ public final class RuleEngineHelper {
      * @param response The ModuleResponse to flatten
      * @param outputMap The map to populate with the flattened map
      * @param baseKey The base of the keys to add
+     * @param divider The dividers added to mark accesses of inner objects
      */
-    public static void flatResponseMap(ModuleResponse response, Map<String, Object> outputMap, String baseKey) {
-        new ResponseParserObject(response.getResponse(), outputMap, baseKey + ".");
+    public static void flatResponseMap(ModuleResponse response, Map<String, Object> outputMap, String baseKey, String divider) {
+        new ResponseParserObject(response.getResponse(), outputMap, baseKey + ".", divider);
     }
 
     private static class ResponseParserObject {
 
         @SuppressWarnings("unchecked") // jacksson data bind will return LinkedHashMap
-        ResponseParserObject(LinkedHashMap<String, Object> jsonObject, Map<String, Object> flatMap, String keyBase) {
+        ResponseParserObject(LinkedHashMap<String, Object> jsonObject, Map<String, Object> flatMap, String keyBase, String divider) {
 
             if(jsonObject == null) {
                 flatMap.put(keyBase.substring(0, keyBase.length() - 1), null);
@@ -35,11 +36,13 @@ public final class RuleEngineHelper {
                 if (entry.getValue() instanceof LinkedHashMap) {
                     new ResponseParserObject((LinkedHashMap<String, Object>) entry.getValue(),
                             flatMap,
-                            String.format("%s%s.", keyBase, entry.getKey().toLowerCase()));
+                            String.format("%s%s%s", keyBase, entry.getKey().toLowerCase(), divider),
+                            divider);
                 } else if (entry.getValue() instanceof ArrayList) {
                     new ResponseParserArray((ArrayList<Object>) entry.getValue(),
                             flatMap,
-                            String.format("%s%s.", keyBase, entry.getKey().toLowerCase()));
+                            String.format("%s%s%s", keyBase, entry.getKey().toLowerCase(), divider),
+                            divider);
                 } else {
                     flatMap.put(String.format("%s%s", keyBase, entry.getKey().toLowerCase()), entry.getValue());
                 }
@@ -50,7 +53,7 @@ public final class RuleEngineHelper {
     private static class ResponseParserArray {
 
         @SuppressWarnings("unchecked") // jacksson data bind will return LinkedHashMap
-        ResponseParserArray(ArrayList<Object> jsonArray, Map<String, Object> flatMap, String keyBase) {
+        ResponseParserArray(ArrayList<Object> jsonArray, Map<String, Object> flatMap, String keyBase, String divider) {
 
             if(jsonArray == null) {
                 flatMap.put(keyBase.substring(0, keyBase.length() - 1), null);
@@ -61,11 +64,13 @@ public final class RuleEngineHelper {
                 if (jsonArray.get(i) instanceof LinkedHashMap) {
                     new ResponseParserObject((LinkedHashMap<String, Object>) jsonArray.get(i),
                             flatMap,
-                            String.format("%s.%d.", keyBase, i));
+                            String.format("%s%s%d%s", keyBase,divider, i, divider),
+                            divider);
                 } else if (jsonArray.get(i) instanceof ArrayList) {
                     new ResponseParserArray((ArrayList<Object>) jsonArray.get(i),
                             flatMap,
-                            String.format("%s.%d.", keyBase, i));
+                            String.format("%s%s%d%s", keyBase, divider, i, divider),
+                            divider);
                 } else {
                     flatMap.put(String.format("%s%d", keyBase, i), jsonArray.get(i));
                 }
