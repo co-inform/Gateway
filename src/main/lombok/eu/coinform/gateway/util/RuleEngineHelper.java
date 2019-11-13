@@ -19,7 +19,7 @@ public final class RuleEngineHelper {
      * @param divider The dividers added to mark accesses of inner objects
      */
     public static void flatResponseMap(ModuleResponse response, Map<String, Object> outputMap, String baseKey, String divider) {
-        new ResponseParserObject(response.getResponse(), outputMap, baseKey + ".", divider);
+        new ResponseParserObject(response.getResponse(), outputMap, baseKey + divider, divider);
     }
 
     private static class ResponseParserObject {

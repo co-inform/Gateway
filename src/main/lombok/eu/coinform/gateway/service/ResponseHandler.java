@@ -6,14 +6,9 @@ import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.util.RuleEngineHelper;
 import lombok.extern.slf4j.Slf4j;
-import model.Credibility;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import rule.engine.Callback;
-import rule.engine.RuleEngine;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -57,10 +52,24 @@ public class ResponseHandler {
 
             for (Map.Entry<String, ModuleResponse> response: moduleResponses.entrySet()) {
                 responseField.put(response.getKey(), response.getValue());
-                RuleEngineHelper.flatResponseMap(response.getValue(), flatResponsesMap, response.getKey(), "_");
+                RuleEngineHelper.flatResponseMap(response.getValue(), flatResponsesMap, response.getKey().toLowerCase(), "_");
             }
 
-            qr.getResponse().put("rule_engine", ruleEngine.evaluateResults(flatResponsesMap));
+            //todo: remove the advanced logging when we are more sure its stable
+            StringBuilder sb = new StringBuilder("{\n");
+            for (Map.Entry<String, Object> vpair: flatResponsesMap.entrySet()) {
+                sb.append("\t");
+                sb.append(vpair.getKey());
+                sb.append(": ");
+                sb.append(vpair.getValue());
+                sb.append("\n");
+            }
+            sb.append("}");
+            log.debug("flatResponsesMap: {}", sb.toString());
+            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponsesMap);
+            log.debug("rule_engine_results:");
+            ruleEngineResult.forEach((key, value) -> log.debug("{}: {}", key, value.toString()));
+            qr.getResponse().put("rule_engine", ruleEngineResult);
 
             redisHandler.setQueryResponse(queryId, qr);
         });

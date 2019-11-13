@@ -1,23 +1,26 @@
 package eu.coinform.gateway.rule_engine;
 
-import eu.coinform.gateway.cache.QueryResponse;
-import model.Credibility;
-import org.springframework.context.annotation.Bean;
-import rule.engine.Callback;
+import model.ModelProperties;
+import rule.engine.RuleEngine;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class PolicyEngineConnector implements RuleEngineConnector {
+    private RuleEngine ruleEngine;
+
+    public PolicyEngineConnector(RuleEngine ruleEngine) {
+        this.ruleEngine = ruleEngine;
+    }
 
     @Override
     public LinkedHashMap<String, Object> evaluateResults(LinkedHashMap<String, Object> results) {
 
-        Callback callback = new Callback() {
-            public HashMap<String, Credibility> module_credibility = new HashMap<>();
-            public Credibility final_credibility = Credibility.not_verifiable_post;
-        };
+        PolicyEngineCallback callback = new PolicyEngineCallback();
 
-        return null;
+        ruleEngine.check(new ModelProperties(results), callback);
+
+        LinkedHashMap<String, Object> ret = new LinkedHashMap<>();
+        ret.put("final_credibility", callback.getFinalCredibility());
+        return ret;
     }
 }

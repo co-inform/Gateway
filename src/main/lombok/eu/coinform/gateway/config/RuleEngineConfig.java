@@ -27,6 +27,6 @@ public class RuleEngineConfig {
 
     @Bean
     public RuleEngineConnector ruleEngineConnector(RuleEngine ruleEngine) {
-        return new PolicyEngineConnector();
+        return new PolicyEngineConnector(ruleEngine);
     }
 }
