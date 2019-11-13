@@ -158,7 +158,7 @@ public class RedisHandler {
                 String.format("%s%s",MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()),
                 moduleTransaction.getModule(),
                 moduleResponse);
-        redisTemplate.expire(String.format("%s%s", MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()), 1, TimeUnit.DAYS);
+        redisTemplate.expire(String.format("%s%s", MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()), 1, TimeUnit.HOURS);
         return CompletableFuture.completedFuture(moduleResponse);
     }
 
