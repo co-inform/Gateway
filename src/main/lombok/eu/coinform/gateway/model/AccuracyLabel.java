@@ -13,4 +13,9 @@ public enum AccuracyLabel {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.name().replaceAll("_", " ");
+    }
+
 }
