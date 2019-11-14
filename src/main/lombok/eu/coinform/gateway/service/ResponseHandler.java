@@ -28,19 +28,12 @@ public class ResponseHandler {
         this.ruleEngine = ruleEngine;
     }
 
-    //todo: Build the policy engine connection
-
     @Async("endpointExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
-        //todo: Aggregate and send the responses to the policy engine
         log.debug("Response from {} to query '{}'", moduleTransaction.getModule(), moduleTransaction.getQueryId());
 
         responseAggregator.addResponse(moduleTransaction.getQueryId());
-
-        //todo: this side-steps the policy engine and put the responses directly to the QueryResponse cache.
         responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
-
-
             QueryResponse qr = redisHandler.getQueryResponse(queryId).join();
             qr.setStatus(QueryResponse.Status.done);
             if (qr.getResponse() == null) {
