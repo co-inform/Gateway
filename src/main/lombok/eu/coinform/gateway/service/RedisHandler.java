@@ -202,7 +202,7 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
         log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
-        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.DAYS);
+        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.HOURS);
         log.trace("was previously absent: {}", isAbsent);
 
         return CompletableFuture.completedFuture(moduleTransaction);
