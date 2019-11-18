@@ -3,6 +3,7 @@ package eu.coinform.gateway.module;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,20 @@ public abstract class Module {
      */
     @Getter
     private String name;
+    /**
+     * The URL user-info.
+     * -- GETTER --
+     * Get the URL user-info.
+     *
+     * @return The Url user-info.
+     * -- SETTER --
+     * Set the URL user-info.
+     *
+     * @param userInfo the URL user-info
+     */
+    @Getter
+    @Setter
+    private String userInfo;
     /**
      * The url of the module
      * -- GETTER --

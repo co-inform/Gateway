@@ -31,6 +31,7 @@ public class ModuleRequestFactory {
         ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(queryId, objectMapper);
         requestBuilder.setScheme(module.getScheme())
                 .setUrl(module.getUrl())
+                .setUserInfo(module.getUserInfo())
                 .setBaseEndpoint(module.getBaseEndpoint())
                 .setPort(module.getPort())
                 .setResponseHandler(module.getStandardResponseHandler())

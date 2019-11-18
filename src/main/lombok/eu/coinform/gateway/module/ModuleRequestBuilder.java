@@ -38,6 +38,7 @@ public class ModuleRequestBuilder {
     private String path;
     private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
     private Module module;
+    private String userInfo;
 
     /**
      * responseHandler is a default implementation of handling a httpResponse which basically means loggin for debug
@@ -209,6 +210,16 @@ public class ModuleRequestBuilder {
     }
 
     /**
+     * Set the URI user-info
+     * @param userInfo the URI user-info
+     * @return this
+     */
+    public ModuleRequestBuilder setUserInfo(String userInfo) {
+        this.userInfo = userInfo;
+        return this;
+    }
+
+    /**
      * build() actually builds the request and returns the finished product
      * @return returns the build request
      * @throws ModuleRequestBuilderException if the URI was not possible to create or the content of the request is empty.
@@ -222,7 +233,7 @@ public class ModuleRequestBuilder {
                 .append("&"));
         URI uri;
         try {
-            uri = new URI(scheme,null, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
+            uri = new URI(scheme, userInfo, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
         } catch (URISyntaxException ex) {
             throw new ModuleRequestBuilderException("Could not create a valid URI " + ex.getMessage());
         }

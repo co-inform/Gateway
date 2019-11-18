@@ -143,7 +143,7 @@ public class RedisHandler {
      * setModuleResponse(String, ModuleResponse) sets the response for a specific transactionId.
      *
      * @param transactionId a String holding the transactionId
-     * @param moduleResponse a {@link ModuleResponse} holding the response to store in the Redis cahce
+     * @param moduleResponse a {@link ModuleResponse} holding the response to store in the Redis cache
      * @return returns a {@literal CompletableFuture<ModuleResponse>}
      * @throws NoSuchTransactionIdException if the parameter ModuleTransaction == null
      */
