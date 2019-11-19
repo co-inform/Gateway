@@ -20,8 +20,6 @@ import java.util.function.Function;
 @Slf4j
 public class ContentAnalysis extends Module implements TwitterTweetRequestInterface {
 
-    //todo: Not done yet. host url needs setting in application-docker.properties
-
     private List<Function<Tweet, ModuleRequest>> tweetFuncList;
 
     /**
