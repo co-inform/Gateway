@@ -51,7 +51,7 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
 
             try {
                 request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                        .setPath("/post/stance")
+                        .setPath("/post/veracity/"+tweet.getTweetId().toString())
                         .setContent(content)
                         .setHeader("accept", "application/json")
                         .build();

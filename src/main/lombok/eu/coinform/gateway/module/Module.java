@@ -8,7 +8,6 @@ import lombok.ToString;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 

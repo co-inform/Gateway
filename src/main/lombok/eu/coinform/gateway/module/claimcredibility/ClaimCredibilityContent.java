@@ -1,10 +1,7 @@
 package eu.coinform.gateway.module.claimcredibility;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.coinform.gateway.module.ModuleRequestContent;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;

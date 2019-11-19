@@ -6,6 +6,7 @@ import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.claimcredibility.ClaimCredibility;
+import eu.coinform.gateway.module.content.ContentAnalysis;
 import eu.coinform.gateway.module.misinfome.MisInfoMe;
 import eu.coinform.gateway.service.RedisHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +44,11 @@ public class ModuleConfig {
                                   @Value("${contentanalysis.server.scheme}") String scheme,
                                   @Value("${contentanalysis.server.url}") String url,
                                   @Value("${contentanalysis.server.base_endpoint}") String baseEndpoint,
-                                  @Value("${contentanalysis.server.port}") int port) {
-        return new ContentAnalysis(name, scheme, url, baseEndpoint, port);
+                                  @Value("${contentanalysis.server.port}") int port,
+                                  BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
+        return new ContentAnalysis(name, scheme, url, baseEndpoint, port, standardResponseHandler);
     }
+
      */
 
     /*
