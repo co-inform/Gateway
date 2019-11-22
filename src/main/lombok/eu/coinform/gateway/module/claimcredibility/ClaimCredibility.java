@@ -1,9 +1,12 @@
 package eu.coinform.gateway.module.claimcredibility;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
+import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
+import eu.coinform.gateway.module.misinfome.MisinfoMeContent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 
@@ -36,8 +39,27 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
         super(name, scheme, url, baseEndpoint, port, standardResponseHandler);
 
         tweetFuncList = new ArrayList<>();
-        // todo: implement functions for requesting to the ClaimCredibility module
-        // tweetFuncList.add((tweet) -> {});
+
+        tweetFuncList.add((tweet) -> {
+            ModuleRequest request = null;
+            ArrayList<ClaimCredibilityTweet> tweets = new ArrayList<>();
+            tweets.add(new ClaimCredibilityTweet(tweet.getTweetId(), tweet.getTweetText()));
+            ClaimCredibilityContent content = new ClaimCredibilityContent(callbackBaseUrl, tweets);
+            log.debug("send post ClaimCredibility tweet, query_id: {}", tweet.getQueryId());
+            try {
+                request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
+                        .setPath("/tweet/claim/credibility")
+                        .setContent(content)
+                        .setHeader("accept", "application/json")
+                        .build();
+
+            } catch (JsonProcessingException ex) {
+                log.error("The tweet object could not be parsed, {}", tweet);
+            } catch (ModuleRequestBuilderException ex) {
+                log.error(ex.getMessage());
+            }
+            return request;
+        });
     }
 
     /**

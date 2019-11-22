@@ -141,7 +141,7 @@ public class RedisHandler {
      * setModuleResponse(String, ModuleResponse) sets the response for a specific transactionId.
      *
      * @param transactionId a String holding the transactionId
-     * @param moduleResponse a {@link ModuleResponse} holding the response to store in the Redis cahce
+     * @param moduleResponse a {@link ModuleResponse} holding the response to store in the Redis cache
      * @return returns a {@literal CompletableFuture<ModuleResponse>}
      * @throws NoSuchTransactionIdException if the parameter ModuleTransaction == null
      */
@@ -156,7 +156,7 @@ public class RedisHandler {
                 String.format("%s%s",MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()),
                 moduleTransaction.getModule(),
                 moduleResponse);
-        redisTemplate.expire(String.format("%s%s", MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()), 1, TimeUnit.DAYS);
+        redisTemplate.expire(String.format("%s%s", MODULE_RESPONSE_PREFIX, moduleTransaction.getQueryId()), 1, TimeUnit.HOURS);
         return CompletableFuture.completedFuture(moduleResponse);
     }
 
@@ -200,7 +200,7 @@ public class RedisHandler {
     @Async("redisExecutor")
     public CompletableFuture<ModuleTransaction> setModuleTransaction(ModuleTransaction moduleTransaction) {
         log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
-        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.DAYS);
+        Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.HOURS);
         log.trace("was previously absent: {}", isAbsent);
 
         return CompletableFuture.completedFuture(moduleTransaction);

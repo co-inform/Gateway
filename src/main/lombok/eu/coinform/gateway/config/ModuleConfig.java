@@ -5,6 +5,7 @@ import com.google.common.io.CharStreams;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
+import eu.coinform.gateway.module.claimcredibility.ClaimCredibility;
 import eu.coinform.gateway.module.content.ContentAnalysis;
 import eu.coinform.gateway.module.misinfome.MisInfoMe;
 import eu.coinform.gateway.service.RedisHandler;
@@ -43,21 +44,25 @@ public class ModuleConfig {
                                   @Value("${contentanalysis.server.url}") String url,
                                   @Value("${contentanalysis.server.base_endpoint}") String baseEndpoint,
                                   @Value("${contentanalysis.server.port}") int port,
-                                        BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
+                                  BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
         return new ContentAnalysis(name, scheme, url, baseEndpoint, port, standardResponseHandler);
     }
 
     /*
     @Bean
     @Qualifier("claimcredibility")
-    public Module claimcredibilityModule(@Value("${claimcredibility.name}") String name,
+    public Module claimCredibilityModule(@Value("${claimcredibility.name}") String name,
                                          @Value("${claimcredibility.server.scheme}") String scheme,
                                          @Value("${claimcredibility.server.url}") String url,
+                                         @Value("${CLAIM_CRED_USER_INFO}") String userInfo,
                                          @Value("${claimcredibility.server.base_endpoint}") String baseEndpoint,
-                                         @Value("${claimcredibility.server.port}") int port) {
-        return new ClaimCredibility(name, scheme, url, baseEndpoint, port);
+                                         @Value("${claimcredibility.server.port}") int port,
+                                         BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
+        ClaimCredibility cc = new ClaimCredibility(name, scheme, url, baseEndpoint, port, standardResponseHandler);
+        cc.setUserInfo(userInfo);
+        return cc;
     }
-    */
+     */
 
     @Bean
     public BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler(RedisHandler redisHandler) {

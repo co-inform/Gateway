@@ -67,7 +67,7 @@ public class RuleEngineHelperTest {
         Map<String, Object> result = new LinkedHashMap<>();
         Map<String, JsonNode> jsonMap = new JsonFlattener(jsonResponse).flatten();
 
-        RuleEngineHelper.flatResponseMap(response, result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(response, result, KEY+".response", ".");
 
         log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
@@ -81,7 +81,7 @@ public class RuleEngineHelperTest {
         Map<String, Object> result = new LinkedHashMap<>();
         Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree("{\"response\": {}}")).flatten();
 
-        RuleEngineHelper.flatResponseMap(mapper.readValue("{\"response\": {}}", ModuleResponse.class), result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(mapper.readValue("{\"response\": {}}", ModuleResponse.class), result, KEY+".response", ".");
 
         log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
@@ -95,7 +95,7 @@ public class RuleEngineHelperTest {
         Map<String, Object> result = new LinkedHashMap<>();
         Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree("{\"response\": null}")).flatten();
 
-        RuleEngineHelper.flatResponseMap(mapper.readValue("{\"response\": null}", ModuleResponse.class), result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(mapper.readValue("{\"response\": null}", ModuleResponse.class), result, KEY+".response", ".");
 
         log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
@@ -110,7 +110,7 @@ public class RuleEngineHelperTest {
         String jsonString ="{\"response\": {\"arr\": [\"test\", null]}}";
         Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree(jsonString)).flatten();
 
-        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response", ".");
 
         log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
@@ -125,7 +125,7 @@ public class RuleEngineHelperTest {
         String jsonString ="{\"response\": {\"arr\": [\"test\", \"hello\"]}}";
         Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree(jsonString)).flatten();
 
-        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response", ".");
 
         log.debug("jsonMap; {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
@@ -140,7 +140,7 @@ public class RuleEngineHelperTest {
         String jsonString ="{\"response\": {\"arr\": []}}";
         Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree(jsonString)).flatten();
 
-        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response", ".");
 
         log.debug("jsonMap: {}", mapper.writeValueAsString(jsonMap));
         log.debug("result: {}", mapper.writeValueAsString(result));
@@ -155,7 +155,7 @@ public class RuleEngineHelperTest {
         String jsonString =" {\"arr\": [\"test\", \"hello\"]}";
         Map<String, JsonNode> jsonMap = new JsonFlattener(mapper.readTree(jsonString)).flatten();
 
-        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response");
+        RuleEngineHelper.flatResponseMap(mapper.readValue(jsonString, ModuleResponse.class), result, KEY+".response", ".");
     }
 
     // Unashamedly nicked from https://stackoverflow.com/questions/58008267/flattening-a-3-level-nested-json-string-in-java

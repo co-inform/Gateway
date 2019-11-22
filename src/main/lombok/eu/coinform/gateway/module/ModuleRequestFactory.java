@@ -1,9 +1,6 @@
 package eu.coinform.gateway.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpResponse;
-
-import java.util.function.BiFunction;
 
 /**
  * ModuleRequestFactory is the factory class responsible for creating ModuleReqeustBuilders
@@ -31,6 +28,7 @@ public class ModuleRequestFactory {
         ModuleRequestBuilder requestBuilder = new ModuleRequestBuilder(queryId, objectMapper);
         requestBuilder.setScheme(module.getScheme())
                 .setUrl(module.getUrl())
+                .setUserInfo(module.getUserInfo())
                 .setBaseEndpoint(module.getBaseEndpoint())
                 .setPort(module.getPort())
                 .setResponseHandler(module.getStandardResponseHandler())

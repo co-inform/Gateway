@@ -82,10 +82,12 @@ public class CheckController {
     }
 
 
+    //todo: known bug. If multiple request are very close to each other in time the gateway can send 2 duplicate queries to the modules.
     private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         log.trace("query received with query_id '{}'", queryObject.getQueryId());
         long start = System.currentTimeMillis();
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
+        //response par is a pair {Existant, queryResponse}. Existant is true is there already exists a query response with the queryId specified
         Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
                 new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();

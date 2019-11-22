@@ -2,18 +2,13 @@ package eu.coinform.gateway.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.springframework.web.util.UriUtils;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +33,7 @@ public class ModuleRequestBuilder {
     private String path;
     private int maxAttempts = DEFAULT_MAX_ATTEMPTS;
     private Module module;
+    private String userInfo;
 
     /**
      * responseHandler is a default implementation of handling a httpResponse which basically means loggin for debug
@@ -209,6 +205,16 @@ public class ModuleRequestBuilder {
     }
 
     /**
+     * Set the URI user-info
+     * @param userInfo the URI user-info
+     * @return this
+     */
+    public ModuleRequestBuilder setUserInfo(String userInfo) {
+        this.userInfo = userInfo;
+        return this;
+    }
+
+    /**
      * build() actually builds the request and returns the finished product
      * @return returns the build request
      * @throws ModuleRequestBuilderException if the URI was not possible to create or the content of the request is empty.
@@ -222,7 +228,7 @@ public class ModuleRequestBuilder {
                 .append("&"));
         URI uri;
         try {
-            uri = new URI(scheme,null, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
+            uri = new URI(scheme, userInfo, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
         } catch (URISyntaxException ex) {
             throw new ModuleRequestBuilderException("Could not create a valid URI " + ex.getMessage());
         }
