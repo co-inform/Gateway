@@ -31,7 +31,7 @@ public class ModuleRequestFactoryTest {
         };
         moduleRequestFactory = new ModuleRequestFactory(module);
         moduleRequestBuilder = moduleRequestFactory.getRequestBuilder(uuid);
-        mrcImplementation = new MRCImplementation("/modules/response/");
+        mrcImplementation = new MRCImplementation("/module/response/");
     }
 
     @Test
@@ -45,7 +45,7 @@ public class ModuleRequestFactoryTest {
         } catch (ModuleRequestBuilderException | JsonProcessingException e){
             log.error(e.getMessage());
         }
-
+        log.debug(moduleRequest.toString());
         assertThat(moduleRequest).isNotNull();
         assertThat(moduleRequest.getQueryId()).isEqualTo(uuid);
     }

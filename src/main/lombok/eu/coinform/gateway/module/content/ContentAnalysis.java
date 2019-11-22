@@ -43,6 +43,7 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
         tweetFuncList = new ArrayList<>();
 
         // adding a Functional object to the list
+        /*
         tweetFuncList.add((tweet) -> {
             ModuleRequest request = null;
             ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
@@ -61,7 +62,7 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
 
             return request;
         });
-
+        */
         // adding a Functional object to the list
         tweetFuncList.add((tweet) -> {
 
