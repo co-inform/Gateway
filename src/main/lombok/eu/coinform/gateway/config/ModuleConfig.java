@@ -48,7 +48,6 @@ public class ModuleConfig {
         return new ContentAnalysis(name, scheme, url, baseEndpoint, port, standardResponseHandler);
     }
 
-    /*
     @Bean
     @Qualifier("claimcredibility")
     public Module claimCredibilityModule(@Value("${claimcredibility.name}") String name,
@@ -62,7 +61,6 @@ public class ModuleConfig {
         cc.setUserInfo(userInfo);
         return cc;
     }
-     */
 
     @Bean
     public BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler(RedisHandler redisHandler) {

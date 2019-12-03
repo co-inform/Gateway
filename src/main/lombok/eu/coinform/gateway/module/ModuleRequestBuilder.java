@@ -228,7 +228,7 @@ public class ModuleRequestBuilder {
                 .append("&"));
         URI uri;
         try {
-            uri = new URI(scheme, userInfo, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
+            uri = new URI(scheme, null, url, port, (baseEndpoint == null ? "": baseEndpoint) + path, sb.length() == 0 ? null : sb.substring(0, sb.length()-1), null);
         } catch (URISyntaxException ex) {
             throw new ModuleRequestBuilderException("Could not create a valid URI " + ex.getMessage());
         }

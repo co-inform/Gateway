@@ -6,7 +6,6 @@ import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
-import eu.coinform.gateway.module.misinfome.MisinfoMeContent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 
@@ -46,13 +45,16 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             tweets.add(new ClaimCredibilityTweet(tweet.getTweetId(), tweet.getTweetText()));
             ClaimCredibilityContent content = new ClaimCredibilityContent(callbackBaseUrl, tweets);
             log.debug("send post ClaimCredibility tweet, query_id: {}", tweet.getQueryId());
+  //          log.debug("userinfo {}", this.getUserInfo());
             try {
                 request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/tweet/claim/credibility")
                         .setContent(content)
                         .setHeader("accept", "application/json")
+                        .setHeader("Authorization", this.getUserInfo())
                         .build();
 
+//                log.debug("headers: {}", request.getHeaders("Authorization")[0]);
             } catch (JsonProcessingException ex) {
                 log.error("The tweet object could not be parsed, {}", tweet);
             } catch (ModuleRequestBuilderException ex) {
