@@ -1,7 +1,7 @@
 package eu.coinform.gateway.model;
 
 public enum AccuracyLabel {
-    accurate, accurate_with_considerations, unsubstantiated, inaccurate_with_considerations, inaccurate, not_verifiable;
+    credible, mostly_credible, credibility_uncertain, mostly_not_credible, not_credible, not_verifiable;
 
     static public AccuracyLabel parseString(String string) throws IllegalArgumentException, NullPointerException {
         try {
