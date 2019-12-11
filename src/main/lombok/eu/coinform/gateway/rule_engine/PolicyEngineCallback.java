@@ -29,6 +29,9 @@ public class PolicyEngineCallback implements Callback {
             cred_sum += cred.ordinal();
             cred_count++;
         }
-        return Credibility.values()[cred_sum/cred_count];
+        if(cred_count > 0)
+           return Credibility.values()[cred_sum/cred_count];
+
+        return Credibility.not_verifiable_post;
     }
 }
