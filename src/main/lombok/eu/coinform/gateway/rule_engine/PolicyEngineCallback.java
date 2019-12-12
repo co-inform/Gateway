@@ -23,6 +23,10 @@ public class PolicyEngineCallback implements Callback {
     }
 
     public Credibility averageCredibility(Collection<Credibility> credibilityLabels) {
+        return credibilityLabels.size() > 0 ?
+                Credibility.values()[credibilityLabels.stream().mapToInt(Enum::ordinal).sum() / credibilityLabels.size()]
+                : Credibility.not_verifiable_post;
+/*
         int cred_sum = 0;
         int cred_count = 0;
         for (Credibility cred : credibilityLabels) {
@@ -33,5 +37,6 @@ public class PolicyEngineCallback implements Callback {
            return Credibility.values()[cred_sum/cred_count];
 
         return Credibility.not_verifiable_post;
+        */
     }
 }
