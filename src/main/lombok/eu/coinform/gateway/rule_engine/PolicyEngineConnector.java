@@ -1,6 +1,7 @@
 package eu.coinform.gateway.rule_engine;
 
 import model.ModelProperties;
+import rule.engine.PolicyEngineCallback;
 import rule.engine.RuleEngine;
 
 import java.util.LinkedHashMap;
