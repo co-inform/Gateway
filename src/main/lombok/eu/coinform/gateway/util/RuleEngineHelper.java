@@ -36,17 +36,21 @@ public final class RuleEngineHelper {
                 if (entry.getValue() instanceof LinkedHashMap) {
                     new ResponseParserObject((LinkedHashMap<String, Object>) entry.getValue(),
                             flatMap,
-                            String.format("%s%s%s", keyBase, entry.getKey().toLowerCase(), divider),
+                            String.format("%s%s%s", keyBase, nameReformatter(entry.getKey()), divider),
                             divider);
                 } else if (entry.getValue() instanceof ArrayList) {
                     new ResponseParserArray((ArrayList<Object>) entry.getValue(),
                             flatMap,
-                            String.format("%s%s%s", keyBase, entry.getKey().toLowerCase(), divider),
+                            String.format("%s%s%s", keyBase, nameReformatter(entry.getKey()), divider),
                             divider);
                 } else {
-                    flatMap.put(String.format("%s%s", keyBase, entry.getKey().toLowerCase()), entry.getValue());
+                    flatMap.put(String.format("%s%s", keyBase, nameReformatter(entry.getKey())), entry.getValue());
                 }
             }
+        }
+
+        private String nameReformatter(String name) {
+            return name.toLowerCase().replaceAll("-", "_");
         }
     }
 
