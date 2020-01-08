@@ -5,6 +5,7 @@ import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
+import eu.coinform.gateway.module.ModuleRequestException;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,7 @@ public class CheckHandler {
         for (Module module: moduleList) {
             log.trace("handle for module: {} -> {}", module.getName(), module);
             if(module instanceof TwitterTweetRequestInterface){
+                log.trace("making tweet requests for {}", module.getName());
                 ((TwitterTweetRequestInterface) module)
                         .tweetRequest() // call the implemented method to get a list of Functional objects
                         .forEach((func) -> {
@@ -75,7 +77,12 @@ public class CheckHandler {
                             redisHandler.setModuleTransaction(new ModuleTransaction(moduleRequest.getTransactionId(),
                                     module.getName(),
                                     moduleRequest.getQueryId()));
-                            moduleRequest.makeRequest(); // make the request as specified by the function
+                            try {
+                                moduleRequest.makeRequest(); // make the request as specified by the function
+                            } catch (ModuleRequestException ex) {
+                                log.error("failed request to {}: {}", module.getName(), ex.getMessage());
+                                redisHandler.getAndDeleteModuleTransaction(moduleRequest.getTransactionId());
+                            }
                         });
             }
         }
