@@ -64,12 +64,12 @@ public final class RuleEngineHelper {
                 if (jsonArray.get(i) instanceof LinkedHashMap) {
                     new ResponseParserObject((LinkedHashMap<String, Object>) jsonArray.get(i),
                             flatMap,
-                            String.format("%s%s%d%s", keyBase,divider, i, divider),
+                            String.format("%s%d%s", keyBase, i, divider),
                             divider);
                 } else if (jsonArray.get(i) instanceof ArrayList) {
                     new ResponseParserArray((ArrayList<Object>) jsonArray.get(i),
                             flatMap,
-                            String.format("%s%s%d%s", keyBase, divider, i, divider),
+                            String.format("%s%d%s", keyBase, i, divider),
                             divider);
                 } else {
                     flatMap.put(String.format("%s%d", keyBase, i), jsonArray.get(i));
