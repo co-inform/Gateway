@@ -19,7 +19,6 @@ import java.util.LinkedHashMap;
 @ToString
 @EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
-//@JsonFilter("QRDebug")
 public class QueryResponse implements Serializable {
 
     /**
