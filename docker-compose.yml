@@ -8,8 +8,6 @@ services:
       - "8080:8080"
     deploy:
       replicas: 1
-      restart_policy:
-        condition: on-failure
   redis:
     image: redis
     volumes:
@@ -19,5 +17,3 @@ services:
     deploy:
       placement:
         constraints: [node.role == manager]
-
-

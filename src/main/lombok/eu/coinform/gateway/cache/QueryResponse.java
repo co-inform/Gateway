@@ -1,7 +1,9 @@
 package eu.coinform.gateway.cache;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -17,6 +19,7 @@ import java.util.LinkedHashMap;
 @ToString
 @EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonFilter("QRDebug")
 public class QueryResponse implements Serializable {
 
     /**
@@ -28,6 +31,7 @@ public class QueryResponse implements Serializable {
      */
     @Getter
     @JsonProperty("query_id")
+    @JsonView(Views.NoDebug.class)
     private String queryId;
     /**
      * The {@link Status} of the query
@@ -42,6 +46,7 @@ public class QueryResponse implements Serializable {
      */
     @Setter
     @Getter
+    @JsonView(Views.NoDebug.class)
     private Status status;
     /**
      * The response to give to the users why query the gateway.
@@ -56,6 +61,7 @@ public class QueryResponse implements Serializable {
      */
     @Getter
     @Setter
+    @JsonView(Views.NoDebug.class)
     private LinkedHashMap<String, Object> response = new LinkedHashMap<>();
     /**
      * The request code from the module on the http request
@@ -66,6 +72,7 @@ public class QueryResponse implements Serializable {
      * @return The latest response or null if no response is produced yet
      */
     @Getter
+    @JsonView(Views.Debug.class)
     private LinkedHashMap<String, Object> module_response_code = new LinkedHashMap<>();
 
     /**

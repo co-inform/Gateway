@@ -1,5 +1,5 @@
 FROM openjdk:11-jre
-
+r
 VOLUME /tmp
 ARG JAR_FILE
 COPY ${JAR_FILE} gateway.jar
