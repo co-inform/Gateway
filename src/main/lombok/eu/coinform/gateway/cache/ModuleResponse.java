@@ -1,5 +1,6 @@
 package eu.coinform.gateway.cache;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -24,6 +25,7 @@ public class ModuleResponse implements Serializable {
      */
     @Getter
     @NotEmpty(message = "The Module Response must contain an response object")
+    @JsonView(Views.Debug.class)
     private LinkedHashMap<String, Object> response;
 
 }
