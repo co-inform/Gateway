@@ -1,12 +1,6 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
@@ -21,11 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.util.LinkedHashMap;
-import java.util.Optional;
 import java.util.function.Consumer;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * The REST Controller defining the endpoints facing towards the users
@@ -35,15 +26,15 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class CheckController {
 
     //todo: remove assembler completely once everything works.
-    private final QueryResponseAssembler assembler;
+//    private final QueryResponseAssembler assembler;
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
 
     CheckController(RedisHandler redisHandler,
-                    QueryResponseAssembler assembler,
+//                    QueryResponseAssembler assembler,
                     CheckHandler checkHandler) {
         this.redisHandler = redisHandler;
-        this.assembler = assembler;
+//        this.assembler = assembler;
         this.checkHandler = checkHandler;
     }
 
