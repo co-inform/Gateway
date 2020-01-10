@@ -25,16 +25,12 @@ import java.util.function.Consumer;
 @Slf4j
 public class CheckController {
 
-    //todo: remove assembler completely once everything works.
-//    private final QueryResponseAssembler assembler;
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
 
     CheckController(RedisHandler redisHandler,
-//                    QueryResponseAssembler assembler,
                     CheckHandler checkHandler) {
         this.redisHandler = redisHandler;
-//        this.assembler = assembler;
         this.checkHandler = checkHandler;
     }
 
