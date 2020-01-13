@@ -62,6 +62,7 @@ public class CheckController {
      */
     //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
+    @JsonView(Views.NoDebug.class)
     @PostMapping("/twitter/tweet")
     public QueryResponse twitterTweet(@Valid @RequestBody Tweet tweet) {
         return queryEndpoint(tweet,
