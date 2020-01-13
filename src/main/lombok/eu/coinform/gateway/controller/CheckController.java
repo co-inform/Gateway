@@ -140,7 +140,7 @@ public class CheckController {
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
 
-        log.debug("findById: {}", queryResponse);
+        log.trace("findById: {}", queryResponse);
 
         return queryResponse;
     }
