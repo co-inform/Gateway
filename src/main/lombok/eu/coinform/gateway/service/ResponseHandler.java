@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -47,19 +48,28 @@ public class ResponseHandler {
                 responseField.put(response.getKey(), response.getValue());
                 RuleEngineHelper.flatResponseMap(response.getValue(), flatResponsesMap, response.getKey().toLowerCase(), "_");
             }
+            qr.setFlattenedModuleResponses(flatResponsesMap);
 
-            //todo: remove the advanced logging when we are more sure its stable
-            StringBuilder sb = new StringBuilder("{\n");
-            for (Map.Entry<String, Object> vpair: flatResponsesMap.entrySet()) {
-                sb.append("\t");
-                sb.append(vpair.getKey());
-                sb.append(": ");
-                sb.append(vpair.getValue());
-                sb.append("\n");
+            if (log.isTraceEnabled()) {
+                StringBuilder sb = new StringBuilder("{\n");
+                for (Map.Entry<String, Object> vpair : flatResponsesMap.entrySet()) {
+                    sb.append("\t");
+                    sb.append(vpair.getKey());
+                    sb.append(": ");
+                    sb.append(vpair.getValue());
+                    sb.append("\n");
+                }
+                sb.append("}");
+                log.trace("flatResponsesMap: {}", sb.toString());
             }
-            sb.append("}");
-            log.debug("flatResponsesMap: {}", sb.toString());
-            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponsesMap, moduleResponses.keySet());
+            LinkedHashMap<String, Object> ruleEngineResult =
+                    ruleEngine.evaluateResults(
+                            flatResponsesMap,
+                            moduleResponses
+                                    .keySet()
+                                    .stream()
+                                    .map(String::toLowerCase)
+                                    .collect(Collectors.toSet()));
             log.debug("rule_engine_results:");
             ruleEngineResult.forEach((key, value) -> log.debug("{}: {}", key, value.toString()));
             qr.getResponse().put("rule_engine", ruleEngineResult);

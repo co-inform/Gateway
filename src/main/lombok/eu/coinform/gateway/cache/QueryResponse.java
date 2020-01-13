@@ -57,21 +57,35 @@ public class QueryResponse implements Serializable {
      *
      * @param response The response to set
      */
-    @Getter
     @Setter
+    @Getter
     @JsonView(Views.NoDebug.class)
     private LinkedHashMap<String, Object> response = new LinkedHashMap<>();
     /**
      * The request code from the module on the http request
-     * @param module_response_code The response to set
      * -- GETTER --
      * Get the request code
      *
      * @return The latest response or null if no response is produced yet
      */
     @Getter
+    @JsonProperty("module_response_code")
     @JsonView(Views.Debug.class)
-    private LinkedHashMap<String, Object> module_response_code = new LinkedHashMap<>();
+    private LinkedHashMap<String, Object> moduleResponseCode = new LinkedHashMap<>();
+    /**
+     * The flattened modules responses map.
+     * -- SETTER --
+     * Set the flattened responses map
+     * @param flattenedModuleResponses the map of the flattened module responses to set
+     * -- GETTER --
+     * Get the flattened responses map
+     * @return the flattened module responses.
+     */
+    @Getter
+    @Setter
+    @JsonProperty("flattened_module_responses")
+    @JsonView(Views.Debug.class)
+    private LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap<>();
 
     /**
      * The status states for queries to the gateway server.

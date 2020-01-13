@@ -86,7 +86,7 @@ public class CheckController {
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
         //response par is a pair {Existant, queryResponse}. Existant is true is there already exists a query response with the queryId specified
         Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
-                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>())).join();
+                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
@@ -116,7 +116,7 @@ public class CheckController {
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
 
-        log.debug("findById: {}", queryResponse);
+        log.trace("findById: {}", queryResponse);
         return queryResponse;
     }
 
