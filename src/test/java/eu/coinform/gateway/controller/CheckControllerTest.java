@@ -4,9 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import eu.coinform.gateway.cache.QueryResponse;
-import eu.coinform.gateway.model.QueryResponseAssembler;
+import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
+import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,11 +42,11 @@ public class CheckControllerTest {
     private ObjectMapper mapper = new ObjectMapper();
     private String jsonTU, jsonTW;
     private final Long tweetId = 1189715310766645254L;
-    //private final Long userId = 25073877L;
     private final String screenName = "realDonaldTrump";
     private final String idUrl = "/response/%s";
     private final String tweetUrl = "/twitter/tweet";
     private final String userUrl = "/twitter/user";
+    private final String debugUrl = idUrl + "/debog";
     final Function<StackWalker, String> methodName = s -> s.walk(sfs -> sfs.skip(1).findFirst().get().getMethodName());
 
     @MockBean
@@ -54,7 +55,6 @@ public class CheckControllerTest {
     private TwitterUser twitterUser = new TwitterUser();
     private Tweet tweet = new Tweet();
     private JacksonTester<Resource<QueryResponse>> jsonTester;
-    private QueryResponseAssembler queryResponseAssembler = new QueryResponseAssembler();
 
     @Autowired
     private MockMvc mockMvc;
@@ -91,14 +91,11 @@ public class CheckControllerTest {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Twitteruser: " + twitterUser.toString());
-        assertThat(queryResorce).isNotNull();
 
         // given
-        given(checkController.twitterUser(Mockito.any(TwitterUser.class)))
-                .willReturn(queryResorce);
+        given(checkController.twitterUser(Mockito.any(TwitterUser.class))).willReturn(queryResponse);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(userUrl)
@@ -109,7 +106,6 @@ public class CheckControllerTest {
 
         // then
         log.debug("Response {}", response.getContentAsString());
-        log.debug("checkResource: {}", jsonTester.write(queryResorce).getJson());
         QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -121,13 +117,11 @@ public class CheckControllerTest {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("Tweet: {}",tweet.toString());
-        assertThat(queryResource).isNotNull();
 
         // given
-        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResource);
+        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResponse);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
@@ -138,7 +132,6 @@ public class CheckControllerTest {
 
         // then
         log.debug("Response: {}", response.getContentAsString());
-        log.debug("checkResource: {}", jsonTester.write(queryResource).getJson());
         QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -150,13 +143,11 @@ public class CheckControllerTest {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("TwitterUser: {}", twitterUser.toString());
-        assertThat(queryResorce).isNotNull();
 
         // given
-        given(checkController.twitterUser((Mockito.any(TwitterUser.class)))).willReturn(queryResorce);
+        given(checkController.twitterUser((Mockito.any(TwitterUser.class)))).willReturn(queryResponse);
 
         // when
         mockMvc.perform(post(userUrl)
@@ -173,13 +164,11 @@ public class CheckControllerTest {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResorce = queryResponseAssembler.toResource(queryResponse);
 
         log.debug("TwitterTweet: {}", tweet.toString());
-        assertThat(queryResorce).isNotNull();
 
         // given
-        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResorce);
+        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResponse);
 
         // when
         mockMvc.perform(post(tweetUrl)
@@ -195,13 +184,13 @@ public class CheckControllerTest {
     public void successfullIdGet() throws Exception{
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
+
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         String url = String.format(idUrl, tweet.getQueryId());
-        assertThat(queryResource).isNotNull();
+
         // given
-        given(checkController.findById(tweet.getQueryId())).willReturn(queryResource);
+        given(checkController.findById(tweet.getQueryId())).willReturn(queryResponse);
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
@@ -210,9 +199,11 @@ public class CheckControllerTest {
 
         QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
 
+        log.debug("Response: {}", response);
+        log.debug("QueryResponse: {}", queryResponse);
         // then
         assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response).isEqualTo(queryResponse);
+        assertThat(response.getModule_response_code().isEmpty()).isTrue();
     }
 
     @Test
@@ -220,14 +211,12 @@ public class CheckControllerTest {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
         QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
 
         String url = String.format(idUrl, "");
-        assertThat(queryResource).isNotNull();
-
         log.debug("url: {}", url);
+
         // given
-        given(checkController.findById("")).willReturn(queryResource);
+        given(checkController.findById("")).willReturn(queryResponse);
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
@@ -246,13 +235,12 @@ public class CheckControllerTest {
         tweet.setTweetText(null);
         jsonTW = mapper.writeValueAsString(tweet);
         QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
-        Resource<QueryResponse> queryResource = queryResponseAssembler.toResource(queryResponse);
+        String jw = mapper.writeValueAsString(queryResponse);
 
         log.debug("Tweet: {}",tweet.toString());
-        assertThat(queryResource).isNotNull();
 
         // given
-        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResource);
+        given(checkController.twitterTweet(Mockito.any(Tweet.class))).willReturn(queryResponse);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
@@ -263,7 +251,6 @@ public class CheckControllerTest {
 
         // then
         log.debug("Response: {}", response.getContentAsString());
-        log.debug("checkResource: {}", jsonTester.write(queryResource).getJson());
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         try {
@@ -271,6 +258,70 @@ public class CheckControllerTest {
         } catch (MismatchedInputException e){
             assertThat(true).isTrue();
         }
+    }
 
+    @Test
+    public void noDebugJsonTest() throws Exception{
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+
+        LinkedHashMap<String, Object> mResponse = new LinkedHashMap<>();
+        mResponse.put("first", Pair.of("hej", "då"));
+        mResponse.put("second", Pair.of("då", "hej"));
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, mResponse);
+
+        String jw = mapper.writerWithView(Views.NoDebug.class).writeValueAsString(queryResponse);
+        String url = String.format(idUrl, tweet.getQueryId());
+        log.debug("QR: {}", queryResponse);
+        log.debug("Url: {}", url);
+        log.debug("jw: {}", jw);
+
+        // given
+        given(checkController.findById(tweet.getQueryId())).willReturn(queryResponse);
+
+        // when
+        MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn().getResponse();
+
+        QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
+        log.debug("Response: {}", httpResponse.getContentAsString());
+
+        // then
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getModule_response_code().size()).isEqualTo(0);
+        assertThat(response.getModule_response_code().get("first")).isNull();
+    }
+
+    @Test
+    public void debugJsonTest() throws Exception{
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+
+        LinkedHashMap<String, Object> mResponse = new LinkedHashMap<>();
+        mResponse.put("first", Pair.of("hej", "då"));
+        mResponse.put("second", Pair.of("då", "hej"));
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, mResponse);
+
+        String jw = mapper.writerWithView(Views.Debug.class).writeValueAsString(queryResponse);
+        String url = String.format(debugUrl, tweet.getQueryId());
+
+        log.debug("QR: {}", queryResponse);
+        log.debug("Url: {}", url);
+        log.debug("jw: {}", jw);
+
+        // given
+        given(checkController.findById(tweet.getQueryId(),"debog")).willReturn(queryResponse);
+
+        // when
+        MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn().getResponse();
+
+        log.debug("Response: {}", httpResponse.getContentAsString());
+        QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
+
+        // then
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getModule_response_code().size()).isEqualTo(2);
+        assertThat(response.getModule_response_code().get("first")).isNotNull();
     }
 }

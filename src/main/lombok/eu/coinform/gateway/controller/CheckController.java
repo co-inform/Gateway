@@ -1,5 +1,7 @@
 package eu.coinform.gateway.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.service.CheckHandler;
@@ -15,8 +17,6 @@ import javax.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * The REST Controller defining the endpoints facing towards the users
@@ -25,16 +25,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Slf4j
 public class CheckController {
 
-    private final QueryResponseAssembler assembler;
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
 
     CheckController(RedisHandler redisHandler,
-                    QueryResponseAssembler assembler,
-                    CheckHandler checkHandler
-    ) {
+                    CheckHandler checkHandler) {
         this.redisHandler = redisHandler;
-        this.assembler = assembler;
         this.checkHandler = checkHandler;
     }
 
@@ -46,7 +42,7 @@ public class CheckController {
     //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
     @PostMapping("/twitter/user")
-    public Resource<QueryResponse> twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
+    public QueryResponse twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
         return queryEndpoint(twitterUser,
                (aTwitterUser) -> checkHandler.twitterUserConsumer((TwitterUser) aTwitterUser));
     }
@@ -67,7 +63,7 @@ public class CheckController {
     //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
     @PostMapping("/twitter/tweet")
-    public Resource<QueryResponse> twitterTweet(@Valid @RequestBody Tweet tweet) {
+    public QueryResponse twitterTweet(@Valid @RequestBody Tweet tweet) {
         return queryEndpoint(tweet,
                 (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet));
     }
@@ -83,7 +79,7 @@ public class CheckController {
 
 
     //todo: known bug. If multiple request are very close to each other in time the gateway can send 2 duplicate queries to the modules.
-    private Resource<QueryResponse> queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
+    private QueryResponse queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         log.trace("query received with query_id '{}'", queryObject.getQueryId());
         long start = System.currentTimeMillis();
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
@@ -96,12 +92,12 @@ public class CheckController {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
             // Like if the cache is older than some threshold it is handled as a new query.
             // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
-            return assembler.toResource(queryResponse);
+            return queryResponse;
         } else if (!responsePair.getKey()) {
             queryObjectConsumer.accept(queryObject);
-            log.trace("{}: query sent of to hander", System.currentTimeMillis() - start);
+            log.trace("{}: query sent of to handler", System.currentTimeMillis() - start);
         }
-        return assembler.toResource(queryResponse);
+        return queryResponse;
     }
 
     /**
@@ -111,17 +107,49 @@ public class CheckController {
      */
     //@CrossOrigin(origins = "https://twitter.com, chrome-extension://kodmajniflhcofdbnfjpkgimbmkpgend")
     @CrossOrigin(origins = "*")
+    @JsonView(Views.NoDebug.class)
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.GET)
-    public Resource<QueryResponse> findById(@PathVariable(value = "query_id", required = true) String query_id) {
-        log.trace("query for response reveived with query_id '{}'", query_id);
+    public QueryResponse findById(@PathVariable(value = "query_id", required = true) String query_id) {
+
+        log.trace("query for response received with query_id '{}'", query_id);
+
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
-        return new Resource<>(queryResponse,
-                linkTo(methodOn(CheckController.class).findById(query_id)).withSelfRel());
+
+        log.debug("findById: {}", queryResponse);
+        return queryResponse;
     }
 
     //@CrossOrigin("*")
+    @JsonView(Views.NoDebug.class)
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response, @PathVariable(value = "query_id", required = true) String query_id) {
+        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @CrossOrigin(origins = "*")
+    @JsonView(Views.Debug.class)
+    @RequestMapping(value = "/response/{query_id}/{debug}", method = RequestMethod.GET)
+    public QueryResponse findById(@PathVariable(value = "query_id", required = true) String query_id, @PathVariable(value = "debug", required = true) String debug) {
+
+        log.trace("query for response received with query_id '{}'", query_id);
+
+        QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
+
+        log.debug("findById: {}", queryResponse);
+
+        return queryResponse;
+    }
+
+    //@CrossOrigin("*")
+    @JsonView(Views.Debug.class)
+    @RequestMapping(value = "/response/{query_id}/{debug}", method = RequestMethod.OPTIONS)
+    public void corsHeadersResponse(HttpServletResponse response,
+                                    @PathVariable(value = "query_id", required = true) String query_id,
+                                    @PathVariable(value = "debug", required = true) String debug) {
         //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
