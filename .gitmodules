@@ -1,3 +1,3 @@
 [submodule "policy_manager"]
 	path = policy_manager
-	url = https://github.com/isspek/policy_manager.git
+	url = https://github.com/co-inform/policy_manager.git
