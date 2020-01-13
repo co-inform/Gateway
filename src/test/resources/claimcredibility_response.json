@@ -1,0 +1,105 @@
+{
+  "response": {
+    "tweet-claim-credibility": [
+      {
+        "tweet_id": 1178504740558163968,
+        "sentences_in_tweet": [
+          {
+            "claim": "Hundreds of scientists, engineers tell U.N.: 'There is no climate emergency' http://bit.ly/2onUUU1",
+            "related_claims": {
+              "reviewed-claims": [],
+              "fact-checker-sentences": [],
+              "credible-pub-sentences": [],
+              "non-credible-pub-sentences": [
+                {
+                  "sentence": "Over 500 Scientists Assure UN’s Guterres, ‘There Is No Climate Emergency’",
+                  "domain": "larouchepub.com",
+                  "similarity": 0.9318794177362368,
+                  "doc_url": "https://larouchepub.com/pr/2019/190925_no_climate_emergency.html",
+                  "coinform_collection": "fc-dev",
+                  "lang_orig": "en",
+                  "published_date": "2019-10-03T22:59:15.905Z",
+                  "claimspot_score": 0.5150278929349053,
+                  "domain_credibility": {
+                    "credibility": {
+                      "confidence": 0.06,
+                      "value": 0.16,
+                      "source": "domain",
+                      "domainReviewed": "larouchepub.com"
+                    },
+                    "itemReviewed": "larouchepub.com"
+                  },
+                  "similarity_credibility": {
+                    "value": 0.16,
+                    "confidence": 0.05591276506417421,
+                    "explanation": "Claim is very similar to:\n\n * Over 500 Scientists Assure UN’s Guterres, ‘There Is No Climate Emergency’\nthat was published in a site (larouchepub.com) that is mostly reliable. "
+                  }
+                },
+                {
+                  "sentence": "Over 500 Scientists Assure UN’s Guterres, ‘There Is No Climate Emergency’\n",
+                  "domain": "larouchepub.com",
+                  "similarity": 0.9318794177362368,
+                  "doc_url": "https://larouchepub.com/pr/2019/190925_no_climate_emergency.html",
+                  "coinform_collection": "fc-dev",
+                  "lang_orig": "en",
+                  "published_date": "2019-10-03T22:59:15.905Z",
+                  "claimspot_score": 0.517022419980991,
+                  "domain_credibility": {
+                    "credibility": {
+                      "confidence": 0.06,
+                      "value": 0.16,
+                      "source": "domain",
+                      "domainReviewed": "larouchepub.com"
+                    },
+                    "itemReviewed": "larouchepub.com"
+                  },
+                  "similarity_credibility": {
+                    "value": 0.16,
+                    "confidence": 0.05591276506417421,
+                    "explanation": "Claim is very similar to:\n\n * Over 500 Scientists Assure UN’s Guterres, ‘There Is No Climate Emergency’\n\nthat was published in a site (larouchepub.com) that is mostly reliable. "
+                  }
+                },
+                {
+                  "sentence": "500 Scientists to UN: ‘There is NO Climate Emergency’",
+                  "domain": "principia-scientific.org",
+                  "similarity": 0.9314538335435278,
+                  "doc_url": "https://principia-scientific.org/500-scientists-to-un-there-is-no-climate-emergency/",
+                  "coinform_collection": "fc-dev",
+                  "lang_orig": "en",
+                  "published_date": "2019-10-04T12:11:25.222Z",
+                  "claimspot_score": 0.4355719397056447,
+                  "domain_credibility": {
+                    "credibility": {
+                      "confidence": 0.3409090909090909,
+                      "value": -0.56,
+                      "source": "domain",
+                      "domainReviewed": "principia-scientific.org"
+                    },
+                    "itemReviewed": "principia-scientific.org"
+                  },
+                  "similarity_credibility": {
+                    "value": -0.56,
+                    "confidence": 0.31754107961711175,
+                    "explanation": "Claim is very similar to:\n\n * 500 Scientists to UN: ‘There is NO Climate Emergency’\nthat was published in a site (principia-scientific.org) that is unreliable. ",
+                    "source": "credibility of related claims (3)"
+                  }
+                }
+              ]
+            },
+            "credibility": {
+              "value": -0.56,
+              "confidence": 0.31754107961711175,
+              "explanation": "Claim is very similar to:\n\n * 500 Scientists to UN: ‘There is NO Climate Emergency’\nthat was published in a site (principia-scientific.org) that is unreliable. ",
+              "source": "credibility of related claims (3)"
+            }
+          }
+        ],
+        "sentences_linked": [],
+        "credibility": 0.0,
+        "confidence": 0.0,
+        "credibility_label": "not verifiable",
+        "explanation": "Could not assess credibility of 1 sentences in the tweet and 0 sentences in linked documents with sufficient confidence"
+      }
+    ]
+  }
+}

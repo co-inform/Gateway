@@ -59,7 +59,7 @@ public class ResponseHandler {
             }
             sb.append("}");
             log.debug("flatResponsesMap: {}", sb.toString());
-            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponsesMap);
+            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponsesMap, moduleResponses.keySet());
             log.debug("rule_engine_results:");
             ruleEngineResult.forEach((key, value) -> log.debug("{}: {}", key, value.toString()));
             qr.getResponse().put("rule_engine", ruleEngineResult);

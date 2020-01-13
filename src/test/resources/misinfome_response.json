@@ -1,0 +1,391 @@
+{
+  "response": {
+    "credibility": {
+      "value": 0.16459850107066382,
+      "confidence": 0.1250892857142857
+    },
+    "profile_as_source_credibility": {
+      "credibility": {
+        "value": 0,
+        "confidence": 0
+      }
+    },
+    "sources_credibility": {
+      "credibility": {
+        "value": 0.1645985010706638,
+        "confidence": 0.8339285714285715
+      },
+      "assessments": [
+        {
+          "itemReviewed": "washingtontimes.com",
+          "credibility": {
+            "value": 0.1645985010706638,
+            "confidence": 0.8339285714285715
+          },
+          "tweets_containing": [
+            "1178504740558163968"
+          ],
+          "url": "/misinfo/credibility/sources/washingtontimes.com",
+          "credibility_weight": 1,
+          "weights": {
+            "final_weight": 0.8339285714285715
+          },
+          "assessments": [
+            {
+              "origin_id": "ntt",
+              "origin": {
+                "id": "ntt",
+                "origin_type": "batch",
+                "weight": 9.0,
+                "homepage": "https://www.newsroomtransparencytracker.com/",
+                "assessments_count": 104,
+                "name": "Newsroom Transparency Tracker",
+                "description": "The Newsroom Transparency Tracker shares the information published by media outlets with respect to four Trust Indicators, transparency standards that provide clarity on a media outlet’s ethics codes and related commitments, how it does its work, and the expertise of its journalists. Developed collaboratively by over 100 senior news executives within the Trust Project network, Trust Indicators are rooted in core journalistic values and based on in-depth research capturing what the public trusts and wants in news.",
+                "logo": "https://www.newsroomtransparencytracker.com/wp-content/uploads/2019/04/NTT_regular.png"
+              },
+              "url": "https://www.newsroomtransparencytracker.com/",
+              "credibility": {
+                "value": -0.1333333333333333,
+                "confidence": 1.0
+              },
+              "itemReviewed": "washingtontimes.com",
+              "original": {
+                "id": "42",
+                "Newsroom": "Washington Times",
+                "Ethics Policy": "None",
+                "Ownership/ Funding": "None",
+                "Mission/ Coverage Priorities": "None",
+                "Verification/ Fact-checking": "None",
+                "Corrections Policy": "Partial",
+                "Unnamed Sources Policy": "None",
+                "Masthead/ Leadership": "Full",
+                "Founding Date": "Full",
+                "Newsroom Contact Info": "Full",
+                "Author/ Reporter Bios": "Full",
+                "Byline Attribution": "Full",
+                "Type of Work Labels": "Full",
+                "Diverse Voices Statement": "None",
+                "Diverse Staffing Report": "None",
+                "Trust Project Partner": "None",
+                "reportanissue": null
+              },
+              "domain": "washingtontimes.com",
+              "source": "washingtontimes.com",
+              "granularity": "source",
+              "weights": {
+                "origin_weight": 9,
+                "final_weight": 9.0
+              }
+            },
+            {
+              "origin_id": "adfontesmedia",
+              "origin": {
+                "id": "adfontesmedia",
+                "origin_type": "batch",
+                "weight": 1.0,
+                "homepage": "https://www.adfontesmedia.com/",
+                "assessments_count": 2217,
+                "name": "Ad Fontes Media",
+                "description": "Navigate the News Landscape and Contribute to a Healthy Democracy.",
+                "logo": "https://www.adfontesmedia.com/wp-content/uploads/2018/08/ad-fonts-media-favicon-66x66.png"
+              },
+              "url": "https://www.adfontesmedia.com/",
+              "credibility": {
+                "value": 0.163375,
+                "confidence": 1.0
+              },
+              "itemReviewed": "washingtontimes.com",
+              "original": {
+                "adfontesmedia": {
+                  "negative": [
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/"
+                  ],
+                  "origin_id": "adfontesmedia",
+                  "positive": [
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/"
+                  ]
+                },
+                "overall": {
+                  "negative": [
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/"
+                  ],
+                  "positive": [
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/",
+                    "https://www.adfontesmedia.com/"
+                  ]
+                }
+              },
+              "domain": null,
+              "source": "washingtontimes.com",
+              "granularity": "source",
+              "weights": {
+                "origin_weight": 1,
+                "final_weight": 1.0
+              }
+            },
+            {
+              "origin_id": "factchecking_report",
+              "origin": {
+                "id": "factchecking_report",
+                "origin_type": "batch",
+                "weight": 2.0,
+                "homepage": "http://socsem.kmi.open.ac.uk/misinfo",
+                "assessments_count": 57981,
+                "name": "Fact-check analysis",
+                "description": "From the fact-checks, we retrieve the claim appearances and therefore we evaluate the credibility of the sources involved.",
+                "logo": "http://socsem.kmi.open.ac.uk/misinfo/assets/MisinfoMe-icon-square.png"
+              },
+              "url": "https://www.washingtonexaminer.com/weekly-standard/fact-check-did-a-vice-news-journalist-reveal-some-anti-kavanaugh-protesters-were-paid",
+              "credibility": {
+                "value": 0.0,
+                "confidence": 0.0
+              },
+              "itemReviewed": "washingtontimes.com",
+              "original": {
+                "washingtonexaminer_com": {
+                  "unknown": [
+                    "https://www.washingtonexaminer.com/weekly-standard/fact-check-did-a-vice-news-journalist-reveal-some-anti-kavanaugh-protesters-were-paid"
+                  ],
+                  "origin_id": "washingtonexaminer_com"
+                },
+                "overall": {
+                  "unknown": [
+                    "https://www.washingtonexaminer.com/weekly-standard/fact-check-did-a-vice-news-journalist-reveal-some-anti-kavanaugh-protesters-were-paid"
+                  ]
+                }
+              },
+              "domain": null,
+              "source": "washingtontimes.com",
+              "granularity": "source",
+              "weights": {
+                "origin_weight": 2,
+                "final_weight": 0.0
+              }
+            },
+            {
+              "origin_id": "realorsatire",
+              "origin": {
+                "id": "realorsatire",
+                "origin_type": "batch",
+                "weight": 1.0,
+                "homepage": "https://realorsatire.com",
+                "assessments_count": 530,
+                "name": "Real or Satire",
+                "description": "Tired of sharing an article that filled you with righteous indignation, only to be scolded by your social media circle for posting fake news? Tired of living in constant fear that the ‘news’ you read isn’t actually news? Wish there was a one-stop shop to check if a site is ‘satirical’ or submit a site to be labeled as ‘satire’? Well, now there’s Real or Satire.",
+                "logo": "http://logo.clearbit.com/realorsatire.com"
+              },
+              "url": "https://realorsatire.com/washingtontimes-com/",
+              "credibility": {
+                "value": 1.0,
+                "confidence": 1.0
+              },
+              "itemReviewed": "washingtontimes.com",
+              "original": {
+                "details_url": "https://realorsatire.com/washingtontimes-com/",
+                "domain": "washingtontimes.com",
+                "category_list": [
+                  "real"
+                ],
+                "description": "The Washington Times, not to be confused with The Times, has been around since the early 80s. Many consider it a right-of-center counterpoint to The Washington Post. [Editorial Note: In our haste, we referred to Washington Times as a “left-of-center” when it is, as the rest of this post states, actually considered right-of-center.] The magazine had heavy ties with Republican…"
+              },
+              "domain": "washingtontimes.com",
+              "source": "washingtontimes.com",
+              "granularity": "source",
+              "weights": {
+                "origin_weight": 1,
+                "final_weight": 1.0
+              }
+            },
+            {
+              "origin_id": "newsguard",
+              "origin": {
+                "id": "newsguard",
+                "origin_type": "realtime",
+                "weight": 10.0,
+                "homepage": "https://www.newsguardtech.com/",
+                "assessments_count": 673,
+                "name": "NewsGuard",
+                "description": "NewsGuard uses journalism to fight false news, misinformation, and disinformation. Our trained analysts, who are experienced journalists, research online news brands to help readers and viewers know which ones are trying to do legitimate journalism--and which are not.",
+                "logo": "https://logo.clearbit.com/newsguardtech.com"
+              },
+              "url": "https://api.newsguardtech.com/9B16A7CD0871D31FD6572BF55E1D20AFF09E1590CC44BE057EDC0811E50426BCB8E29C442C51DED4B08B9B9497F36743F68E1EEC36609472",
+              "credibility": {
+                "value": 0.2,
+                "confidence": 1.0
+              },
+              "itemReviewed": "washingtontimes.com",
+              "original": {
+                "id": "d334dad0-89a4-4700-878b-7124a21928e3",
+                "identifier": "washingtontimes.com",
+                "parent": null,
+                "rank": "T",
+                "score": 60.0,
+                "topline": "The website of The Washington Times, a daily national newspaper owned by the Unification Church, publishing conservative news and commentary. The site has not corrected years-old&nbsp;false stories. ",
+                "country": "US",
+                "language": "en",
+                "criteria": [
+                  {
+                    "title": "ownership",
+                    "body": "No",
+                    "order": 0
+                  },
+                  {
+                    "title": "management",
+                    "body": "Yes",
+                    "order": 0
+                  },
+                  {
+                    "title": "newsOpinion",
+                    "body": "No",
+                    "order": 0
+                  },
+                  {
+                    "title": "falseContent",
+                    "body": "Yes",
+                    "order": 0
+                  },
+                  {
+                    "title": "basicStandards",
+                    "body": "Yes",
+                    "order": 0
+                  },
+                  {
+                    "title": "contentCreators",
+                    "body": "Yes",
+                    "order": 0
+                  },
+                  {
+                    "title": "labelsAdvertising",
+                    "body": "No",
+                    "order": 0
+                  },
+                  {
+                    "title": "deceptiveHeadlines",
+                    "body": "Yes",
+                    "order": 0
+                  },
+                  {
+                    "title": "accountabilityPractices",
+                    "body": "No",
+                    "order": 0
+                  }
+                ],
+                "labelToken": "9B16A7CD0871D31FD6572BF55E1D20AFF09E1590CC44BE057EDC0811E50426BCB8E29C442C51DED4B08B9B9497F36743F68E1EEC36609472",
+                "locale": "en-US"
+              },
+              "domain": "washingtontimes.com",
+              "source": "washingtontimes.com",
+              "granularity": "source",
+              "weights": {
+                "origin_weight": 10,
+                "final_weight": 10.0
+              }
+            },
+            {
+              "origin_id": "mywot",
+              "origin": {
+                "id": "mywot",
+                "origin_type": "realtime",
+                "weight": 5.0,
+                "homepage": "https://mywot.com/",
+                "assessments_count": 2149,
+                "name": "Web Of Trust",
+                "description": "Ever wondered how to check if a website is safe? Get the community to do the website security checks for you.",
+                "logo": "https://www.mywot.com/images/logo.png"
+              },
+              "url": "https://www.mywot.com/en/scorecard/washingtontimes.com",
+              "credibility": {
+                "value": 0.8,
+                "confidence": 0.47
+              },
+              "itemReviewed": "washingtontimes.com",
+              "original": {
+                "target": "washingtontimes.com",
+                "reputation_components": {
+                  "0": {
+                    "type": "Trustworthiness",
+                    "reputation_value": 90,
+                    "reputation_scale": "Excellent",
+                    "confidence": 47
+                  },
+                  "1": {
+                    "type": "Deprecated",
+                    "reputation_value": 90,
+                    "reputation_scale": "Excellent",
+                    "confidence": 47
+                  },
+                  "2": {
+                    "type": "Deprecated",
+                    "reputation_value": 90,
+                    "reputation_scale": "Excellent",
+                    "confidence": 47
+                  },
+                  "4": {
+                    "type": "Child safety",
+                    "reputation_value": 91,
+                    "reputation_scale": "Excellent",
+                    "confidence": 47
+                  }
+                },
+                "categories": {
+                  "501": {
+                    "category_group": "Positive",
+                    "description": "Good site",
+                    "confidence": 99
+                  },
+                  "303": {
+                    "category_group": "Neutral",
+                    "description": "Opinions, religion, politics",
+                    "confidence": 3
+                  }
+                },
+                "blacklists": {},
+                "detail_page": "https://www.mywot.com/en/scorecard/washingtontimes.com"
+              },
+              "domain": "washingtontimes.com",
+              "source": "washingtontimes.com",
+              "granularity": "source",
+              "weights": {
+                "origin_weight": 5,
+                "final_weight": 2.3499999999999996
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "urls_credibility": {
+      "credibility": {
+        "value": 0.0,
+        "confidence": 0.0
+      },
+      "assessments": []
+    },
+    "itemReviewed": 1178504740558163968
+  }
+}
