@@ -252,12 +252,7 @@ public class CheckControllerTest {
         // then
         log.debug("Response: {}", response.getContentAsString());
 
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        try {
-            QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
-        } catch (MismatchedInputException e){
-            assertThat(true).isTrue();
-        }
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
