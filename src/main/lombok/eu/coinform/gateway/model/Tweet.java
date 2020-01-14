@@ -51,7 +51,6 @@ public class Tweet implements QueryObject {
      */
     @Getter
     @Setter
-    @NotEmpty(message = "no tweet_text specified")
     @JsonProperty("tweet_text")
     private String tweetText;
 
