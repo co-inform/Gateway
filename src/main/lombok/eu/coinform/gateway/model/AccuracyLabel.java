@@ -1,19 +1,19 @@
 package eu.coinform.gateway.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum AccuracyLabel {
-    credible, mostly_credible, credibility_uncertain, mostly_not_credible, not_credible, not_verifiable;
-
-    static public AccuracyLabel parseString(String string) throws IllegalArgumentException, NullPointerException {
-        try {
-            return AccuracyLabel.valueOf(AccuracyLabel.class, string);
-        } catch (IllegalArgumentException ex) {
-            return AccuracyLabel.valueOf(AccuracyLabel.class, string.replaceAll(" ", "_"));
-        }
-    }
-
-    @Override
-    public String toString() {
-        return this.name().replaceAll("_", " ");
-    }
+    @JsonProperty("accurate")
+    accurate,
+    @JsonProperty("accurate with considerations")
+    accurate_with_considerations,
+    @JsonProperty("unsubstantiated")
+    unsubstantiated,
+    @JsonProperty("inaccurate with considerations")
+    inaccurate_with_considerations,
+    @JsonProperty("inaccurate")
+    inaccurate,
+    @JsonProperty("not verifiable")
+    not_verifiable;
 
 }

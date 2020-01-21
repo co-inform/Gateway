@@ -8,7 +8,6 @@ import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -160,10 +159,12 @@ public class CheckController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
-    public Resource<EvaluationResponse> evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+    public EvaluationResponse evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
 
         //todo: actually do something with the incoming tweet evaluations
-        return new Resource<>(new EvaluationResponse(tweetEvaluation.getEvaluationId()));
+        redisHandler.addToEvaluationList(tweetEvaluation);
+
+        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
     }
 
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)

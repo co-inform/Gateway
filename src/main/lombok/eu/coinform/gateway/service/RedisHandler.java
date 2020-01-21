@@ -3,6 +3,7 @@ package eu.coinform.gateway.service;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.model.Evaluation;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.util.Pair;
@@ -29,6 +30,7 @@ public class RedisHandler {
     private static final String AGGREGATOR_QUEUE_LOCK = "AQK_LOCK";
     private static final String QUEUED_RESPONSE_COUNTER_PREFIX = "QRC_";
     private static final String HANDLED_RESPONSE_COUNTER_PREFIX = "HRC_";
+    private static final String EVALUATION_LIST_KEY = "EVAL_LST_KEY";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -271,5 +273,14 @@ public class RedisHandler {
         log.trace("setHandledResponseCounter {} {}", queryId, number);
         redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number, 1, TimeUnit.DAYS);
         return CompletableFuture.completedFuture(true);
+    }
+
+    @Async("redisExecutor")
+    public CompletableFuture<Long> addToEvaluationList(Evaluation evaluation) {
+        Long ret =  redisTemplate.opsForList().leftPush(EVALUATION_LIST_KEY, evaluation);
+        //todo: It currently just stores the last 100 evaluations. When we setup the database connection this should
+        // be handled better
+        redisTemplate.opsForList().trim(EVALUATION_LIST_KEY, 0, 99);
+        return CompletableFuture.completedFuture(ret);
     }
 }
