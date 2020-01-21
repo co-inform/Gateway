@@ -1,6 +1,8 @@
 package eu.coinform.gateway.model;
 
-public interface Evaluation {
+import java.io.Serializable;
+
+public interface Evaluation extends Serializable {
     /**
      * Get the evaluationId
      * @return the evaluationId
