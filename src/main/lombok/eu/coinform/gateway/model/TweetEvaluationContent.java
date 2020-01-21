@@ -7,12 +7,13 @@ import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
 public class TweetEvaluationContent implements Serializable {
 
-    @NotEmpty(message = "A tweet evaluation must contain a accuracy label")
+    @NotNull(message = "A tweet evaluation must contain a accuracy label")
     @JsonView(Views.NoDebug.class)
     private AccuracyLabel label;
 

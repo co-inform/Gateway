@@ -8,9 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.util.LinkedHashMap;
 import java.util.UUID;
 
 @Slf4j
@@ -23,14 +22,15 @@ public class TweetEvaluation implements Evaluation {
     @Getter
     @Setter
     @JsonProperty("tweet_id")
-    @NotNull(message = "no tweet_id specified")
     @JsonView(Views.NoDebug.class)
+    @NotNull(message = "no tweet_id specified")
     private Long tweetId;
 
     @Setter
     @Getter
-    @NotNull(message = "no evaluation object")
     @JsonView(Views.NoDebug.class)
+    @NotNull(message = "no evaluation object")
+    @Valid
     private TweetEvaluationContent evaluation;
 
     @Getter
