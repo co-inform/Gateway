@@ -8,7 +8,6 @@ import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -86,7 +85,7 @@ public class CheckController {
         log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
         //response par is a pair {Existant, queryResponse}. Existant is true is there already exists a query response with the queryId specified
         Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
-                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>())).join();
+                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
         if (queryResponse.getStatus() == QueryResponse.Status.done) {
@@ -116,7 +115,7 @@ public class CheckController {
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
 
-        log.debug("findById: {}", queryResponse);
+        log.trace("findById: {}", queryResponse);
         return queryResponse;
     }
 
@@ -140,7 +139,7 @@ public class CheckController {
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
 
-        log.debug("findById: {}", queryResponse);
+        log.trace("findById: {}", queryResponse);
 
         return queryResponse;
     }
@@ -160,10 +159,12 @@ public class CheckController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
-    public Resource<EvaluationResponse> evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+    public EvaluationResponse evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
 
         //todo: actually do something with the incoming tweet evaluations
-        return new Resource<>(new EvaluationResponse(tweetEvaluation.getEvaluationId()));
+        redisHandler.addToEvaluationList(tweetEvaluation);
+
+        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
     }
 
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)

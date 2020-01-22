@@ -81,7 +81,7 @@ public class ModuleConfig {
                 }
             }
             QueryResponse queryResponse = redisHandler.getQueryResponse(moduleRequest.getQueryId()).join();
-            queryResponse.getModule_response_code().put(moduleRequest.getModule().getName().toLowerCase(), httpResponse.getStatusLine().getStatusCode());
+            queryResponse.getModuleResponseCode().put(moduleRequest.getModule().getName().toLowerCase(), httpResponse.getStatusLine().getStatusCode());
             redisHandler.setQueryResponse(moduleRequest.getQueryId(), queryResponse);
             return httpResponse;
         });

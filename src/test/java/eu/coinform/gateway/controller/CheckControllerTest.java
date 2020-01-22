@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -54,7 +53,7 @@ public class CheckControllerTest {
 
     private TwitterUser twitterUser = new TwitterUser();
     private Tweet tweet = new Tweet();
-    private JacksonTester<Resource<QueryResponse>> jsonTester;
+    private JacksonTester<QueryResponse> jsonTester;
 
     @Autowired
     private MockMvc mockMvc;
@@ -90,7 +89,7 @@ public class CheckControllerTest {
     public void twitterUser() throws Exception{
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse(twitterUser.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
 
         log.debug("Twitteruser: " + twitterUser.toString());
 
@@ -116,7 +115,7 @@ public class CheckControllerTest {
     public void twitterTweet() throws Exception{
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
 
         log.debug("Tweet: {}",tweet.toString());
 
@@ -142,7 +141,7 @@ public class CheckControllerTest {
     public void malformedTwitterUser() throws Exception {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
 
         log.debug("TwitterUser: {}", twitterUser.toString());
 
@@ -163,7 +162,7 @@ public class CheckControllerTest {
     public void malformedTwitterTweet() throws Exception {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
 
         log.debug("TwitterTweet: {}", tweet.toString());
 
@@ -185,7 +184,7 @@ public class CheckControllerTest {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
 
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
 
         String url = String.format(idUrl, tweet.getQueryId());
 
@@ -203,14 +202,14 @@ public class CheckControllerTest {
         log.debug("QueryResponse: {}", queryResponse);
         // then
         assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getModule_response_code().isEmpty()).isTrue();
+        assertThat(response.getModuleResponseCode().isEmpty()).isTrue();
     }
 
     @Test
     public void nullIdGet() throws Exception {
         log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse("", QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
 
         String url = String.format(idUrl, "");
         log.debug("url: {}", url);
@@ -234,7 +233,7 @@ public class CheckControllerTest {
 
         tweet.setTweetText(null);
         jsonTW = mapper.writeValueAsString(tweet);
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>());
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
         String jw = mapper.writeValueAsString(queryResponse);
 
         log.debug("Tweet: {}",tweet.toString());
@@ -252,12 +251,7 @@ public class CheckControllerTest {
         // then
         log.debug("Response: {}", response.getContentAsString());
 
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        try {
-            QueryResponse resp = mapper.readValue(response.getContentAsString(), QueryResponse.class);
-        } catch (MismatchedInputException e){
-            assertThat(true).isTrue();
-        }
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
@@ -267,7 +261,7 @@ public class CheckControllerTest {
         LinkedHashMap<String, Object> mResponse = new LinkedHashMap<>();
         mResponse.put("first", Pair.of("hej", "då"));
         mResponse.put("second", Pair.of("då", "hej"));
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, mResponse);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, mResponse, new LinkedHashMap<>());
 
         String jw = mapper.writerWithView(Views.NoDebug.class).writeValueAsString(queryResponse);
         String url = String.format(idUrl, tweet.getQueryId());
@@ -288,8 +282,8 @@ public class CheckControllerTest {
 
         // then
         assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getModule_response_code().size()).isEqualTo(0);
-        assertThat(response.getModule_response_code().get("first")).isNull();
+        assertThat(response.getModuleResponseCode().size()).isEqualTo(0);
+        assertThat(response.getModuleResponseCode().get("first")).isNull();
     }
 
     @Test
@@ -299,7 +293,7 @@ public class CheckControllerTest {
         LinkedHashMap<String, Object> mResponse = new LinkedHashMap<>();
         mResponse.put("first", Pair.of("hej", "då"));
         mResponse.put("second", Pair.of("då", "hej"));
-        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, mResponse);
+        QueryResponse queryResponse = new QueryResponse(tweet.getQueryId(), QueryResponse.Status.in_progress, null, mResponse, new LinkedHashMap<>());
 
         String jw = mapper.writerWithView(Views.Debug.class).writeValueAsString(queryResponse);
         String url = String.format(debugUrl, tweet.getQueryId());
@@ -321,7 +315,7 @@ public class CheckControllerTest {
 
         // then
         assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getModule_response_code().size()).isEqualTo(2);
-        assertThat(response.getModule_response_code().get("first")).isNotNull();
+        assertThat(response.getModuleResponseCode().size()).isEqualTo(2);
+        assertThat(response.getModuleResponseCode().get("first")).isNotNull();
     }
 }

@@ -3,6 +3,7 @@ package eu.coinform.gateway.service;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.util.RuleEngineHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -20,12 +23,17 @@ public class ResponseHandler {
     final private ResponseAggregator responseAggregator;
     final private RuleEngineConnector ruleEngine;
 
+    List<Module> moduleList;
+
     public ResponseHandler(RedisHandler redisHandler,
                            ResponseAggregator responseAggregator,
-                           RuleEngineConnector ruleEngine) {
+                           RuleEngineConnector ruleEngine,
+                           List<Module> moduleList
+                           ) {
         this.redisHandler = redisHandler;
         this.responseAggregator = responseAggregator;
         this.ruleEngine = ruleEngine;
+        this.moduleList = moduleList;
     }
 
     @Async("endpointExecutor")
@@ -35,7 +43,6 @@ public class ResponseHandler {
         responseAggregator.addResponse(moduleTransaction.getQueryId());
         responseAggregator.processAggregatedResponses((queryId, moduleResponses) -> {
             QueryResponse qr = redisHandler.getQueryResponse(queryId).join();
-            qr.setStatus(QueryResponse.Status.done);
             if (qr.getResponse() == null) {
                 qr.setResponse(new LinkedHashMap<>());
             }
@@ -47,21 +54,36 @@ public class ResponseHandler {
                 responseField.put(response.getKey(), response.getValue());
                 RuleEngineHelper.flatResponseMap(response.getValue(), flatResponsesMap, response.getKey().toLowerCase(), "_");
             }
+            qr.setFlattenedModuleResponses(flatResponsesMap);
 
-            //todo: remove the advanced logging when we are more sure its stable
-            StringBuilder sb = new StringBuilder("{\n");
-            for (Map.Entry<String, Object> vpair: flatResponsesMap.entrySet()) {
-                sb.append("\t");
-                sb.append(vpair.getKey());
-                sb.append(": ");
-                sb.append(vpair.getValue());
-                sb.append("\n");
+            if (log.isTraceEnabled()) {
+                StringBuilder sb = new StringBuilder("{\n");
+                for (Map.Entry<String, Object> vpair : flatResponsesMap.entrySet()) {
+                    sb.append("\t");
+                    sb.append(vpair.getKey());
+                    sb.append(": ");
+                    sb.append(vpair.getValue());
+                    sb.append("\n");
+                }
+                sb.append("}");
+                log.trace("flatResponsesMap: {}", sb.toString());
             }
-            sb.append("}");
-            log.debug("flatResponsesMap: {}", sb.toString());
-            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponsesMap, moduleResponses.keySet());
+            LinkedHashMap<String, Object> ruleEngineResult =
+                    ruleEngine.evaluateResults(
+                            flatResponsesMap,
+                            moduleResponses
+                                    .keySet()
+                                    .stream()
+                                    .map(String::toLowerCase)
+                                    .collect(Collectors.toSet()));
             log.debug("rule_engine_results:");
             ruleEngineResult.forEach((key, value) -> log.debug("{}: {}", key, value.toString()));
+
+            Object responsesList =  ruleEngineResult.get("module_labels");
+            if (responsesList != null && ((Map) responsesList).keySet().size() == moduleList.size()) {
+                qr.setStatus(QueryResponse.Status.done);
+            }
+
             qr.getResponse().put("rule_engine", ruleEngineResult);
 
             redisHandler.setQueryResponse(queryId, qr);
