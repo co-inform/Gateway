@@ -88,7 +88,7 @@ public class CheckController {
                 new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
-        if (queryResponse.getStatus() == QueryResponse.Status.done) {
+        if (queryResponse.getStatus() == QueryResponse.Status.done || queryResponse.getStatus() == QueryResponse.Status.partly_done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
             // Like if the cache is older than some threshold it is handled as a new query.
             // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
