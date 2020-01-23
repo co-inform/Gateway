@@ -82,6 +82,8 @@ public class ResponseHandler {
             Object responsesList =  ruleEngineResult.get("module_labels");
             if (responsesList != null && ((Map) responsesList).keySet().size() == moduleList.size()) {
                 qr.setStatus(QueryResponse.Status.done);
+            } else {
+                qr.setStatus(QueryResponse.Status.partly_done);
             }
 
             qr.getResponse().put("rule_engine", ruleEngineResult);

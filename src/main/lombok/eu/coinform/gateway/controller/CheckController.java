@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -26,11 +30,14 @@ public class CheckController {
 
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
+    private final RuleEngineConnector ruleEngineConnector;
 
     CheckController(RedisHandler redisHandler,
-                    CheckHandler checkHandler) {
+                    CheckHandler checkHandler,
+                    RuleEngineConnector ruleEngineConnector) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
+        this.ruleEngineConnector = ruleEngineConnector;
     }
 
     /**
@@ -88,7 +95,7 @@ public class CheckController {
                 new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>())).join();
         QueryResponse queryResponse = responsePair.getValue();
         log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
-        if (queryResponse.getStatus() == QueryResponse.Status.done) {
+        if (queryResponse.getStatus() == QueryResponse.Status.done || queryResponse.getStatus() == QueryResponse.Status.partly_done) {
             //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
             // Like if the cache is older than some threshold it is handled as a new query.
             // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
@@ -173,6 +180,24 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
+    public LinkedHashMap<String, Object> ruleEngineCheck(@Valid @RequestBody RuleEngineTestInput ruleEngineTestInput) {
+        LinkedHashMap<String, Object> moduleResponses = new LinkedHashMap<>();
+        moduleResponses.put("misinfome_credibility_value", ruleEngineTestInput.getMisinfoMe().getCred());
+        moduleResponses.put("misinfome_credibility_confidence", ruleEngineTestInput.getMisinfoMe().getCred());
+        moduleResponses.put("contentanalysis_credibility", ruleEngineTestInput.getStance().getCred());
+        moduleResponses.put("contentanalysis_confidence", ruleEngineTestInput.getStance().getConf());
+        moduleResponses.put("claimcredibility_tweet_claim_credibility_0_credibility", ruleEngineTestInput.getClaimCredibility().getCred());
+        moduleResponses.put("claimcredibility_tweet_claim_credibility_0_confidence", ruleEngineTestInput.getClaimCredibility().getConf());
+
+        Set<String> modules = new HashSet<>();
+        modules.add("misinfome");
+        modules.add("claimcredibility");
+        modules.add("contentanalysis");
+
+        return ruleEngineConnector.evaluateResults(moduleResponses, modules);
     }
 
 }
