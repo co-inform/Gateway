@@ -9,6 +9,11 @@ CREATE TABLE `password_auth` (
                                  `password` varchar(60) not null
 );
 
+CREATE TABLE `role` (
+    `id` bigint unsigned not null unique PRIMARY KEY,
+    `role` enum('ADMIN', 'USER')
+);
+
 ALTER TABLE `password_auth` ADD FOREIGN KEY (`id`) REFERENCES `user` (`id`);
 
 create unique index username_index on `password_auth`(`email`)

@@ -6,6 +6,8 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -24,5 +26,8 @@ public class User implements Serializable {
 
     @OneToOne(optional = true, mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private PasswordAuth passwordAuth;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Role> roles;
 
 }
