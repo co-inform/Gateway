@@ -2,26 +2,24 @@ package eu.coinform.gateway.db;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "role")
-public class Role {
-
-    Role(Long id, User user, RoleEnum role) {
-        this.id = id;
-        this.user = user;
-        this.role = role;
-    }
+public class Role implements Serializable {
 
     @Id
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @PrimaryKeyJoinColumn(name = "id")
+    @ManyToOne
+    @PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
     private User user;
 
 

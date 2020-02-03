@@ -1,17 +1,14 @@
 package eu.coinform.gateway.db;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Entity
-@Embeddable
 @Table(name = "user")
 public class User implements Serializable {
 
@@ -27,7 +24,7 @@ public class User implements Serializable {
     @OneToOne(optional = true, mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private PasswordAuth passwordAuth;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Role> roles;
 
 }

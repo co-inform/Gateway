@@ -33,16 +33,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .addFilter(usernamePasswordAuthenticationFilter())
+                .addFilter(jwtAuthenticationFilter())
                 .antMatcher("/twitter/evaluate")
                     .authorizeRequests()
                     .antMatchers("/twitter/evaluate").hasRole(RoleEnum.USER.toString())
                     .and()
                 .antMatcher("/login")
                     .authorizeRequests()
-                    .antMatchers("/login").hasRole(RoleEnum.USER.toString())
-                    .and()
-                    .addFilter(usernamePasswordAuthenticationFilter())
-                    .addFilter(jwtAuthenticationFilter());
+                    .antMatchers("/login").hasRole(RoleEnum.USER.toString());
     }
 
     @Bean

@@ -1,5 +1,6 @@
 package eu.coinform.gateway.db;
 
+import com.google.common.collect.Lists;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,14 +17,17 @@ public class UserDbManager {
 
     private UserRepository userRepository;
     private PasswordAuthRepository passwordAuthRepository;
+    private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
 
     UserDbManager(
             UserRepository userRepository,
             PasswordAuthRepository passwordAuthRepository,
+            RoleRepository roleRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordAuthRepository = passwordAuthRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -33,17 +37,22 @@ public class UserDbManager {
         }
 
         User user = new User();
-        User dbUser =  userRepository.save(user);
-        dbUser.setRoles(roleList.stream().map(roleEnum -> new Role(dbUser.getId(), dbUser, roleEnum)).collect(Collectors.toList()));
+        User dbUser = userRepository.save(user);
         PasswordAuth passwordAuth = new PasswordAuth();
         passwordAuth.setEmail(email.toLowerCase());
         passwordAuth.setPassword(passwordEncoder.encode(password));
         passwordAuth.setUser(dbUser);
         passwordAuth.setId(dbUser.getId());
         dbUser.setPasswordAuth(passwordAuth);
+        //dbUser.setRoles(roleList.stream().map(role ->  new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()));
+        dbUser.setRoles(
+                Lists.newLinkedList(
+                        roleRepository.saveAll(
+                                roleList.stream().map(role -> new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()))));
+
         userRepository.save(dbUser);
 
-        return user;
+        return dbUser;
     }
 
     public User logIn(String email, String password) throws AuthenticationException {
