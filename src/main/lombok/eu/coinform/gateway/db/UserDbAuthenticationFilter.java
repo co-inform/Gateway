@@ -36,7 +36,6 @@ public class UserDbAuthenticationFilter extends AbstractAuthenticationProcessing
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        log.debug("authenticating");
         ObjectMapper objectMapper = new ObjectMapper();
         LoginForm loginForm;
         try {

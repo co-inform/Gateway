@@ -9,7 +9,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,17 +26,14 @@ public class UserDbAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-        log.debug("trying to log in as {}", name);
-
         User user = userDbManager.logIn(name, password);
 
-        log.debug("successfullty logged is as {}", user.getId());
-
-        List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
-                .map(Role::toString)
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-        return new UsernamePasswordAuthenticationToken(name, password, grantedAuthorities);
+        Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
+        for (Role role: user.getRoles()) {
+            GrantedAuthority authority = new SimpleGrantedAuthority(role.getRole().toString());
+            grantedAuthorities.add(authority);
+        }
+        return new UsernamePasswordAuthenticationToken(user.getPasswordAuth().getEmail(), user.getPasswordAuth().getPassword(), grantedAuthorities);
     }
 
     @Override

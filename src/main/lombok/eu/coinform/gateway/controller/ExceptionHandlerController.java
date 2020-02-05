@@ -1,5 +1,6 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,14 @@ public class ExceptionHandlerController {
     @ResponseBody
     @ExceptionHandler(NoSuchTransactionIdException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String NoSuchTransactionIdHandler(NoSuchTransactionIdException ex) {
+    public String noSuchTransactionIdHandler(NoSuchTransactionIdException ex) {
+        return ex.getMessage();
+    }
+
+    @ResponseBody
+    @ExceptionHandler(UsernameAlreadyExistException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String usernameAleadyExistException(UsernameAlreadyExistException ex) {
         return ex.getMessage();
     }
 }

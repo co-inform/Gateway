@@ -40,7 +40,6 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .collect(Collectors.toList());
 
             if (!StringUtils.isEmpty(user)) {
-                log.debug("autherized as {}", authorities.stream().map(SimpleGrantedAuthority::toString).reduce((s1, s2) -> s1 + ", " + s2).orElse("empty"));
                 Authentication jwtAuth = new JwtAuthenticationToken(token, authorities);
                 return jwtAuth;
             }
