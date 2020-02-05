@@ -18,8 +18,6 @@ public class JwtToken {
     public static final String TOKEN_ISSUER = "secure-api";
     public static final String TOKEN_AUDIENCE = "secure-app";
 
-    public static final String AUTH_TYPE = "atype";
-
     private JwtToken(String token) {
         this.token = token;
     }
@@ -33,7 +31,6 @@ public class JwtToken {
     public static class Builder {
 
         private String user;
-        private AuthType authType;
         private List<String> roles;
         private Long expirationTime;
         private SignatureAlgorithm signatureAlgorithm;
@@ -41,11 +38,6 @@ public class JwtToken {
 
         public Builder setUser(String user) {
             this.user = user;
-            return this;
-        }
-
-        public Builder setAuthType(AuthType authType) {
-            this.authType = authType;
             return this;
         }
 
@@ -78,7 +70,6 @@ public class JwtToken {
                     .setSubject(user)
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
-                    .claim(AUTH_TYPE, authType)
                     .compact();
             return new JwtToken(token);
         }

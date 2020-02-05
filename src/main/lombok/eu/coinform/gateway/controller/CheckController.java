@@ -5,7 +5,6 @@ import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.RoleEnum;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
-import eu.coinform.gateway.jwt.AuthType;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
@@ -195,13 +194,12 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public LoginResponse login() {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
         String token = (new JwtToken.Builder())
-                .setAuthType(AuthType.usrpass)
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
                 .setExpirationTime(7*24*60*60*1000L)

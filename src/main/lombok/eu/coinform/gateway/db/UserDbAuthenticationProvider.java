@@ -1,6 +1,7 @@
 package eu.coinform.gateway.db;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -11,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @AllArgsConstructor
 public class UserDbAuthenticationProvider implements AuthenticationProvider {
 
@@ -21,7 +23,11 @@ public class UserDbAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
 
+        log.debug("trying to log in as {}", name);
+
         User user = userDbManager.logIn(name, password);
+
+        log.debug("successfullty logged is as {}", user.getId());
 
         List<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
                 .map(Role::toString)

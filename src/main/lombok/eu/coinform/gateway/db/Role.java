@@ -16,10 +16,11 @@ public class Role implements Serializable {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id")
     private User user;
 
 
