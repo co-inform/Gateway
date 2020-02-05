@@ -8,6 +8,7 @@ import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
@@ -23,7 +24,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -41,13 +45,16 @@ public class CheckController {
     private final RedisHandler redisHandler;
     private final UserDbManager userDbManager;
     private final String signatureKey;
+    private final RuleEngineConnector ruleEngineConnector;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
+                    RuleEngineConnector ruleEngineConnector,
                     UserDbManager userDbManager,
                     @Value("${JWT_KEY}") String signatureKey) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
+        this.ruleEngineConnector = ruleEngineConnector;
         this.userDbManager = userDbManager;
         this.signatureKey = signatureKey;
     }
@@ -216,5 +223,24 @@ public class CheckController {
         roles.add(RoleEnum.USER);
         userDbManager.registerUser(registerForm.email, registerForm.password, roles);
     }
+
+    @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
+    public LinkedHashMap<String, Object> ruleEngineCheck(@Valid @RequestBody RuleEngineTestInput ruleEngineTestInput) {
+        LinkedHashMap<String, Object> moduleResponses = new LinkedHashMap<>();
+        moduleResponses.put("misinfome_credibility_value", ruleEngineTestInput.getMisinfoMe().getCred());
+        moduleResponses.put("misinfome_credibility_confidence", ruleEngineTestInput.getMisinfoMe().getCred());
+        moduleResponses.put("contentanalysis_credibility", ruleEngineTestInput.getStance().getCred());
+        moduleResponses.put("contentanalysis_confidence", ruleEngineTestInput.getStance().getConf());
+        moduleResponses.put("claimcredibility_tweet_claim_credibility_0_credibility", ruleEngineTestInput.getClaimCredibility().getCred());
+        moduleResponses.put("claimcredibility_tweet_claim_credibility_0_confidence", ruleEngineTestInput.getClaimCredibility().getConf());
+
+        Set<String> modules = new HashSet<>();
+        modules.add("misinfome");
+        modules.add("claimcredibility");
+        modules.add("contentanalysis");
+
+        return ruleEngineConnector.evaluateResults(moduleResponses, modules);
+    }
+
 }
 
