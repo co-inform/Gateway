@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class JwtToken {
 
         public JwtToken build() {
             String token = Jwts.builder()
-                    .signWith(Keys.hmacShaKeyFor(key.getBytes()), signatureAlgorithm)
+                    .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(key)), signatureAlgorithm)
                     .setHeaderParam("typ", TOKEN_TYPE)
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)

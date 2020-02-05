@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.StringUtils;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String token = authentication.getCredentials().toString();
         try {
-            byte[] signingKey = JWT_SECRET.getBytes();
+            byte[] signingKey = Base64.getDecoder().decode(JWT_SECRET);
 
             var parsedToken = Jwts.parser()
                     .setSigningKey(signingKey)
