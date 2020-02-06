@@ -27,7 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     public SecurityConfig(
             UserDbManager userDbManager,
-            @Value("{JWT_KEY}") String JWT_SECRET) {
+            @Value("${JWT_KEY}") String JWT_SECRET) {
         this.userDbManager = userDbManager;
         this.JWT_SECRET = JWT_SECRET;
     }

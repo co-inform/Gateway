@@ -1,6 +1,6 @@
 CREATE TABLE `user` (
                         `id` bigint unsigned not null auto_increment unique PRIMARY KEY,
-                        `created_at` datetime DEFAULT (now())
+                        `created_at` datetime
 );
 
 CREATE TABLE `password_auth` (
