@@ -22,10 +22,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
     private UserDbManager userDbManager;
-    @Value("${JWT_KEY}")
     private String JWT_SECRET;
+
+    public SecurityConfig(
+            UserDbManager userDbManager,
+            @Value("{JWT_KEY}") String JWT_SECRET) {
+        this.userDbManager = userDbManager;
+        this.JWT_SECRET = JWT_SECRET;
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder builder) {
@@ -45,11 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .anyRequest().permitAll();
     }
 
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     private UserDbAuthenticationFilter userDbAuthenticationFilter() throws Exception {
         return new UserDbAuthenticationFilter(authenticationManager(), userDbManager);

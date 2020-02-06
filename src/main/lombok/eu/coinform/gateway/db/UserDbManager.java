@@ -21,7 +21,7 @@ public class UserDbManager {
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
 
-    UserDbManager(
+    public UserDbManager(
             UserRepository userRepository,
             PasswordAuthRepository passwordAuthRepository,
             RoleRepository roleRepository,

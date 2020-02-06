@@ -1,15 +1,23 @@
 package eu.coinform.gateway.config;
 
+import eu.coinform.gateway.db.PasswordAuthRepository;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.sql.DataSource;
 
 @Configuration
 public class DbConfig {
+
+    @Bean
+    public PasswordEncoder getPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public DataSource getDataSource(
@@ -34,10 +42,14 @@ public class DbConfig {
                 .build();
     }
 
+    /*
+    @Bean
     public Flyway getFlyway(DataSource dataSource) {
         Flyway flyway = Flyway.configure().dataSource(dataSource).load();
         flyway.migrate();
         return flyway;
     }
+
+     */
 
 }

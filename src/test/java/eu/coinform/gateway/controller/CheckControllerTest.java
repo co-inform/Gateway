@@ -3,8 +3,13 @@ package eu.coinform.gateway.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import eu.coinform.gateway.GatewayApplication;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.db.PasswordAuthRepository;
+import eu.coinform.gateway.db.RoleRepository;
+import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.db.UserRepository;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.util.Pair;
@@ -17,9 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,6 +37,8 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -57,6 +68,15 @@ public class CheckControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Configuration
+    @Import(GatewayApplication.class)
+    public static class CheckControllerTestConfig {
+        @Bean
+        public UserDbManager testUserDbManager() {
+            return new UserDbManager(mock(UserRepository.class), mock(PasswordAuthRepository.class), mock(RoleRepository.class), mock(PasswordEncoder.class));
+        }
+    }
 
     @Before
     public void setupTests(){
