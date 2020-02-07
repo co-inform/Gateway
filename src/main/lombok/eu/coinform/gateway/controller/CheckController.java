@@ -15,6 +15,7 @@ import eu.coinform.gateway.util.Pair;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -216,6 +217,7 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @ResponseStatus(code = HttpStatus.CREATED)
     public void register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException  {
 
         List<RoleEnum> roles = new LinkedList<>();

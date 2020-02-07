@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private UserDbManager userDbManager;
-    private String JWT_SECRET;
+    private final String JWT_SECRET;
 
     public SecurityConfig(
             UserDbManager userDbManager,
