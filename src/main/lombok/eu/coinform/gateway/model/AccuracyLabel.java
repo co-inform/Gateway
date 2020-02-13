@@ -8,5 +8,4 @@ public enum AccuracyLabel {
     unsubstantiated,
     inaccurate_with_considerations,
     inaccurate,
-    not_verifiable;
 }
