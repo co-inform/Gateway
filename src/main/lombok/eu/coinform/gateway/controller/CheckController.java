@@ -1,6 +1,7 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.RoleEnum;
 import eu.coinform.gateway.db.UserDbManager;
@@ -12,10 +13,12 @@ import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
+import eu.coinform.gateway.util.StatusResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -217,12 +220,13 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public void register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException  {
+//    @ResponseStatus(code = HttpStatus.CREATED) // this does not work on REST services, need to pass a ResponseEntity back to serve a status code other than 200 (on successfull)
+    public ResponseEntity<StatusResponse> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException, JsonProcessingException {
 
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
         userDbManager.registerUser(registerForm.email, registerForm.password, roles);
+        return ResponseEntity.status(HttpStatus.CREATED).body(StatusResponse.USERCREATED);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
