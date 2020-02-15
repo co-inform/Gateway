@@ -9,7 +9,7 @@ import java.io.IOException;
 public class UsernameAlreadyExistException extends IOException {
 
     UsernameAlreadyExistException(String username) {
-        super("{\"status\": \"User already exists\"}");
+        super(String.format("User %s already exist", username));
     }
 
 }

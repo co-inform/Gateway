@@ -3,7 +3,7 @@ package eu.coinform.gateway.util;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
-@JsonFormat(shape =JsonFormat.Shape.OBJECT)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum StatusResponse {
     USERCREATED("User created"),
     USEREXISTS("User already exists");

@@ -1,7 +1,6 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.RoleEnum;
 import eu.coinform.gateway.db.UserDbManager;
@@ -221,7 +220,7 @@ public class CheckController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
 //    @ResponseStatus(code = HttpStatus.CREATED) // this does not work on REST services, need to pass a ResponseEntity back to serve a status code other than 200 (on successfull)
-    public ResponseEntity<StatusResponse> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException, JsonProcessingException {
+    public ResponseEntity<StatusResponse> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
 
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);

@@ -3,6 +3,7 @@ package eu.coinform.gateway.controller;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
+import eu.coinform.gateway.util.StatusResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,7 +30,7 @@ public class ExceptionHandlerController {
     @ResponseBody
     @ExceptionHandler(UsernameAlreadyExistException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String usernameAleadyExistException(UsernameAlreadyExistException ex) {
-        return ex.getMessage();
+    public StatusResponse usernameAlreadyExistException(UsernameAlreadyExistException ex) {
+        return StatusResponse.USEREXISTS;
     }
 }
