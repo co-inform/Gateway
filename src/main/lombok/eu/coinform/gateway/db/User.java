@@ -36,4 +36,11 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Role> roles;
 
+    @Getter
+    @Setter
+    private boolean enabled;
+
+    public User(){
+        this.enabled = false;
+    }
 }
