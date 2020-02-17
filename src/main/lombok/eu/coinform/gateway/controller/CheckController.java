@@ -12,7 +12,7 @@ import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
-import eu.coinform.gateway.util.StatusResponse;
+import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -220,12 +220,12 @@ public class CheckController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
 //    @ResponseStatus(code = HttpStatus.CREATED) // this does not work on REST services, need to pass a ResponseEntity back to serve a status code other than 200 (on successfull)
-    public ResponseEntity<StatusResponse> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
 
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
         userDbManager.registerUser(registerForm.email, registerForm.password, roles);
-        return ResponseEntity.status(HttpStatus.CREATED).body(StatusResponse.USERCREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
