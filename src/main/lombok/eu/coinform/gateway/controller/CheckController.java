@@ -66,7 +66,6 @@ public class CheckController {
      * @param twitterUser The twitter user the query is about
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
-    //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
     @PostMapping("/twitter/user")
     public QueryResponse twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
@@ -87,7 +86,6 @@ public class CheckController {
      * @param tweet The tweet the query is about.
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
-    //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
     @JsonView(Views.NoDebug.class)
     @PostMapping("/twitter/tweet")
@@ -96,7 +94,6 @@ public class CheckController {
                 (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet));
     }
 
-    //@CrossOrigin("*")
     @RequestMapping(value = "/twitter/tweet", method = RequestMethod.OPTIONS)
     public void corsHeadersTweet(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
@@ -133,7 +130,6 @@ public class CheckController {
      * @param query_id The query_id that identifies the earlier query
      * @return A {@link QueryResponse} containing the answer or at least progress of the query.
      */
-    //@CrossOrigin(origins = "https://twitter.com, chrome-extension://kodmajniflhcofdbnfjpkgimbmkpgend")
     @CrossOrigin(origins = "*")
     @JsonView(Views.NoDebug.class)
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.GET)
@@ -147,11 +143,9 @@ public class CheckController {
         return queryResponse;
     }
 
-    //@CrossOrigin("*")
     @JsonView(Views.NoDebug.class)
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response, @PathVariable(value = "query_id", required = true) String query_id) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
@@ -172,7 +166,6 @@ public class CheckController {
         return queryResponse;
     }
 
-    //@CrossOrigin("*")
     @JsonView(Views.Debug.class)
     @RequestMapping(value = "/response/{query_id}/{debug}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response,
@@ -219,7 +212,6 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-//    @ResponseStatus(code = HttpStatus.CREATED) // this does not work on REST services, need to pass a ResponseEntity back to serve a status code other than 200 (on successfull)
     public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
 
         List<RoleEnum> roles = new LinkedList<>();
