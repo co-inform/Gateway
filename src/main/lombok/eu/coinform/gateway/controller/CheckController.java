@@ -10,6 +10,7 @@ import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
+import eu.coinform.gateway.service.EmailService;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
@@ -48,17 +49,20 @@ public class CheckController {
     private final UserDbManager userDbManager;
     private final String signatureKey;
     private final RuleEngineConnector ruleEngineConnector;
+    private final EmailService emailService;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
                     RuleEngineConnector ruleEngineConnector,
                     UserDbManager userDbManager,
-                    @Value("${JWT_KEY}") String signatureKey) {
+                    @Value("${JWT_KEY}") String signatureKey,
+                    EmailService emailService) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
         this.userDbManager = userDbManager;
         this.signatureKey = signatureKey;
+        this.emailService = emailService;
     }
 
     /**
@@ -217,6 +221,7 @@ public class CheckController {
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
         userDbManager.registerUser(registerForm.email, registerForm.password, roles);
+        emailService.sendSimpleMessage(registerForm.email);
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
