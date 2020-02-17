@@ -12,10 +12,12 @@ import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
+import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -64,7 +66,6 @@ public class CheckController {
      * @param twitterUser The twitter user the query is about
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
-    //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
     @PostMapping("/twitter/user")
     public QueryResponse twitterUser(@Valid @RequestBody TwitterUser twitterUser) {
@@ -85,7 +86,6 @@ public class CheckController {
      * @param tweet The tweet the query is about.
      * @return A {@link QueryResponse} containing a 'query_id' uniquely identifying the query.
      */
-    //@CrossOrigin("https://twitter.com, chrome://**, chrome-extension://**")
     @CrossOrigin(origins = "*")
     @JsonView(Views.NoDebug.class)
     @PostMapping("/twitter/tweet")
@@ -94,7 +94,6 @@ public class CheckController {
                 (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet));
     }
 
-    //@CrossOrigin("*")
     @RequestMapping(value = "/twitter/tweet", method = RequestMethod.OPTIONS)
     public void corsHeadersTweet(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
@@ -131,7 +130,6 @@ public class CheckController {
      * @param query_id The query_id that identifies the earlier query
      * @return A {@link QueryResponse} containing the answer or at least progress of the query.
      */
-    //@CrossOrigin(origins = "https://twitter.com, chrome-extension://kodmajniflhcofdbnfjpkgimbmkpgend")
     @CrossOrigin(origins = "*")
     @JsonView(Views.NoDebug.class)
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.GET)
@@ -145,11 +143,9 @@ public class CheckController {
         return queryResponse;
     }
 
-    //@CrossOrigin("*")
     @JsonView(Views.NoDebug.class)
     @RequestMapping(value = "/response/{query_id}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response, @PathVariable(value = "query_id", required = true) String query_id) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
@@ -170,7 +166,6 @@ public class CheckController {
         return queryResponse;
     }
 
-    //@CrossOrigin("*")
     @JsonView(Views.Debug.class)
     @RequestMapping(value = "/response/{query_id}/{debug}", method = RequestMethod.OPTIONS)
     public void corsHeadersResponse(HttpServletResponse response,
@@ -217,12 +212,12 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public void register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException  {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
 
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
         userDbManager.registerUser(registerForm.email, registerForm.password, roles);
+        return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
