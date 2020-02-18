@@ -7,7 +7,8 @@ import lombok.Getter;
 public enum ErrorResponse {
     USEREXISTS("User already exists"),
     NOSUCHQUERYID("No such query_id"),
-    NOSUCHTRANSACTIONID("No such transaction_id");
+    NOSUCHTRANSACTIONID("No such transaction_id"),
+    USERNOTVERIFIED("User not verified");
 
     @Getter
     private final String error;

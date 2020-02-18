@@ -1,5 +1,6 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.db.UserNotVerifiedException;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
@@ -33,4 +34,12 @@ public class ExceptionHandlerController {
     public ErrorResponse usernameAlreadyExistException(UsernameAlreadyExistException ex) {
         return ErrorResponse.USEREXISTS;
     }
+
+    @ResponseBody
+    @ExceptionHandler(UserNotVerifiedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse userNotVerifiedException(UserNotVerifiedException ex){
+        return ErrorResponse.USERNOTVERIFIED;
+    }
+
 }

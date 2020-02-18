@@ -1,10 +1,10 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.common.collect.Lists;
 import eu.coinform.gateway.cache.Views;
-import eu.coinform.gateway.db.RoleEnum;
-import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.UsernameAlreadyExistException;
+import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
@@ -12,11 +12,14 @@ import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.EmailService;
 import eu.coinform.gateway.service.RedisHandler;
+import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,11 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -50,18 +49,21 @@ public class CheckController {
     private final String signatureKey;
     private final RuleEngineConnector ruleEngineConnector;
     private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
                     RuleEngineConnector ruleEngineConnector,
                     UserDbManager userDbManager,
                     @Value("${JWT_KEY}") String signatureKey,
+                    ApplicationEventPublisher eventPublisher,
                     EmailService emailService) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
         this.userDbManager = userDbManager;
         this.signatureKey = signatureKey;
+        this.eventPublisher = eventPublisher;
         this.emailService = emailService;
     }
 
@@ -220,9 +222,36 @@ public class CheckController {
 
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
-        userDbManager.registerUser(registerForm.email, registerForm.password, roles);
-        emailService.sendSimpleMessage(registerForm.email);
+
+        User user = userDbManager.registerUser(registerForm.email, registerForm.password, roles);
+
+        try {
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
+        } catch (Exception me){
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.USEREXISTS);
+        }
+        //emailService.sendSimpleMessage(registerForm.email);
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
+    }
+
+    @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
+    public String confirmRegistration(@RequestParam("token") String token){
+        log.debug("In registrationConfirm");
+        VerificationToken myToken = userDbManager.getVerificationToken(token);
+        if(myToken == null){
+            return "redirect:/badUser.html";
+        }
+        log.debug("Token: {}", myToken.toString());
+        User user = myToken.getUser();
+        log.debug("User: {}", user.toString());
+        Calendar cal = Calendar.getInstance();
+        if ((myToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
+            return "redirect:/badUser.html";
+        }
+
+        user.setEnabled(true);
+        userDbManager.updateUser(user);
+        return "redirect:/confirmed.html";
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)

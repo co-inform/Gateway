@@ -12,8 +12,8 @@ public class EmailConfig {
     @Bean
     public SimpleMailMessage templateSimpleMessage() {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setText("Testing hello");
-        message.setSubject("Email verification");
+        message.setText("Please confirm your email %s by clicking the link %s");
+        message.setSubject("Coinform Email verification");
         return message;
     }
 }

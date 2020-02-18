@@ -7,28 +7,30 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.message.AuthException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class UserDbManager {
+public class UserDbManager { //implements ApplicationListener<OnRegistrationCompleteEvent> {
 
     private UserRepository userRepository;
     private PasswordAuthRepository passwordAuthRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+    private VerificationTokenRepository verificationTokenRepository;
 
     public UserDbManager(
             UserRepository userRepository,
             PasswordAuthRepository passwordAuthRepository,
             RoleRepository roleRepository,
+            VerificationTokenRepository verificationTokenRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordAuthRepository = passwordAuthRepository;
         this.roleRepository = roleRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -46,7 +48,6 @@ public class UserDbManager {
         passwordAuth.setUser(dbUser);
         passwordAuth.setId(dbUser.getId());
         dbUser.setPasswordAuth(passwordAuth);
-        //dbUser.setRoles(roleList.stream().map(role ->  new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()));
         dbUser.setRoles(
                 Lists.newLinkedList(
                         roleRepository.saveAll(
@@ -57,7 +58,12 @@ public class UserDbManager {
         return dbUser;
     }
 
-    public User logIn(String email, String password) throws AuthenticationException {
+    public User updateUser(User user){
+        User u = userRepository.save(user);
+        return u;
+    }
+
+    public User logIn(String email, String password) throws AuthenticationException, UserNotVerifiedException {
         Optional<PasswordAuth> passwordAuth = passwordAuthRepository.getByEmail(email.toLowerCase());
         if (passwordAuth.isEmpty()) {
             throw new UsernameNotFoundException("No such username");
@@ -66,6 +72,24 @@ public class UserDbManager {
         if (!passwordEncoder.matches(password, passwordAuth.get().getPassword())) {
             throw new BadCredentialsException("Incorrect Password");
         }
+
+//        passwordAuth.get().getUser().isEnabled();
+        if(!userRepository.findById(passwordAuth.get().getId()).get().isEnabled()){
+            throw new UserNotVerifiedException("User not verified");
+        }
         return passwordAuth.get().getUser();
+    }
+
+    public void createVerificationToken(User user, String token){
+        VerificationToken myToken = new VerificationToken(token, user);
+        verificationTokenRepository.save(myToken);
+    }
+
+    public VerificationToken getVerificationToken(String token){
+        return verificationTokenRepository.findByToken(token);
+    }
+
+    public User getUser(VerificationToken verificationToken){
+        return userRepository.findByVerificationToken(verificationToken);
     }
 }

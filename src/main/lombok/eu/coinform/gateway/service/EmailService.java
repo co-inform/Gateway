@@ -22,13 +22,13 @@ public class EmailService {
         this.template = template;
     }
 
-    public void sendSimpleMessage(String to){
+    public void sendSimpleMessage(String to, String link){
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setFrom(from);
         message.setTo(to);
         message.setSubject(template.getSubject());
-        message.setText(template.getText());
+        message.setText(String.format(template.getText(),to,link));
         emailSender.send(message);
     }
 

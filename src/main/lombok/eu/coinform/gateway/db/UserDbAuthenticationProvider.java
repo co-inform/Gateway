@@ -1,6 +1,7 @@
 package eu.coinform.gateway.db;
 
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ public class UserDbAuthenticationProvider implements AuthenticationProvider {
 
     private UserDbManager userDbManager;
 
+    @SneakyThrows
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String name = authentication.getName();
