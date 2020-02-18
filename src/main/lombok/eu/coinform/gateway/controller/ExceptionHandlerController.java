@@ -37,7 +37,7 @@ public class ExceptionHandlerController {
 
     @ResponseBody
     @ExceptionHandler(UserNotVerifiedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse userNotVerifiedException(UserNotVerifiedException ex){
         return ErrorResponse.USERNOTVERIFIED;
     }
