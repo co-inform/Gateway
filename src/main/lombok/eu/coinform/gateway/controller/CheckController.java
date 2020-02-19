@@ -5,6 +5,8 @@ import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
+import eu.coinform.gateway.jwt.JwtAuthenticationProvider;
+import eu.coinform.gateway.jwt.JwtAuthenticationToken;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
@@ -206,12 +208,20 @@ public class CheckController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
+        Long userId;
+
+        if(authentication instanceof JwtAuthenticationToken){
+            userId = (Long) authentication.getPrincipal();
+        } else {
+            userId = userDbManager.getByEmail(authentication.getName()).getId();
+        }
+
         String token = (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setDbManager(userDbManager)
+                .setCounter(userDbManager.getById(userId).get().getCounter())
                 .setExpirationTime(7*24*60*60*1000L)
-                .setUser((Long) authentication.getPrincipal())
+                .setUser(userId)
                 .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
         return new LoginResponse(token);
@@ -263,7 +273,6 @@ public class CheckController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         userDbManager.logOut((Long) authentication.getPrincipal());
-        authentication.setAuthenticated(false);
         return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
     }
 

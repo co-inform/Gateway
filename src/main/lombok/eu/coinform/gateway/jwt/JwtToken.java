@@ -35,26 +35,21 @@ public class JwtToken {
     private String token;
 
     public static class Builder {
-        private UserDbManager userDbManager;
 
-        private String user;
+        private Long user;
         private List<String> roles;
         private Long expirationTime;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
+        private int counter;
 
         public Builder setUser(Long user) {
-            this.user = String.valueOf(user);
-            return this;
-        }
-
-        public Builder setUser(String user){
             this.user = user;
             return this;
         }
 
-        public Builder setDbManager(UserDbManager userDbManager){
-            this.userDbManager = userDbManager;
+        public Builder setCounter(int counter){
+            this.counter = counter;
             return this;
         }
 
@@ -80,18 +75,15 @@ public class JwtToken {
 
         public JwtToken build() {
 
-            Optional<User> u = userDbManager.getById(Long.parseLong(user));
-
-
             String token = Jwts.builder()
                     .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(key)), signatureAlgorithm)
                     .setHeaderParam("typ", TOKEN_TYPE)
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)
-                    .setSubject(user)
+                    .setSubject(user.toString())
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
-                    .claim("count", u.get().getCounter())
+                    .claim("count", counter)
                     .compact();
             return new JwtToken(token);
         }

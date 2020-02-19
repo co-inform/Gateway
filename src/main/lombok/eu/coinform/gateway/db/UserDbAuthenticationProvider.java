@@ -35,7 +35,7 @@ public class UserDbAuthenticationProvider implements AuthenticationProvider {
             GrantedAuthority authority = new SimpleGrantedAuthority(role.getRole().toString());
             grantedAuthorities.add(authority);
         }
-        return new UsernamePasswordAuthenticationToken(user.getPasswordAuth().getId(), user.getPasswordAuth().getPassword(), grantedAuthorities);
+        return new UsernamePasswordAuthenticationToken(user.getPasswordAuth().getEmail(), user.getPasswordAuth().getPassword(), grantedAuthorities);
     }
 
     @Override

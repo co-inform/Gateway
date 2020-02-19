@@ -9,14 +9,12 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -42,9 +40,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .parseClaimsJws(token.replace(JwtToken.TOKEN_PREFIX, ""));
 
             String user = parsedToken.getBody().getSubject();
-            Optional<User> userId = userDbManager.getById(Long.parseLong(user));
+            Optional<User> u = userDbManager.getById(Long.parseLong(user));
             int counter =  (int) parsedToken.getBody().get("count");
-            if(userId.get().getCounter() != counter){
+            if(u.get().getCounter() != counter){
                 throw new UserLoggedOutException();
             }
 
@@ -54,7 +52,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .collect(Collectors.toList());
 
             if (!StringUtils.isEmpty(user)) {
-                Authentication jwtAuth = new JwtAuthenticationToken(token, authorities);
+                Authentication jwtAuth = new JwtAuthenticationToken(Long.parseLong(user), token, authorities);
                 return jwtAuth;
             }
         } catch (ExpiredJwtException ex) {
