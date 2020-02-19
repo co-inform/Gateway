@@ -2,16 +2,21 @@ package eu.coinform.gateway.jwt;
 
 import eu.coinform.gateway.db.Role;
 import eu.coinform.gateway.db.RoleEnum;
+import eu.coinform.gateway.db.User;
+import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class JwtToken {
+
 
     public static final String TOKEN_HEADER = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
@@ -30,6 +35,7 @@ public class JwtToken {
     private String token;
 
     public static class Builder {
+        private UserDbManager userDbManager;
 
         private String user;
         private List<String> roles;
@@ -37,8 +43,18 @@ public class JwtToken {
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
 
-        public Builder setUser(String user) {
+        public Builder setUser(Long user) {
+            this.user = String.valueOf(user);
+            return this;
+        }
+
+        public Builder setUser(String user){
             this.user = user;
+            return this;
+        }
+
+        public Builder setDbManager(UserDbManager userDbManager){
+            this.userDbManager = userDbManager;
             return this;
         }
 
@@ -63,6 +79,10 @@ public class JwtToken {
         }
 
         public JwtToken build() {
+
+            Optional<User> u = userDbManager.getById(Long.parseLong(user));
+
+
             String token = Jwts.builder()
                     .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(key)), signatureAlgorithm)
                     .setHeaderParam("typ", TOKEN_TYPE)
@@ -71,8 +91,10 @@ public class JwtToken {
                     .setSubject(user)
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
+                    .claim("count", u.get().getCounter())
                     .compact();
             return new JwtToken(token);
         }
     }
 }
+

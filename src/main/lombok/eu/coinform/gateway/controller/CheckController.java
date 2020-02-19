@@ -1,9 +1,9 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.google.common.collect.Lists;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
@@ -18,7 +18,6 @@ import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -210,8 +209,9 @@ public class CheckController {
         String token = (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
+                .setDbManager(userDbManager)
                 .setExpirationTime(7*24*60*60*1000L)
-                .setUser(authentication.getName())
+                .setUser((Long) authentication.getPrincipal())
                 .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
         return new LoginResponse(token);
@@ -230,29 +230,43 @@ public class CheckController {
         } catch (Exception me){
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.USEREXISTS);
         }
-        //emailService.sendSimpleMessage(registerForm.email);
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
     @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
-    public String confirmRegistration(@RequestParam("token") String token){
-        log.debug("In registrationConfirm");
-        VerificationToken myToken = userDbManager.getVerificationToken(token);
-        if(myToken == null){
-            return "redirect:/badUser.html";
+    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token){
+
+        if(!userDbManager.confirmUser(token)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOUSER);
         }
-        log.debug("Token: {}", myToken.toString());
-        User user = myToken.getUser();
-        log.debug("User: {}", user.toString());
-        Calendar cal = Calendar.getInstance();
-        if ((myToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
-            return "redirect:/badUser.html";
+        return ResponseEntity.ok(SuccesfullResponse.USERVERIFIED);
+    }
+
+    @RequestMapping(value = "/passwordreset", method = RequestMethod.POST)
+    public ResponseEntity<?> passwordReset(@RequestBody @Valid PasswordResetForm form) {
+        User user = userDbManager.getByEmail(form.getEmail());
+        if(user == null) {
+            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
         }
 
-        user.setEnabled(true);
-        userDbManager.updateUser(user);
-        return "redirect:/confirmed.html";
+        try{
+            eventPublisher.publishEvent(new OnPasswordResetEvent(user));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.NOUSER);
+        }
+
+        return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
     }
+
+    @RequestMapping(value = "/exit", method = RequestMethod.GET)
+    public ResponseEntity<?> logout(){
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        userDbManager.logOut((Long) authentication.getPrincipal());
+        authentication.setAuthenticated(false);
+        return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
+    }
+
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
     public LinkedHashMap<String, Object> ruleEngineCheck(@Valid @RequestBody RuleEngineTestInput ruleEngineTestInput) {

@@ -1,19 +1,19 @@
 package eu.coinform.gateway.db;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class UserDbManager { //implements ApplicationListener<OnRegistrationCompleteEvent> {
+@Slf4j
+public class UserDbManager {
 
     private UserRepository userRepository;
     private PasswordAuthRepository passwordAuthRepository;
@@ -58,11 +58,6 @@ public class UserDbManager { //implements ApplicationListener<OnRegistrationComp
         return dbUser;
     }
 
-    public User updateUser(User user){
-        User u = userRepository.save(user);
-        return u;
-    }
-
     public User logIn(String email, String password) throws AuthenticationException, UserNotVerifiedException {
         Optional<PasswordAuth> passwordAuth = passwordAuthRepository.getByEmail(email.toLowerCase());
         if (passwordAuth.isEmpty()) {
@@ -73,7 +68,6 @@ public class UserDbManager { //implements ApplicationListener<OnRegistrationComp
             throw new BadCredentialsException("Incorrect Password");
         }
 
-//        passwordAuth.get().getUser().isEnabled();
         if(!userRepository.findById(passwordAuth.get().getId()).get().isEnabled()){
             throw new UserNotVerifiedException("User not verified");
         }
@@ -89,7 +83,46 @@ public class UserDbManager { //implements ApplicationListener<OnRegistrationComp
         return verificationTokenRepository.findByToken(token);
     }
 
-    public User getUser(VerificationToken verificationToken){
-        return userRepository.findByVerificationToken(verificationToken);
+    public boolean confirmUser(String token){
+        VerificationToken myToken = verificationTokenRepository.findByToken(token);
+        if(myToken == null){
+            throw new UserDbAuthenticationException("No such token user to verify");
+        }
+        User user = myToken.getUser();
+        Calendar cal = Calendar.getInstance();
+        if ((myToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
+            throw new UserDbAuthenticationException("Verification link outdated");
+        }
+        user.setEnabled(true);
+        userRepository.save(user);
+        return true;
+    }
+
+
+    public void logOut(Long userId){
+        Optional<User> user = userRepository.findById(userId);
+        user.get().setCounter(user.get().getCounter()+1);
+        userRepository.save(user.get());
+    }
+
+    public String passwordReset(User user){
+        String token = UUID.randomUUID().toString();
+        user.setEnabled(false);
+        user.setCounter(user.getCounter()+1);
+        verificationTokenRepository.save(new VerificationToken(token, user));
+        userRepository.save(user);
+        return token;
+    }
+
+    public Optional<User> getById(Long userid){
+        return userRepository.findById(userid);
+    }
+
+    public String getEmailById(Long userid){
+        return passwordAuthRepository.findById(userid).get().getEmail();
+    }
+
+    public User getByEmail(String email){
+        return passwordAuthRepository.getByEmail(email).get().getUser();
     }
 }

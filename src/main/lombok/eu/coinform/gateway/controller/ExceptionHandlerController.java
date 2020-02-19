@@ -2,6 +2,7 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.db.UserNotVerifiedException;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
+import eu.coinform.gateway.jwt.JwtAuthenticationException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.util.ErrorResponse;
@@ -42,4 +43,10 @@ public class ExceptionHandlerController {
         return ErrorResponse.USERNOTVERIFIED;
     }
 
+    @ResponseBody
+    @ExceptionHandler(JwtAuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse jwtAuthenticationException(JwtAuthenticationException ex){
+        return ErrorResponse.JWTEXCEPTION;
+    }
 }

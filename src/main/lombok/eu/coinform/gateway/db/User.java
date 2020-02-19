@@ -3,12 +3,14 @@ package eu.coinform.gateway.db;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+@ToString
 @Entity
 @Table(name = "user")
 public class User implements Serializable {
@@ -44,6 +46,11 @@ public class User implements Serializable {
     @Setter
     @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private VerificationToken verificationToken;
+
+    @Getter
+    @Setter
+    @Column(name = "counter")
+    private int counter;
 
     public User(){
         this.enabled = false;
