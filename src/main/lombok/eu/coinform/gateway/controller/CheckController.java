@@ -3,30 +3,16 @@ package eu.coinform.gateway.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.*;
-import eu.coinform.gateway.events.OnPasswordResetEvent;
-import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
-import eu.coinform.gateway.jwt.JwtAuthenticationProvider;
-import eu.coinform.gateway.jwt.JwtAuthenticationToken;
-import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.EmailService;
 import eu.coinform.gateway.service.RedisHandler;
-import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
-import eu.coinform.gateway.util.SuccesfullResponse;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,8 +20,6 @@ import javax.validation.Valid;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 
 /**
  * The REST Controller defining the endpoints facing towards the users
@@ -46,26 +30,14 @@ public class CheckController {
 
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
-    private final UserDbManager userDbManager;
-    private final String signatureKey;
     private final RuleEngineConnector ruleEngineConnector;
-    private final EmailService emailService;
-    private final ApplicationEventPublisher eventPublisher;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
-                    RuleEngineConnector ruleEngineConnector,
-                    UserDbManager userDbManager,
-                    @Value("${JWT_KEY}") String signatureKey,
-                    ApplicationEventPublisher eventPublisher,
-                    EmailService emailService) {
+                    RuleEngineConnector ruleEngineConnector) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
-        this.userDbManager = userDbManager;
-        this.signatureKey = signatureKey;
-        this.eventPublisher = eventPublisher;
-        this.emailService = emailService;
     }
 
     /**
@@ -203,78 +175,6 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-
-        Long userId;
-
-        if(authentication instanceof JwtAuthenticationToken){
-            userId = (Long) authentication.getPrincipal();
-        } else {
-            userId = userDbManager.getByEmail(authentication.getName()).getId();
-        }
-
-        String token = (new JwtToken.Builder())
-                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
-                .setKey(signatureKey)
-                .setCounter(userDbManager.getById(userId).get().getCounter())
-                .setExpirationTime(7*24*60*60*1000L)
-                .setUser(userId)
-                .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .build().getToken();
-        return new LoginResponse(token);
-    }
-
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
-
-        List<RoleEnum> roles = new LinkedList<>();
-        roles.add(RoleEnum.USER);
-
-        User user = userDbManager.registerUser(registerForm.email, registerForm.password, roles);
-
-        try {
-            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
-        } catch (Exception me){
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.USEREXISTS);
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
-    }
-
-    @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
-    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token){
-
-        if(!userDbManager.confirmUser(token)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOUSER);
-        }
-        return ResponseEntity.ok(SuccesfullResponse.USERVERIFIED);
-    }
-
-    @RequestMapping(value = "/passwordreset", method = RequestMethod.POST)
-    public ResponseEntity<?> passwordReset(@RequestBody @Valid PasswordResetForm form) {
-        User user = userDbManager.getByEmail(form.getEmail());
-        if(user == null) {
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
-        }
-
-        try{
-            eventPublisher.publishEvent(new OnPasswordResetEvent(user));
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.NOUSER);
-        }
-
-        return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
-    }
-
-    @RequestMapping(value = "/exit", method = RequestMethod.GET)
-    public ResponseEntity<?> logout(){
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        userDbManager.logOut((Long) authentication.getPrincipal());
-        return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
-    }
 
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
