@@ -21,7 +21,7 @@ public class RegistrationCompleteListener extends GatewayEventListener<OnRegistr
         String token = UUID.randomUUID().toString();
         userDbManager.createVerificationToken(user, token);
         String toAddress = user.getPasswordAuth().getEmail();
-        String verifyUrl = scheme + "://" + url + "/registrationConfirm?token="+token;
+        String verifyUrl = url + "/registrationConfirm?token="+token;
         emailService.sendVerifyEmailMessage(toAddress, verifyUrl);
 
     }

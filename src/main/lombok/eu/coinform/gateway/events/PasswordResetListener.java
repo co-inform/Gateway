@@ -22,7 +22,7 @@ public class PasswordResetListener extends GatewayEventListener<OnPasswordResetE
         User user = event.getUser();
         log.debug("HandleEvent user {}:", user);
         String token = userDbManager.passwordReset(user);
-        String verifyUrl = scheme + "://" + url + "/registrationConfirm?token="+token;
+        String verifyUrl = url + "/registrationConfirm?token="+token;
         emailService.sendPasswordResetMessage(user.getPasswordAuth().getEmail(),verifyUrl);
     }
 }

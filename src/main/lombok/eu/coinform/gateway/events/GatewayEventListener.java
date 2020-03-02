@@ -10,15 +10,12 @@ import org.springframework.lang.NonNull;
 
 abstract public class GatewayEventListener<T extends ApplicationEvent> implements ApplicationListener<T>{
 
-    protected UserDbManager userDbManager;
-    protected EmailService emailService;
-    protected VerificationTokenRepository verificationTokenRepository;
+    protected final UserDbManager userDbManager;
+    protected final EmailService emailService;
+    protected final VerificationTokenRepository verificationTokenRepository;
 
-    @Value("${gateway.url}")
+    @Value("${gateway.scheme}://${gateway.url}")
     protected String url;
-
-    @Value("${gateway.scheme}")
-    protected String scheme;
 
     GatewayEventListener(UserDbManager userDbManager,
                          EmailService emailService,
