@@ -54,8 +54,16 @@ public class UserDbManager {
                                 roleList.stream().map(role -> new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()))));
 
         userRepository.save(dbUser);
+        verificationTokenRepository.save(new VerificationToken(UUID.randomUUID().toString(), user));
 
         return dbUser;
+    }
+
+    public boolean newPassword(User user, String password) {
+        user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+        verificationTokenRepository.delete(verificationTokenRepository.findByUser(user));
+        return true;
     }
 
     public User logIn(String email, String password) throws AuthenticationException, UserNotVerifiedException {
@@ -75,8 +83,11 @@ public class UserDbManager {
     }
 
     public void createVerificationToken(User user, String token){
+        log.debug("User: {}, token: {}", user, token);
         VerificationToken myToken = new VerificationToken(token, user);
-        verificationTokenRepository.save(myToken);
+        log.debug("myToken: {}, userId: {}", myToken.getToken(), myToken.getId());
+        VerificationToken t = verificationTokenRepository.save(myToken);
+        log.debug("t: {}, t.id: {}", t.getToken(), t.getId());
     }
 
     public VerificationToken getVerificationToken(String token){
@@ -86,7 +97,7 @@ public class UserDbManager {
     public boolean confirmUser(String token){
         VerificationToken myToken = verificationTokenRepository.findByToken(token);
         if(myToken == null){
-            throw new UserDbAuthenticationException("No such token user to verify");
+            throw new UserDbAuthenticationException("No such token to verify");
         }
         User user = myToken.getUser();
         Calendar cal = Calendar.getInstance();
@@ -95,23 +106,26 @@ public class UserDbManager {
         }
         user.setEnabled(true);
         userRepository.save(user);
+        verificationTokenRepository.delete(myToken);
         return true;
     }
 
 
     public void logOut(Long userId){
         Optional<User> user = userRepository.findById(userId);
-        user.get().setCounter(user.get().getCounter()+1);
+        user.get().setCounter(user.get().getCounter()+1); // to invalidate the JWT token
         userRepository.save(user.get());
     }
 
     public String passwordReset(User user){
-        String token = UUID.randomUUID().toString();
-        user.setEnabled(false);
-        user.setCounter(user.getCounter()+1);
-        verificationTokenRepository.save(new VerificationToken(token, user));
+        log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
+        String uuid = UUID.randomUUID().toString();
+        user.setCounter(user.getCounter()+1); // to invalidate the JWT token
+        VerificationToken token = verificationTokenRepository.findByUser(user);
+        token.updateToken(uuid);
+        verificationTokenRepository.save(token);
         userRepository.save(user);
-        return token;
+        return uuid;
     }
 
     public Optional<User> getById(Long userid){
@@ -125,4 +139,11 @@ public class UserDbManager {
     public User getByEmail(String email){
         return passwordAuthRepository.getByEmail(email).get().getUser();
     }
+/*
+    public User getByVerificationToken(VerificationToken token){
+        log.debug("Token: {}", token.getToken());
+        return userRepository.findByVerificationToken(token);
+    }
+
+ */
 }

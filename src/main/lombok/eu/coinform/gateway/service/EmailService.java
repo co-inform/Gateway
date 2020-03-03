@@ -27,11 +27,13 @@ public class EmailService {
 
     public void sendVerifyEmailMessage(String to, String link){
         SimpleMailMessage message = new SimpleMailMessage();
+        log.debug("Send {} to {}", link, to);
 
         message.setFrom(from);
         message.setTo(to);
         message.setSubject("Coinform Verification email");
         message.setText(String.format(verify,to,link));
+        log.debug("Message: {}", message);
         emailSender.send(message);
     }
 

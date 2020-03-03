@@ -3,6 +3,7 @@ package eu.coinform.gateway.events;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.VerificationTokenRepository;
 import eu.coinform.gateway.service.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;

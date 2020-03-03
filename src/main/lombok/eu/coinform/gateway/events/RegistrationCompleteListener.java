@@ -2,11 +2,13 @@ package eu.coinform.gateway.events;
 
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.service.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class RegistrationCompleteListener extends GatewayEventListener<OnRegistrationCompleteEvent> {
 
     RegistrationCompleteListener(UserDbManager userDbManager,
@@ -18,10 +20,11 @@ public class RegistrationCompleteListener extends GatewayEventListener<OnRegistr
     @Override
     protected void handleEvent(OnRegistrationCompleteEvent event){
         User user = event.getUser();
-        String token = UUID.randomUUID().toString();
-        userDbManager.createVerificationToken(user, token);
+        log.debug("User: {}", user.getPasswordAuth().getEmail());
+        VerificationToken token = verificationTokenRepository.findByUser(user);
         String toAddress = user.getPasswordAuth().getEmail();
-        String verifyUrl = url + "/registrationConfirm?token="+token;
+        String verifyUrl = url + "/registrationConfirm?token="+token.getToken();
+        log.debug("Email: {}, verifyUrl: {}", toAddress, verifyUrl);
         emailService.sendVerifyEmailMessage(toAddress, verifyUrl);
 
     }

@@ -1,9 +1,6 @@
 package eu.coinform.gateway.controller;
 
-import eu.coinform.gateway.db.RoleEnum;
-import eu.coinform.gateway.db.User;
-import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.UsernameAlreadyExistException;
+import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.jwt.JwtAuthenticationToken;
@@ -20,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -41,7 +40,6 @@ public class UserController {
         this.userDbManager = userDbManager;
         this.eventPublisher = eventPublisher;
         this.signatureKey = signatureKey;
-
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -77,6 +75,7 @@ public class UserController {
         User user = userDbManager.registerUser(registerForm.email, registerForm.password, roles);
 
         try {
+            log.debug("Publishing event");
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
         } catch (Exception me){
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.USEREXISTS);
@@ -95,6 +94,7 @@ public class UserController {
 
     @RequestMapping(value = "/passwordreset", method = RequestMethod.POST)
     public ResponseEntity<?> passwordReset(@RequestBody @Valid PasswordResetForm form) {
+        log.debug("Form: {}", form.email);
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
             return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);

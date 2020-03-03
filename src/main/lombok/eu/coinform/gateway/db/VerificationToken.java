@@ -2,6 +2,7 @@ package eu.coinform.gateway.db;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.util.Date;
 @Table(name = "verified")
 public class VerificationToken implements Serializable {
 
-    private static final int EXPIRATION = 60*24;
+    private static final int EXPIRATION = 60*2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,8 +28,8 @@ public class VerificationToken implements Serializable {
 
     @Getter
     @Setter
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false, name = "user_id")
+    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER, optional = true)
+    @MapsId //@JoinColumn(nullable = false, name = "user_id")
     private User user;
 
     @Getter
