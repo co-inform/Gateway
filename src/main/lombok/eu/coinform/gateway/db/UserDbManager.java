@@ -2,11 +2,13 @@ package eu.coinform.gateway.db;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -98,15 +100,15 @@ public class UserDbManager {
         return verificationTokenRepository.findByToken(token);
     }
 
-    public boolean confirmUser(String token){
+    public boolean confirmUser(String token) throws LinkTimedOutException{
         Optional<VerificationToken> myToken = verificationTokenRepository.findByToken(token);
         if(myToken.isEmpty()){
-            throw new UserDbAuthenticationException(token);
+            throw new NoSuchTokenException(token);
         }
         User user = myToken.map(VerificationToken::getUser).get();
         Calendar cal = Calendar.getInstance();
         if ((myToken.get().getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
-            throw new UserDbAuthenticationException("Verification link outdated");
+            throw new LinkTimedOutException("Verification link timed out");
         }
         user.setEnabled(true);
         userRepository.save(user);

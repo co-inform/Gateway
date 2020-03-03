@@ -1,8 +1,6 @@
 package eu.coinform.gateway.controller;
 
-import eu.coinform.gateway.db.UserDbAuthenticationException;
-import eu.coinform.gateway.db.UserNotVerifiedException;
-import eu.coinform.gateway.db.UsernameAlreadyExistException;
+import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.jwt.JwtAuthenticationException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
@@ -55,10 +53,19 @@ public class ExceptionHandlerController {
     }
 
     @ResponseBody
-    @ExceptionHandler(UserDbAuthenticationException.class)
+    @ExceptionHandler(NoSuchTokenException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ModelAndView userNameNotFoundException(UserDbAuthenticationException ex, Model model) {
+    public ModelAndView noSuchTokenException(NoSuchTokenException ex, Model model) {
         ModelAndView mav = new ModelAndView("notverified");
+        mav.addObject("token", ex.getMessage());
+        return mav;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(LinkTimedOutException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ModelAndView linkTimedOutException(LinkTimedOutException ex, Model model) {
+        ModelAndView mav = new ModelAndView("timedout");
         mav.addObject("token", ex.getMessage());
         return mav;
     }
