@@ -7,6 +7,7 @@ import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.util.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -41,6 +42,13 @@ public class ExceptionHandlerController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse userNotVerifiedException(UserNotVerifiedException ex){
         return ErrorResponse.USERNOTVERIFIED;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(UsernameNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse userNameNotFoundException(UsernameNotFoundException ex) {
+        return ErrorResponse.NOUSER;
     }
 
     @ResponseBody

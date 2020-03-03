@@ -20,7 +20,7 @@ public class PasswordResetListener extends GatewayEventListener<OnPasswordResetE
     @Override
     protected void handleEvent(OnPasswordResetEvent event) {
         User user = event.getUser();
-        log.debug("HandleEvent user {}:", user.getPasswordAuth().getEmail());
+        log.debug("HandleEvent user: {}", user.getPasswordAuth().getEmail());
         String token = userDbManager.passwordReset(user);
         String verifyUrl = url + "/passwordreset?token="+token;
         emailService.sendPasswordResetMessage(user.getPasswordAuth().getEmail(),verifyUrl);

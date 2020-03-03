@@ -62,8 +62,10 @@ public class UserDbManager {
     public boolean newPassword(User user, String password) {
         user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
-        verificationTokenRepository.delete(verificationTokenRepository.findByUser(user));
-        return true;
+        return verificationTokenRepository.findByUser(user).map(token -> {
+            verificationTokenRepository.delete(token);
+            return true;
+        }).or(() -> Optional.of(false)).get();
     }
 
     public User logIn(String email, String password) throws AuthenticationException, UserNotVerifiedException {
@@ -79,6 +81,11 @@ public class UserDbManager {
         if(!userRepository.findById(passwordAuth.get().getId()).get().isEnabled()){
             throw new UserNotVerifiedException("User not verified");
         }
+
+        verificationTokenRepository.findByUser(passwordAuth.get().getUser()).ifPresent(token -> {
+            verificationTokenRepository.delete(token);
+        });
+
         return passwordAuth.get().getUser();
     }
 
@@ -90,40 +97,41 @@ public class UserDbManager {
         log.debug("t: {}, t.id: {}", t.getToken(), t.getId());
     }
 
-    public VerificationToken getVerificationToken(String token){
+    public Optional<VerificationToken> getVerificationToken(String token){
         return verificationTokenRepository.findByToken(token);
     }
 
     public boolean confirmUser(String token){
-        VerificationToken myToken = verificationTokenRepository.findByToken(token);
-        if(myToken == null){
+        Optional<VerificationToken> myToken = verificationTokenRepository.findByToken(token);
+        if(myToken.isEmpty()){
             throw new UserDbAuthenticationException("No such token to verify");
         }
-        User user = myToken.getUser();
+        User user = myToken.map(VerificationToken::getUser).get();
         Calendar cal = Calendar.getInstance();
-        if ((myToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
+        if ((myToken.get().getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
             throw new UserDbAuthenticationException("Verification link outdated");
         }
         user.setEnabled(true);
         userRepository.save(user);
-        verificationTokenRepository.delete(myToken);
+        verificationTokenRepository.delete(myToken.get());
         return true;
     }
 
 
     public void logOut(Long userId){
         Optional<User> user = userRepository.findById(userId);
-        user.get().setCounter(user.get().getCounter()+1); // to invalidate the JWT token
+        user.ifPresent(u -> u.setCounter(u.getCounter()+1)); // to invalidate the JWT token
         userRepository.save(user.get());
     }
 
     public String passwordReset(User user){
         log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
-        String uuid = UUID.randomUUID().toString();
         user.setCounter(user.getCounter()+1); // to invalidate the JWT token
-        VerificationToken token = verificationTokenRepository.findByUser(user);
-        token.updateToken(uuid);
-        verificationTokenRepository.save(token);
+        Optional<VerificationToken> token = verificationTokenRepository.findByUser(user);
+        String uuid = UUID.randomUUID().toString();
+
+        token.ifPresent(verificationToken -> verificationTokenRepository.delete(verificationToken));
+        verificationTokenRepository.save(new VerificationToken(uuid, user));
         userRepository.save(user);
         return uuid;
     }
@@ -133,17 +141,13 @@ public class UserDbManager {
     }
 
     public String getEmailById(Long userid){
-        return passwordAuthRepository.findById(userid).get().getEmail();
+        return passwordAuthRepository.findById(userid)
+                .map(PasswordAuth::getEmail).get();
     }
 
     public User getByEmail(String email){
-        return passwordAuthRepository.getByEmail(email).get().getUser();
-    }
-/*
-    public User getByVerificationToken(VerificationToken token){
-        log.debug("Token: {}", token.getToken());
-        return userRepository.findByVerificationToken(token);
+        return passwordAuthRepository.getByEmail(email)
+                .map(PasswordAuth::getUser).get();
     }
 
- */
 }

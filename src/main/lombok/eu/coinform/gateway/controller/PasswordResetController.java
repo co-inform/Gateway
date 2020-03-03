@@ -5,13 +5,12 @@ import eu.coinform.gateway.db.UserDbAuthenticationException;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.VerificationToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.Optional;
 
 @Controller
 @Slf4j
@@ -26,12 +25,12 @@ public class PasswordResetController {
     @RequestMapping(value = "/passwordreset", method = RequestMethod.GET)
     public String passwordReset(@RequestParam(name = "token", required = true) String token, Model model){
         log.debug("Param: {}", token);
-        VerificationToken myToken = userDbManager.getVerificationToken(token);
-        User user = myToken.getUser();
-        log.debug("myToken: {}", myToken.getToken());
-        if (user == null) {
-            throw new UserDbAuthenticationException("No such token exist");
+        Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
+        if(myToken.isEmpty()){
+            throw new UsernameNotFoundException("No such token for that user");
         }
+        User user = myToken.get().getUser();
+//        log.debug("myToken: {}", myToken.getToken());
 
         model.addAttribute("userid", user.getPasswordAuth().getEmail());
         model.addAttribute("token", token);
@@ -47,7 +46,7 @@ public class PasswordResetController {
             return "mismatch";
         }
 
-        VerificationToken token = userDbManager.getVerificationToken(form.token);
+        VerificationToken token = userDbManager.getVerificationToken(form.token).map(t -> t).get();
         User user = token.getUser();
 
         if(user == null){
@@ -58,8 +57,6 @@ public class PasswordResetController {
         if(!userDbManager.newPassword(user, form.pw1)){
             throw new UserDbAuthenticationException("Oups");
         }
-
-
 
         return "success";
     }

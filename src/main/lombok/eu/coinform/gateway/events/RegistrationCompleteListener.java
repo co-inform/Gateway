@@ -5,8 +5,6 @@ import eu.coinform.gateway.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 @Slf4j
 public class RegistrationCompleteListener extends GatewayEventListener<OnRegistrationCompleteEvent> {
@@ -21,7 +19,7 @@ public class RegistrationCompleteListener extends GatewayEventListener<OnRegistr
     protected void handleEvent(OnRegistrationCompleteEvent event){
         User user = event.getUser();
         log.debug("User: {}", user.getPasswordAuth().getEmail());
-        VerificationToken token = verificationTokenRepository.findByUser(user);
+        VerificationToken token = verificationTokenRepository.findByUser(user).map(t -> t).get();
         String toAddress = user.getPasswordAuth().getEmail();
         String verifyUrl = url + "/registrationConfirm?token="+token.getToken();
         log.debug("Email: {}, verifyUrl: {}", toAddress, verifyUrl);
