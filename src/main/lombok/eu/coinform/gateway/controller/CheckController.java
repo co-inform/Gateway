@@ -171,8 +171,6 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-
-
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
     public LinkedHashMap<String, Object> ruleEngineCheck(@Valid @RequestBody RuleEngineTestInput ruleEngineTestInput) {
         LinkedHashMap<String, Object> moduleResponses = new LinkedHashMap<>();
