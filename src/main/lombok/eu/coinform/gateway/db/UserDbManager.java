@@ -104,7 +104,7 @@ public class UserDbManager {
     public boolean confirmUser(String token){
         Optional<VerificationToken> myToken = verificationTokenRepository.findByToken(token);
         if(myToken.isEmpty()){
-            throw new UserDbAuthenticationException("No such token to verify");
+            throw new UserDbAuthenticationException(token);
         }
         User user = myToken.map(VerificationToken::getUser).get();
         Calendar cal = Calendar.getInstance();

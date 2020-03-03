@@ -14,11 +14,11 @@ import java.util.Optional;
 
 @Controller
 @Slf4j
-public class PasswordResetController {
+public class UserPagesController {
 
     private final UserDbManager userDbManager;
 
-    PasswordResetController(UserDbManager userDbManager){
+    UserPagesController(UserDbManager userDbManager){
         this.userDbManager = userDbManager;
     }
 
@@ -59,5 +59,21 @@ public class PasswordResetController {
         }
 
         return "success";
+    }
+
+    @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
+    public String confirmRegistration(@RequestParam("token") String token, Model model){
+
+        Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
+
+        if(!userDbManager.confirmUser(token)){
+            model.addAttribute("token", token);
+            return "notverified";
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOUSER);
+        }
+
+        model.addAttribute("userid", myToken.get().getUser().getPasswordAuth().getEmail());
+        return "verified";
+//        return ResponseEntity.ok(SuccesfullResponse.USERVERIFIED);
     }
 }

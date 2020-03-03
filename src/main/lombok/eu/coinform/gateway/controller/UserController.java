@@ -17,8 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -83,14 +81,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
-    @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
-    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token){
 
-        if(!userDbManager.confirmUser(token)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOUSER);
-        }
-        return ResponseEntity.ok(SuccesfullResponse.USERVERIFIED);
-    }
 
     @RequestMapping(value = "/passwordreset", method = RequestMethod.POST)
     public ResponseEntity<?> passwordReset(@RequestBody @Valid PasswordResetForm form) {
