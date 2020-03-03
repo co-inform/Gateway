@@ -89,12 +89,9 @@ public class UserDbManager {
         return passwordAuth.get().getUser();
     }
 
-    public void createVerificationToken(User user, String token){
-        log.debug("User: {}, token: {}", user, token);
+    public void createAndSaveVerificationToken(User user, String token){
         VerificationToken myToken = new VerificationToken(token, user);
-        log.debug("myToken: {}, userId: {}", myToken.getToken(), myToken.getId());
         VerificationToken t = verificationTokenRepository.save(myToken);
-        log.debug("t: {}, t.id: {}", t.getToken(), t.getId());
     }
 
     public Optional<VerificationToken> getVerificationToken(String token){
