@@ -1,9 +1,6 @@
 package eu.coinform.gateway.controller;
 
-import eu.coinform.gateway.db.User;
-import eu.coinform.gateway.db.UserDbAuthenticationException;
-import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.VerificationToken;
+import eu.coinform.gateway.db.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -62,7 +59,8 @@ public class UserPagesController {
     }
 
     @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
-    public String confirmRegistration(@RequestParam("token") String token, Model model){
+    public String confirmRegistration(@RequestParam("token") String token, Model model) throws LinkTimedOutException {
+
 
         Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
 

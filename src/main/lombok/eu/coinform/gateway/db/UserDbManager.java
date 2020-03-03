@@ -2,13 +2,11 @@ package eu.coinform.gateway.db;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,7 +68,7 @@ public class UserDbManager {
         }).or(() -> Optional.of(false)).get();
     }
 
-    public User logIn(String email, String password) throws AuthenticationException, UserNotVerifiedException {
+    public User logIn(String email, String password) throws AuthenticationException {
         Optional<PasswordAuth> passwordAuth = passwordAuthRepository.getByEmail(email.toLowerCase());
         if (passwordAuth.isEmpty()) {
             throw new UsernameNotFoundException("No such username");
