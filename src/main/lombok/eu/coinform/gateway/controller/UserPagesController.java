@@ -26,13 +26,11 @@ public class UserPagesController {
 
     @RequestMapping(value = "/passwordreset", method = RequestMethod.GET)
     public String passwordReset(@RequestParam(name = "token", required = true) String token, Model model){
-        log.debug("Param: {}", token);
         Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
         if(myToken.isEmpty()){
-            throw new UsernameNotFoundException("No such token for that user");
+            throw new NoSuchTokenException("");
         }
         User user = myToken.get().getUser();
-//        log.debug("myToken: {}", myToken.getToken());
 
         model.addAttribute("userid", user.getPasswordAuth().getEmail());
         model.addAttribute("token", token);
@@ -56,7 +54,7 @@ public class UserPagesController {
             throw new UsernameNotFoundException("No such user");
         }
 
-        if(!userDbManager.newPassword(user, form.pw1)){
+        if(!userDbManager.passwordReset(user, form.pw1)){
             throw new UserDbAuthenticationException("Oups");
         }
 
@@ -78,11 +76,9 @@ public class UserPagesController {
         if(!userDbManager.confirmUser(token)){
             model.addAttribute("token", token);
             return "notverified";
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOUSER);
         }
 
         model.addAttribute("userid", myToken.get().getUser().getPasswordAuth().getEmail());
         return "verified";
-//        return ResponseEntity.ok(SuccesfullResponse.USERVERIFIED);
     }
 }

@@ -59,7 +59,7 @@ public class UserDbManager {
         return dbUser;
     }
 
-    public boolean newPassword(User user, String password) {
+    public boolean passwordReset(User user, String password) {
         user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
 
@@ -72,7 +72,6 @@ public class UserDbManager {
     public boolean passwordChange(Long userid, String newPassword, String oldPassword){
         User user = userRepository.findById(userid).get();
         if(!passwordEncoder.matches(oldPassword, user.getPasswordAuth().getPassword())){
-            log.debug("oldPassword {}, storedPassword {}", passwordEncoder.encode(oldPassword), user.getPasswordAuth().getPassword());
             return false;
         }
         user.getPasswordAuth().setPassword(passwordEncoder.encode(newPassword));

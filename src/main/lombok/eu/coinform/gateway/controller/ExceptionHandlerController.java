@@ -6,6 +6,7 @@ import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.util.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -75,5 +76,12 @@ public class ExceptionHandlerController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse jwtAuthenticationException(JwtAuthenticationException ex){
         return ErrorResponse.JWTEXCEPTION;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse badCredentialsException(BadCredentialsException ex){
+        return ErrorResponse.BADCREDENTIALS;
     }
 }

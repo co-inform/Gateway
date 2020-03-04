@@ -10,6 +10,7 @@ public enum ErrorResponse {
     NOSUCHTRANSACTIONID("No such transaction_id"),
     USERNOTVERIFIED("User not verified"),
     NOUSER("No such user registered"),
+    BADCREDENTIALS("Wrong password/username"),
     JWTEXCEPTION("A JWT token exception");
 
     @Getter

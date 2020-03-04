@@ -4,7 +4,7 @@ import java.util.NoSuchElementException;
 
 public class NoSuchTokenException extends NoSuchElementException {
 
-    NoSuchTokenException(String message){
+    public NoSuchTokenException(String message){
         super(message);
     }
 }

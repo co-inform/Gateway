@@ -84,8 +84,8 @@ public class UserController {
 
 
 
-    @RequestMapping(value = "/passwordreset", method = RequestMethod.POST)
-    public ResponseEntity<?> passwordReset(@RequestBody @Valid PasswordResetForm form) {
+    @RequestMapping(value = "/reset-password", method = RequestMethod.POST)
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetForm form) {
         log.debug("Form: {}", form.email);
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
@@ -95,7 +95,7 @@ public class UserController {
         try{
             eventPublisher.publishEvent(new OnPasswordResetEvent(user));
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
         }
 
         return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
