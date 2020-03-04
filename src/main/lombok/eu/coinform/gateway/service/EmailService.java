@@ -21,7 +21,7 @@ public class EmailService {
     @Value("${email.reset}")
     private String reset;
 
-    @Value("${email.successfullreset}")
+    @Value("${email.successful}")
     private String success;
 
     EmailService(JavaMailSender emailSender){
