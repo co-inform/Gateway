@@ -69,6 +69,17 @@ public class UserDbManager {
         }).or(() -> Optional.of(false)).get();
     }
 
+    public boolean passwordChange(Long userid, String newPassword, String oldPassword){
+        User user = userRepository.findById(userid).get();
+        if(!passwordEncoder.matches(oldPassword, user.getPasswordAuth().getPassword())){
+            log.debug("oldPassword {}, storedPassword {}", passwordEncoder.encode(oldPassword), user.getPasswordAuth().getPassword());
+            return false;
+        }
+        user.getPasswordAuth().setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return true;
+    }
+
     public User logIn(String email, String password) throws AuthenticationException {
         Optional<PasswordAuth> passwordAuth = passwordAuthRepository.getByEmail(email.toLowerCase());
         if (passwordAuth.isEmpty()) {

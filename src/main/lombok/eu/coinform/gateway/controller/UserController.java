@@ -3,6 +3,7 @@ package eu.coinform.gateway.controller;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
+import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
 import eu.coinform.gateway.jwt.JwtAuthenticationToken;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.util.ErrorResponse;
@@ -98,6 +99,29 @@ public class UserController {
         }
 
         return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
+    }
+
+    @RequestMapping(value = "/change-password", method = RequestMethod.POST)
+    public ResponseEntity<?> passwordChange(@RequestBody @Valid PasswordChangeForm form){
+
+        SecurityContext ctx = SecurityContextHolder.getContext();
+        Authentication authentication = ctx.getAuthentication();
+
+        Long userid = (Long) authentication.getPrincipal();
+
+        if(!userDbManager.passwordChange(userid, form.newPassword, form.oldPassword)){
+            log.debug("oldPassword {}, newPassword {}", form.oldPassword, form.newPassword);
+            throw new UserDbAuthenticationException("User has given a mismatching password");
+        }
+
+        try {
+            User user = userDbManager.getById(userid).get();
+            eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+        }
+
+        return ResponseEntity.ok(SuccesfullResponse.PASSWORDCHANGE);
     }
 
     @RequestMapping(value = "/exit", method = RequestMethod.GET)

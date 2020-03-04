@@ -55,7 +55,7 @@ public class EmailService {
 
         message.setFrom(from);
         message.setTo(to);
-        message.setSubject("Successfull password reset of CoInform system");
+        message.setSubject("Password successfully changed for the CoInform system");
         message.setText(String.format(success,to));
         emailSender.send(message);
     }
