@@ -21,6 +21,9 @@ public class EmailService {
     @Value("${email.reset}")
     private String reset;
 
+    @Value("${email.successfullreset}")
+    private String success;
+
     EmailService(JavaMailSender emailSender){
         this.emailSender = emailSender;
     }
@@ -44,6 +47,16 @@ public class EmailService {
         message.setTo(to);
         message.setSubject("Coinform Reset password email");
         message.setText(String.format(reset,link));
+        emailSender.send(message);
+    }
+
+    public void sendSuccessMessage(String to){
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Successfull password reset of CoInform system");
+        message.setText(String.format(success,to));
         emailSender.send(message);
     }
 

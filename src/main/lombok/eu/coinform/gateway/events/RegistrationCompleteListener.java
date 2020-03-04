@@ -9,17 +9,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RegistrationCompleteListener extends GatewayEventListener<OnRegistrationCompleteEvent> {
 
+    private final UserDbManager userDbManager;
+
     RegistrationCompleteListener(UserDbManager userDbManager,
-                                 EmailService emailService,
-                                 VerificationTokenRepository verificationTokenRepository){
-        super(userDbManager, emailService, verificationTokenRepository);
+                                 EmailService emailService) {
+        super(emailService);
+        this.userDbManager = userDbManager;
     }
 
     @Override
     protected void handleEvent(OnRegistrationCompleteEvent event){
         User user = event.getUser();
         log.debug("User: {}", user.getPasswordAuth().getEmail());
-        VerificationToken token = verificationTokenRepository.findByUser(user).map(t -> t).get();
+        VerificationToken token = userDbManager.getVerificationToken(user).map(t -> t).get();
         String toAddress = user.getPasswordAuth().getEmail();
         String verifyUrl = url + "/registrationConfirm?token="+token.getToken();
         log.debug("Email: {}, verifyUrl: {}", toAddress, verifyUrl);

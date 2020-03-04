@@ -1,7 +1,9 @@
 package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,9 +16,12 @@ import java.util.Optional;
 public class UserPagesController {
 
     private final UserDbManager userDbManager;
+    private final ApplicationEventPublisher eventPublisher;
 
-    UserPagesController(UserDbManager userDbManager){
+    UserPagesController(UserDbManager userDbManager,
+                        ApplicationEventPublisher eventpublisher){
         this.userDbManager = userDbManager;
+        this.eventPublisher = eventpublisher;
     }
 
     @RequestMapping(value = "/passwordreset", method = RequestMethod.GET)
@@ -53,6 +58,12 @@ public class UserPagesController {
 
         if(!userDbManager.newPassword(user, form.pw1)){
             throw new UserDbAuthenticationException("Oups");
+        }
+
+        try {
+            eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
+        } catch (Exception e) {
+            log.debug("Maybe not successful? {}", e.getMessage());
         }
 
         return "success";

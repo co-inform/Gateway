@@ -62,6 +62,7 @@ public class UserDbManager {
     public boolean newPassword(User user, String password) {
         user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+
         return verificationTokenRepository.findByUser(user).map(token -> {
             verificationTokenRepository.delete(token);
             return true;
@@ -96,6 +97,10 @@ public class UserDbManager {
 
     public Optional<VerificationToken> getVerificationToken(String token){
         return verificationTokenRepository.findByToken(token);
+    }
+
+    public Optional<VerificationToken> getVerificationToken(User user){
+        return verificationTokenRepository.findByUser(user);
     }
 
     public boolean confirmUser(String token) throws LinkTimedOutException{

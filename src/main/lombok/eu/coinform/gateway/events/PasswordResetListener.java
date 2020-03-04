@@ -11,10 +11,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class PasswordResetListener extends GatewayEventListener<OnPasswordResetEvent>{
 
+    private final UserDbManager userDbManager;
+
     PasswordResetListener(UserDbManager userDbManager,
-                          EmailService emailService,
-                          VerificationTokenRepository verificationTokenRepository) {
-        super(userDbManager, emailService, verificationTokenRepository);
+                          EmailService emailService) {
+        super(emailService);
+        this.userDbManager = userDbManager;
     }
 
     @Override
