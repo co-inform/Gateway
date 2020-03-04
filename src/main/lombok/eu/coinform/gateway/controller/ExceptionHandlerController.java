@@ -56,7 +56,7 @@ public class ExceptionHandlerController {
     @ResponseBody
     @ExceptionHandler(NoSuchTokenException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ModelAndView noSuchTokenException(NoSuchTokenException ex, Model model) {
+    public ModelAndView noSuchTokenException(NoSuchTokenException ex) {
         ModelAndView mav = new ModelAndView("notverified");
         mav.addObject("token", ex.getMessage());
         return mav;
@@ -65,7 +65,7 @@ public class ExceptionHandlerController {
     @ResponseBody
     @ExceptionHandler(LinkTimedOutException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ModelAndView linkTimedOutException(LinkTimedOutException ex, Model model) {
+    public ModelAndView linkTimedOutException(LinkTimedOutException ex) {
         ModelAndView mav = new ModelAndView("timedout");
         mav.addObject("token", ex.getMessage());
         return mav;
