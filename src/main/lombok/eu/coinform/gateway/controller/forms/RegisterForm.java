@@ -1,4 +1,4 @@
-package eu.coinform.gateway.controller;
+package eu.coinform.gateway.controller.forms;
 
 import lombok.Data;
 
@@ -6,9 +6,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Data
-public class LogoutForm {
+public class RegisterForm {
     @Email
-    private String email;
+    String email;
     @NotEmpty
-    private String password;
+    String password;
 }

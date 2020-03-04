@@ -1,5 +1,8 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.controller.forms.PasswordChangeForm;
+import eu.coinform.gateway.controller.forms.PasswordResetForm;
+import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
@@ -71,13 +74,13 @@ public class UserController {
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
 
-        User user = userDbManager.registerUser(registerForm.email, registerForm.password, roles);
+        User user = userDbManager.registerUser(registerForm.getEmail(), registerForm.getPassword(), roles);
 
         try {
             log.debug("Publishing event");
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
         } catch (Exception me){
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.USEREXISTS);
+            ResponseEntity.badRequest().body(ErrorResponse.USEREXISTS);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
@@ -86,7 +89,7 @@ public class UserController {
 
     @RequestMapping(value = "/reset-password", method = RequestMethod.POST)
     public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetForm form) {
-        log.debug("Form: {}", form.email);
+        log.debug("Form: {}", form.getEmail());
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
             return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
@@ -109,8 +112,7 @@ public class UserController {
 
         Long userid = (Long) authentication.getPrincipal();
 
-        if(!userDbManager.passwordChange(userid, form.newPassword, form.oldPassword)){
-            log.debug("oldPassword {}, newPassword {}", form.oldPassword, form.newPassword);
+        if(!userDbManager.passwordChange(userid, form.getNewPassword(), form.getOldPassword())){
             throw new UserDbAuthenticationException("User has given a mismatching password");
         }
 

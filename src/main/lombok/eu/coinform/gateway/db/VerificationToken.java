@@ -28,7 +28,7 @@ public class VerificationToken implements Serializable {
     @Getter
     @Setter
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER, optional = true)
-    @MapsId //@JoinColumn(nullable = false, name = "user_id")
+    @MapsId
     private User user;
 
     @Getter

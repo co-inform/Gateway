@@ -1,5 +1,6 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.controller.forms.NewPasswordForm;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -41,12 +42,11 @@ public class UserPagesController {
     @PostMapping(value = "/resetting")
     public String saveNewPassword(@ModelAttribute NewPasswordForm form) {
 
-        log.debug("Form values: {}, {}, {}", form.pw1, form.pw2, form.token);
-        if(!form.pw1.equals(form.pw2)){
+        if(!form.getPw1().equals(form.getPw2())){
             return "mismatch";
         }
 
-        VerificationToken token = userDbManager.getVerificationToken(form.token).map(t -> t).get();
+        VerificationToken token = userDbManager.getVerificationToken(form.getToken()).map(t -> t).get();
         User user = token.getUser();
 
         if(user == null){
@@ -54,7 +54,7 @@ public class UserPagesController {
             throw new UsernameNotFoundException("No such user");
         }
 
-        if(!userDbManager.passwordReset(user, form.pw1)){
+        if(!userDbManager.passwordReset(user, form.getPw1())){
             throw new UserDbAuthenticationException("Oups");
         }
 

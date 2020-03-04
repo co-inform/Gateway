@@ -1,4 +1,4 @@
-package eu.coinform.gateway.controller;
+package eu.coinform.gateway.controller.forms;
 
 import lombok.Data;
 
