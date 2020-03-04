@@ -18,7 +18,6 @@ public class UserDbAuthenticationProvider implements AuthenticationProvider {
 
     private UserDbManager userDbManager;
 
-//    @SneakyThrows
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String name = authentication.getName();

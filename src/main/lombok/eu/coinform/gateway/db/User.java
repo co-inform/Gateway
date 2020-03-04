@@ -38,12 +38,7 @@ public class User implements Serializable {
     @Getter
     @Setter
     private boolean enabled;
-/*
-    @Getter
-    @Setter
-    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private VerificationToken verificationToken;
-*/
+
     @Getter
     @Setter
     @Column(name = "counter")
