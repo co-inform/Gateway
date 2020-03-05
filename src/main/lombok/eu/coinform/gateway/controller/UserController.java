@@ -14,7 +14,9 @@ import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,9 +25,15 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,6 +50,25 @@ public class UserController {
         this.userDbManager = userDbManager;
         this.eventPublisher = eventPublisher;
         this.signatureKey = signatureKey;
+    }
+
+    @RequestMapping(value = "/renew-token", method = RequestMethod.GET)
+    public ResponseEntity<?> renewToken(HttpServletRequest request) {
+        //todo: First ever initialization, return 404 when no renew-token supplied
+        Optional<Cookie> cookie = findCookie("renew-token",request);
+        if(cookie.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+
+        // todo: token renewal,
+        return ResponseEntity.ok(SuccesfullResponse.TOKENRENEWED);
+    }
+
+    public Optional<Cookie> findCookie(String key, HttpServletRequest request){
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> key.equals(cookie.getName()))
+                .findAny();
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

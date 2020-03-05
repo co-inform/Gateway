@@ -9,6 +9,7 @@ public enum SuccesfullResponse {
     PASSWORDRESET("Password reset, please check your email for reset link"),
     USERLOGGEDOUT("User succesfully logged out"),
     PASSWORDCHANGE("Password successfully changed"),
+    TOKENRENEWED("Token renewed"),
     USERVERIFIED("User successfully verified");
 
     @Getter
