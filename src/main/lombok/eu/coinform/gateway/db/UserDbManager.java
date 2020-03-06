@@ -1,6 +1,7 @@
 package eu.coinform.gateway.db;
 
 import com.google.common.collect.Lists;
+import eu.coinform.gateway.db.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -20,18 +21,21 @@ public class UserDbManager {
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private VerificationTokenRepository verificationTokenRepository;
+    private SessionTokenRepository sessionTokenRepository;
 
     public UserDbManager(
             UserRepository userRepository,
             PasswordAuthRepository passwordAuthRepository,
             RoleRepository roleRepository,
             VerificationTokenRepository verificationTokenRepository,
+            SessionTokenRepository sessionTokenRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordAuthRepository = passwordAuthRepository;
         this.roleRepository = roleRepository;
         this.verificationTokenRepository = verificationTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sessionTokenRepository = sessionTokenRepository;
     }
 
     public User registerUser(String email, String password, List<RoleEnum> roleList) throws UsernameAlreadyExistException {
@@ -133,6 +137,7 @@ public class UserDbManager {
     public void logOut(Long userId){
         Optional<User> user = userRepository.findById(userId);
         user.ifPresent(u -> u.setCounter(u.getCounter()+1)); // to invalidate the JWT token
+        sessionTokenRepository.deleteById(userId); // remove the longlived session
         userRepository.save(user.get());
     }
 
@@ -162,4 +167,25 @@ public class UserDbManager {
                 .map(PasswordAuth::getUser).get();
     }
 
+    public SessionToken getSessionTokenByUser(User user) {
+        return sessionTokenRepository.findByUser(user).get();
+    }
+
+    public SessionToken saveSessionToken(SessionToken token){
+        return sessionTokenRepository.save(token);
+    }
+
+    public Optional<SessionToken> getSessionTokenByToken(String token){
+        return sessionTokenRepository.findBySessionToken(token);
+    }
+/*
+    public boolean existBySessionToken(String token){
+        return sessionTokenRepository.existBySessionToken(token);
+//        return sessionTokenRepository.findBySessionToken(new SessionToken(token)).isEmpty();
+    }
+/*
+    public Optional<User> getUserBySessionToken(SessionToken token){
+        return userRepository.findBySessionToken(token);
+    }
+*/
 }

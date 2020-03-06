@@ -1,19 +1,13 @@
 package eu.coinform.gateway.jwt;
 
-import eu.coinform.gateway.db.Role;
-import eu.coinform.gateway.db.RoleEnum;
-import eu.coinform.gateway.db.User;
-import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class JwtToken {
 

@@ -1,4 +1,4 @@
-package eu.coinform.gateway.db;
+package eu.coinform.gateway.db.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -43,6 +43,11 @@ public class User implements Serializable {
     @Setter
     @Column(name = "counter")
     private int counter;
+
+    @Getter
+    @Setter
+    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
+    private SessionToken sessionToken;
 
     public User(){
         this.enabled = false;

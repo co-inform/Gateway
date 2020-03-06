@@ -1,6 +1,6 @@
 package eu.coinform.gateway.events;
 
-import eu.coinform.gateway.db.User;
+import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.service.EmailService;
 import org.springframework.stereotype.Component;
 

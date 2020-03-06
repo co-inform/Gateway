@@ -1,5 +1,7 @@
 package eu.coinform.gateway.db;
 
+import eu.coinform.gateway.db.entity.Role;
+import eu.coinform.gateway.db.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -24,6 +26,7 @@ public class UserDbAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         User user = userDbManager.logIn(name, password);
+
 
         Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
         for (Role role: user.getRoles()) {

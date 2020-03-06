@@ -1,6 +1,8 @@
 package eu.coinform.gateway.events;
 
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.db.entity.User;
+import eu.coinform.gateway.db.entity.VerificationToken;
 import eu.coinform.gateway.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

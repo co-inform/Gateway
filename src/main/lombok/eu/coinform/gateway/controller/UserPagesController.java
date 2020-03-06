@@ -2,6 +2,8 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.controller.forms.NewPasswordForm;
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.db.entity.User;
+import eu.coinform.gateway.db.entity.VerificationToken;
 import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

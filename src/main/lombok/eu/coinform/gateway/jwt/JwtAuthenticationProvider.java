@@ -1,6 +1,6 @@
 package eu.coinform.gateway.jwt;
 
-import eu.coinform.gateway.db.User;
+import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -42,7 +42,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             String user = parsedToken.getBody().getSubject();
             Optional<User> u = userDbManager.getById(Long.parseLong(user));
             int counter =  (int) parsedToken.getBody().get("count");
-            if(u.get().getCounter() != counter){
+
+            if(u.isEmpty() || u.get().getCounter() != counter){
                 throw new UserLoggedOutException();
             }
 

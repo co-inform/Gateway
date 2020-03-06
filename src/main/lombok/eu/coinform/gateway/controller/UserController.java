@@ -4,6 +4,9 @@ import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
 import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.db.entity.RoleEnum;
+import eu.coinform.gateway.db.entity.SessionToken;
+import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
@@ -14,9 +17,7 @@ import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,10 +26,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -39,6 +37,10 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 public class UserController {
+
+    private final String RENEWAL_TOKEN_NAME = "renew-token";
+    private final int RENEWAL_TOKEN_MAXAGE = 60*60*24*90;
+    private final String RENEWAL_TOKEN_DOMAIN = "coinform.eu";
 
     private final UserDbManager userDbManager;
     private final ApplicationEventPublisher eventPublisher;
@@ -59,20 +61,26 @@ public class UserController {
         if(cookie.isEmpty()){
             return ResponseEntity.notFound().build();
         }
+        String token = cookie.get().getValue();
+        Optional<SessionToken> ost = userDbManager.getSessionTokenByToken(token);
+
+        if(ost.isEmpty()) {
+           return ResponseEntity.notFound().build();
+        }
 
 
         // todo: token renewal,
         return ResponseEntity.ok(SuccesfullResponse.TOKENRENEWED);
     }
 
-    public Optional<Cookie> findCookie(String key, HttpServletRequest request){
+    private Optional<Cookie> findCookie(String key, HttpServletRequest request){
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> key.equals(cookie.getName()))
                 .findAny();
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login() {
+    public LoginResponse login(HttpServletResponse response) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
@@ -84,14 +92,28 @@ public class UserController {
             userId = userDbManager.getByEmail(authentication.getName()).getId();
         }
 
+        Optional<User> user = userDbManager.getById(userId);
+
+        if(user.isEmpty()){
+            throw new UserDbAuthenticationException("User not found");
+        }
+
         String token = (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setCounter(userDbManager.getById(userId).get().getCounter())
+                .setCounter(user.get().getCounter())
                 .setExpirationTime(7*24*60*60*1000L)
                 .setUser(userId)
                 .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
+
+        SessionToken st = new SessionToken(user.get());
+        userDbManager.saveSessionToken(st);
+        final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
+        cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
+        response.addCookie(cookie);
         return new LoginResponse(token);
     }
 
