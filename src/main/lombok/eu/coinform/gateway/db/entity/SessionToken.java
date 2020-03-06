@@ -47,6 +47,7 @@ public class SessionToken implements Serializable {
 
     public SessionToken(User user) {
         this.user = user;
+        this.id = user.getId();
         this.sessionToken = createToken();
         this.createdAt = new Date();
     }

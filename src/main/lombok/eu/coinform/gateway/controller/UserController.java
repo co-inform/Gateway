@@ -57,7 +57,7 @@ public class UserController {
     @RequestMapping(value = "/renew-token", method = RequestMethod.GET)
     public ResponseEntity<?> renewToken(HttpServletRequest request) {
         //todo: First ever initialization, return 404 when no renew-token supplied
-        Optional<Cookie> cookie = findCookie("renew-token",request);
+        Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
         if(cookie.isEmpty()){
             return ResponseEntity.notFound().build();
         }
@@ -68,9 +68,23 @@ public class UserController {
            return ResponseEntity.notFound().build();
         }
 
+        User user = ost.get().getUser();
+        log.debug("User: {} ", user.getPasswordAuth().getEmail());
 
-        // todo: token renewal,
-        return ResponseEntity.ok(SuccesfullResponse.TOKENRENEWED);
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+
+        String jwtToken = (new JwtToken.Builder())
+                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
+                .setKey(signatureKey)
+                .setCounter(user.getCounter())
+                .setExpirationTime(10000L) //todo: set to 2*60*1000L when done testing this.
+                .setUser(user.getId())
+                .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .build().getToken();
+
+        // todo: JWT token renewal,
+        return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
 
     private Optional<Cookie> findCookie(String key, HttpServletRequest request){
@@ -102,7 +116,7 @@ public class UserController {
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
                 .setCounter(user.get().getCounter())
-                .setExpirationTime(7*24*60*60*1000L)
+                .setExpirationTime(10000L) //todo: set to 2*60*1000L when doen testing this.
                 .setUser(userId)
                 .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
@@ -126,9 +140,9 @@ public class UserController {
         User user = userDbManager.registerUser(registerForm.getEmail(), registerForm.getPassword(), roles);
 
         try {
-            log.debug("Publishing event");
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
         } catch (Exception me){
+            log.debug(me.getMessage());
             ResponseEntity.badRequest().body(ErrorResponse.USEREXISTS);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
@@ -138,7 +152,6 @@ public class UserController {
 
     @RequestMapping(value = "/reset-password", method = RequestMethod.POST)
     public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetForm form) {
-        log.debug("Form: {}", form.getEmail());
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
             return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
@@ -147,6 +160,7 @@ public class UserController {
         try{
             eventPublisher.publishEvent(new OnPasswordResetEvent(user));
         } catch (Exception e){
+            log.debug(e.getMessage());
             return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
         }
 
@@ -176,10 +190,15 @@ public class UserController {
     }
 
     @RequestMapping(value = "/exit", method = RequestMethod.GET)
-    public ResponseEntity<?> logout(){
+    public ResponseEntity<?> logout(HttpServletResponse response){
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         userDbManager.logOut((Long) authentication.getPrincipal());
+        final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, "");
+        cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
         return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
     }
 
