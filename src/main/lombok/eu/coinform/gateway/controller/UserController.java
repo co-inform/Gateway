@@ -87,6 +87,9 @@ public class UserController {
     }
 
     private Optional<Cookie> findCookie(String key, HttpServletRequest request){
+        if(request.getCookies() == null){
+            return Optional.empty();
+        }
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> key.equals(cookie.getName()))
                 .findAny();
