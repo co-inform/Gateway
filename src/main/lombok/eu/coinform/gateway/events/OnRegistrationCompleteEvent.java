@@ -15,7 +15,6 @@ public class OnRegistrationCompleteEvent extends ApplicationEvent {
 
     public OnRegistrationCompleteEvent(User user){
         super(user);
-        log.debug("Event: {}", user.getPasswordAuth().getEmail());
         this.user = user;
     }
 }

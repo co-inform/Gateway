@@ -22,11 +22,9 @@ public class RegistrationCompleteListener extends GatewayEventListener<OnRegistr
     @Override
     protected void handleEvent(OnRegistrationCompleteEvent event){
         User user = event.getUser();
-        log.debug("User: {}", user.getPasswordAuth().getEmail());
         VerificationToken token = userDbManager.getVerificationToken(user).map(t -> t).get();
         String toAddress = user.getPasswordAuth().getEmail();
         String verifyUrl = url + "/registrationConfirm?token="+token.getToken();
-        log.debug("Email: {}, verifyUrl: {}", toAddress, verifyUrl);
         emailService.sendVerifyEmailMessage(toAddress, verifyUrl);
 
     }

@@ -136,9 +136,11 @@ public class UserDbManager {
 
     public void logOut(Long userId){
         Optional<User> user = userRepository.findById(userId);
-        user.ifPresent(u -> u.setCounter(u.getCounter()+1)); // to invalidate the JWT token
-        sessionTokenRepository.deleteById(userId); // remove the longlived session
-        userRepository.save(user.get());
+        user.ifPresent(u -> {
+            u.setCounter(u.getCounter()+1);
+            sessionTokenRepository.deleteById(userId);
+            userRepository.save(u);
+        }); // to invalidate the JWT token and remove longlived session
     }
 
     public String passwordReset(User user){
@@ -178,14 +180,5 @@ public class UserDbManager {
     public Optional<SessionToken> getSessionTokenByToken(String token){
         return sessionTokenRepository.findBySessionToken(token);
     }
-/*
-    public boolean existBySessionToken(String token){
-        return sessionTokenRepository.existBySessionToken(token);
-//        return sessionTokenRepository.findBySessionToken(new SessionToken(token)).isEmpty();
-    }
-/*
-    public Optional<User> getUserBySessionToken(SessionToken token){
-        return userRepository.findBySessionToken(token);
-    }
-*/
+
 }
