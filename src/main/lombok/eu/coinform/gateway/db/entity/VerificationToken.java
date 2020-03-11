@@ -66,4 +66,8 @@ public class VerificationToken implements Serializable {
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
+    public boolean checkExpiryDatePassed(Date date){
+        return expiryDate.before(date);
+    }
+
 }

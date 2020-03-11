@@ -123,8 +123,7 @@ public class UserDbManager {
             throw new NoSuchTokenException(token);
         }
         User user = myToken.map(VerificationToken::getUser).get();
-        Calendar cal = Calendar.getInstance();
-        if ((myToken.get().getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
+        if (myToken.get().checkExpiryDatePassed(new Date())) {
             throw new LinkTimedOutException("Verification link timed out");
         }
         user.setEnabled(true);
@@ -146,10 +145,10 @@ public class UserDbManager {
     public String passwordReset(User user){
         log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
         user.setCounter(user.getCounter()+1); // to invalidate the JWT token
-        Optional<VerificationToken> token = verificationTokenRepository.findByUser(user);
+        Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
         String uuid = UUID.randomUUID().toString();
 
-        token.ifPresent(verificationToken -> verificationTokenRepository.delete(verificationToken));
+        oToken.ifPresent(verificationToken -> verificationTokenRepository.delete(verificationToken));
         verificationTokenRepository.save(new VerificationToken(uuid, user));
         userRepository.save(user);
         return uuid;

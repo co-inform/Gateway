@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Controller
@@ -28,11 +29,16 @@ public class UserPagesController {
     }
 
     @RequestMapping(value = "/passwordreset", method = RequestMethod.GET)
-    public String passwordReset(@RequestParam(name = "token", required = true) String token, Model model){
+    public String passwordReset(@RequestParam(name = "token", required = true) String token, Model model) throws LinkTimedOutException{
         Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
         if(myToken.isEmpty()){
             throw new NoSuchTokenException("");
         }
+
+        if(myToken.get().checkExpiryDatePassed(new Date())){
+            throw new LinkTimedOutException("Reset link timed out");
+        }
+
         User user = myToken.get().getUser();
 
         model.addAttribute("userid", user.getPasswordAuth().getEmail());
@@ -42,13 +48,17 @@ public class UserPagesController {
     }
 
     @PostMapping(value = "/resetting")
-    public String saveNewPassword(@ModelAttribute NewPasswordForm form) {
+    public String saveNewPassword(@ModelAttribute NewPasswordForm form) throws LinkTimedOutException {
 
         if(!form.getPw1().equals(form.getPw2())){
             return "mismatch";
         }
 
         VerificationToken token = userDbManager.getVerificationToken(form.getToken()).map(t -> t).get();
+
+        if(token.checkExpiryDatePassed(new Date())){
+            throw new LinkTimedOutException("Reset link timed out");
+        }
         User user = token.getUser();
 
         if(user == null){
@@ -72,15 +82,14 @@ public class UserPagesController {
     @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
     public String confirmRegistration(@RequestParam("token") String token, Model model) throws LinkTimedOutException {
 
-
-        Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
-
         if(!userDbManager.confirmUser(token)){
             model.addAttribute("token", token);
             return "notverified";
         }
 
-        model.addAttribute("userid", myToken.get().getUser().getPasswordAuth().getEmail());
+        Optional<VerificationToken> oToken = userDbManager.getVerificationToken(token);
+
+        oToken.ifPresent(myToken -> model.addAttribute("userid", myToken.getUser().getPasswordAuth().getEmail()));
         return "verified";
     }
 }

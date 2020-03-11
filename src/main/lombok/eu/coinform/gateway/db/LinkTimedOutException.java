@@ -4,7 +4,7 @@ import org.apache.http.HttpException;
 
 public class LinkTimedOutException extends HttpException {
 
-    LinkTimedOutException(String message){
+    public LinkTimedOutException(String message){
         super(message);
     }
 
