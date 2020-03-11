@@ -4,6 +4,7 @@ import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
 import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.db.entity.Role;
 import eu.coinform.gateway.db.entity.RoleEnum;
 import eu.coinform.gateway.db.entity.SessionToken;
 import eu.coinform.gateway.db.entity.User;
@@ -22,16 +23,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.*;
 import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,7 +55,6 @@ public class UserController {
 
     @RequestMapping(value = "/renew-token", method = RequestMethod.GET)
     public ResponseEntity<?> renewToken(HttpServletRequest request) {
-        //todo: First ever initialization, return 404 when no renew-token supplied
         Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
         if(cookie.isEmpty()){
             return ResponseEntity.notFound().build();
@@ -69,21 +67,22 @@ public class UserController {
         }
 
         User user = ost.get().getUser();
-        log.debug("User: {} ", user.getPasswordAuth().getEmail());
 
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
+        Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
+        for (Role role: user.getRoles()) {
+            GrantedAuthority authority = new SimpleGrantedAuthority(role.getRole().toString());
+            grantedAuthorities.add(authority);
+        }
 
         String jwtToken = (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
                 .setCounter(user.getCounter())
-                .setExpirationTime(10000L) //todo: set to 2*60*1000L when done testing this.
+                .setExpirationTime(2*60*1000L)
                 .setUser(user.getId())
-                .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .setRoles(grantedAuthorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
 
-        // todo: JWT token renewal,
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
 
@@ -116,7 +115,7 @@ public class UserController {
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
                 .setCounter(user.get().getCounter())
-                .setExpirationTime(10000L) //todo: set to 2*60*1000L when doen testing this.
+                .setExpirationTime(2*60*1000L)
                 .setUser(userId)
                 .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
