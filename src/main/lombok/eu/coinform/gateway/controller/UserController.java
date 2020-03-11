@@ -124,6 +124,7 @@ public class UserController {
         userDbManager.saveSessionToken(st);
         final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
+        cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
         response.addCookie(cookie);
