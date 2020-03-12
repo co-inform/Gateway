@@ -199,7 +199,7 @@ public class UserDbManager {
      * @return true if password successfully changed
      */
 
-    public boolean changePassword(User user, String password) {
+    public boolean setPassword(User user, String password) {
         user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);

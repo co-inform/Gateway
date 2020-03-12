@@ -54,11 +54,18 @@ public class UserPagesController {
             return "mismatch";
         }
 
-        VerificationToken token = userDbManager.getVerificationToken(form.getToken()).map(t -> t).get();
+        Optional<VerificationToken> oToken = userDbManager.getVerificationToken(form.getToken());
+
+        if(oToken.isEmpty()){
+            throw new NoSuchTokenException("Could not find such a token");
+        }
+
+        VerificationToken token = oToken.get();
 
         if(token.checkExpiryDatePassed(new Date())){
             throw new LinkTimedOutException("Reset link timed out");
         }
+
         User user = token.getUser();
 
         if(user == null){
@@ -66,7 +73,7 @@ public class UserPagesController {
             throw new UsernameNotFoundException("No such user");
         }
 
-        if(!userDbManager.changePassword(user, form.getPw1())){
+        if(!userDbManager.setPassword(user, form.getPw1())){
             throw new UserDbAuthenticationException("Change unsuccessful");
         }
 
@@ -87,11 +94,7 @@ public class UserPagesController {
             return "notverified";
         }
 
-        log.debug("Token: {}", token);
-        //todo: confirmuser above deletes the token.
         VerificationToken myToken = userDbManager.getAndDeleteVerificationToken(token);
-        log.debug("Token: {}", myToken.getToken());
-
         model.addAttribute("userid", myToken.getUser().getPasswordAuth().getEmail());
         return "verified";
     }
