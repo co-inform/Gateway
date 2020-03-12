@@ -66,8 +66,8 @@ public class UserPagesController {
             throw new UsernameNotFoundException("No such user");
         }
 
-        if(!userDbManager.passwordReset(user, form.getPw1())){
-            throw new UserDbAuthenticationException("Oups");
+        if(!userDbManager.changePassword(user, form.getPw1())){
+            throw new UserDbAuthenticationException("Change unsuccessful");
         }
 
         try {

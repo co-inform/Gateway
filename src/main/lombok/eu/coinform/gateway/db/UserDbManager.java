@@ -63,15 +63,6 @@ public class UserDbManager {
         return dbUser;
     }
 
-    public boolean passwordReset(User user, String password) {
-        user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
-
-        return verificationTokenRepository.findByUser(user).map(token -> {
-            verificationTokenRepository.delete(token);
-            return true;
-        }).or(() -> Optional.of(false)).get();
-    }
 
     public boolean passwordChange(Long userid, String newPassword, String oldPassword){
         User user = userRepository.findById(userid).get();
@@ -143,9 +134,16 @@ public class UserDbManager {
         }); // to invalidate the JWT token and remove longlived session
     }
 
-    public String passwordReset(User user){
+    public boolean changePassword(User user, String password) {
+        user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+        Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
+        oToken.ifPresent(token -> verificationTokenRepository.delete(token));
+        return true;
+    }
+
+    public String resetPassword(User user){
         log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
-        user.setCounter(user.getCounter()+1); // to invalidate the JWT token
         Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
 
         if(oToken.isPresent() && oToken.get().checkExpiryDatePassed(new Date())) {
