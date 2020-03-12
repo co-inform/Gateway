@@ -38,6 +38,16 @@ public class UserDbManager {
         this.sessionTokenRepository = sessionTokenRepository;
     }
 
+    /**
+     * Registers a new User with the CoInform system using the supplied email, password and list of roles
+     *
+     * @param email the users email
+     * @param password the users password
+     * @param roleList a list of actual roles for the user
+     * @return the created User
+     * @throws UsernameAlreadyExistException
+     */
+
     public User registerUser(String email, String password, List<RoleEnum> roleList) throws UsernameAlreadyExistException {
         if (passwordAuthRepository.existsByEmail(email)) {
             throw new UsernameAlreadyExistException(email);
@@ -63,6 +73,13 @@ public class UserDbManager {
         return dbUser;
     }
 
+    /**
+     * Change password for the user belonging to the passed userid.
+     * @param userid Long holding the userid
+     * @param newPassword the new password for the user
+     * @param oldPassword the old password that is stored in the database
+     * @return true if password successfully changed, otherwise false
+     */
 
     public boolean passwordChange(Long userid, String newPassword, String oldPassword){
         User user = userRepository.findById(userid).get();
@@ -73,6 +90,14 @@ public class UserDbManager {
         userRepository.save(user);
         return true;
     }
+
+    /**
+     * logIn(String, String) logs a user in to the CoInform system
+     * @param email the email for the User
+     * @param password the password for the User
+     * @return the logged in User if succesfull
+     * @throws AuthenticationException if not possible to authenticate the user
+     */
 
     public User logIn(String email, String password) throws AuthenticationException {
         Optional<PasswordAuth> passwordAuth = passwordAuthRepository.getByEmail(email.toLowerCase());
@@ -95,6 +120,12 @@ public class UserDbManager {
         return passwordAuth.get().getUser();
     }
 
+    /**
+     * Finds and returns the VerificationToken that equals the supplied String. Also deletes it from the database.
+     * @param token the String to search for in the database
+     * @return the found VerificationToken or null
+     */
+
     public VerificationToken getAndDeleteVerificationToken(String token){
         Optional<VerificationToken> oToken = verificationTokenRepository.findByToken(token);
 
@@ -105,13 +136,32 @@ public class UserDbManager {
         return null;
     }
 
+    /**
+     * Retreives an Optional holding the VerificationToken found for the supplied String
+     * @param token the String to search for
+     * @return an Option holding the VerificatationToken
+     */
+
     public Optional<VerificationToken> getVerificationToken(String token){
         return verificationTokenRepository.findByToken(token);
     }
 
+    /**
+     * Retreives an Optional holding the Verification connected to the supplied User
+     * @param user the User whom to search for a VerificationToken
+     * @return returns an Optional holding the VerificationToken
+     */
     public Optional<VerificationToken> getVerificationToken(User user){
         return verificationTokenRepository.findByUser(user);
     }
+
+    /**
+     * Memthod to set the enabled flag on a user. Called when a user clicks the link sent to it in the
+     * verification email upon registration
+     * @param token the token sent in the email
+     * @return true if user is successfully verified
+     * @throws LinkTimedOutException
+     */
 
     public boolean confirmUser(String token) throws LinkTimedOutException{
         Optional<VerificationToken> oToken = verificationTokenRepository.findByToken(token);
@@ -128,6 +178,10 @@ public class UserDbManager {
         return true;
     }
 
+    /**
+     * Logs a user out of the CoInform system. Invalidates both the JWT token and the SessionToken
+     * @param userId the userId for the specific user whom to logout
+     */
 
     public void logOut(Long userId){
         Optional<User> user = userRepository.findById(userId);
@@ -138,6 +192,13 @@ public class UserDbManager {
         }); // to invalidate the JWT token and remove longlived session
     }
 
+    /**
+     * Method to change the stored password for the supplied user
+     * @param user The user object for whom to change the password
+     * @param password The new password to set for the supplied user
+     * @return true if password successfully changed
+     */
+
     public boolean changePassword(User user, String password) {
         user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
@@ -145,6 +206,12 @@ public class UserDbManager {
         oToken.ifPresent(token -> verificationTokenRepository.delete(token));
         return true;
     }
+
+    /**
+     * Method called when a user wants to reset its password
+     * @param user The User object for whom to reset the password
+     * @return a String holding the token that verifies the user
+     */
 
     public String resetPassword(User user){
         log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
@@ -170,27 +237,51 @@ public class UserDbManager {
         return token;
     }
 
+    /**
+     * get an Optional holding the User object corresponding to the userId
+     * @param userid a Long identifying the user
+     * @return an Optional holding the User
+     */
+
     public Optional<User> getById(Long userid){
         return userRepository.findById(userid);
     }
 
-    public String getEmailById(Long userid){
-        return passwordAuthRepository.findById(userid)
-                .map(PasswordAuth::getEmail).get();
-    }
+    /**
+     * Returns a User object corresponding to the supplied e´´ail
+     * @param email a String holding an email to search for
+     * @return a User object if it exist
+     */
 
     public User getByEmail(String email){
         return passwordAuthRepository.getByEmail(email)
                 .map(PasswordAuth::getUser).get();
     }
 
+    /**
+     * Finds a SessionToken object for the corresponding User
+     * @param user the User for whom to find a SessionToken
+     * @return A SessionToken object that corresponds to the User
+     */
     public SessionToken getSessionTokenByUser(User user) {
         return sessionTokenRepository.findByUser(user).get();
     }
 
+    /**
+     * Saves a passed in SessionToken into the dataabse
+     * @param token the token to store in the database
+     * @return the SessionToken stored
+     */
+
     public SessionToken saveSessionToken(SessionToken token){
         return sessionTokenRepository.save(token);
     }
+
+    /**
+     * Retreives a SessionToken object from the database that corresponds to the Striong
+     * @param token the String to search for
+     * @return the SessionToken object
+     */
 
     public Optional<SessionToken> getSessionTokenByToken(String token){
         return sessionTokenRepository.findBySessionToken(token);
