@@ -1,5 +1,6 @@
 package eu.coinform.gateway.db.entity;
 
+import eu.coinform.gateway.util.TokenCreator;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +17,7 @@ public class VerificationToken implements Serializable {
     private static final int EXPIRATION = 60*2;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     @Getter
     @Setter
     private Long id;
@@ -36,38 +37,27 @@ public class VerificationToken implements Serializable {
     @Column(name = "expiry_date")
     private Date expiryDate;
 
-    private Date calculateExpiryDate(int expiryTimeInMinutes){
+    public VerificationToken() {
+        this.token = TokenCreator.createSafeUrlToken();
+        this.expiryDate = calculateExpiryDate(EXPIRATION);
+    }
+
+    public VerificationToken(final User user) {
+        this.token = TokenCreator.createSafeUrlToken();
+        this.expiryDate = calculateExpiryDate(EXPIRATION);
+        this.user = user;
+        this.id = user.getId();
+    }
+
+    public boolean checkExpiryDatePassed(Date date) {
+        return expiryDate.before(date);
+    }
+
+    private Date calculateExpiryDate(int expiryTimeInMinutes) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Timestamp(cal.getTime().getTime()));
         cal.add(Calendar.MINUTE, expiryTimeInMinutes);
         return new Date(cal.getTime().getTime());
-    }
-
-    public VerificationToken(){
-        super();
-    }
-
-    public VerificationToken(final String token){
-        super();
-
-        this.token = token;
-        this.expiryDate = calculateExpiryDate(EXPIRATION);
-    }
-
-    public VerificationToken(final String token, final User user){
-        super();
-        this.token = token;
-        this.expiryDate = calculateExpiryDate(EXPIRATION);
-        this.user = user;
-    }
-
-    public void updateToken(final String token){
-        this.token = token;
-        this.expiryDate = calculateExpiryDate(EXPIRATION);
-    }
-
-    public boolean checkExpiryDatePassed(Date date){
-        return expiryDate.before(date);
     }
 
 }

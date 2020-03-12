@@ -1,13 +1,11 @@
 package eu.coinform.gateway.db.entity;
 
+import eu.coinform.gateway.util.TokenCreator;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Date;
 
 @Entity
@@ -15,6 +13,7 @@ import java.util.Date;
 public class SessionToken implements Serializable {
 
     @Getter
+    @Setter
     @Id
     @Column(name = "user_id")
     private Long id;
@@ -36,31 +35,14 @@ public class SessionToken implements Serializable {
     private User user;
 
     public SessionToken() {
-        this.sessionToken = createToken();
-        this.createdAt = new Date();
-    }
-
-    public SessionToken(String token){
-        this.sessionToken = token;
-        this.createdAt = new Date();
+        this.sessionToken = TokenCreator.createSessionToken();
     }
 
     public SessionToken(User user) {
         this.user = user;
         this.id = user.getId();
-        this.sessionToken = createToken();
+        this.sessionToken = TokenCreator.createSessionToken();
         this.createdAt = new Date();
-    }
-
-    private String createToken() {
-        byte[] bytes = new byte[32];
-
-        try {
-            SecureRandom.getInstanceStrong().nextBytes(bytes);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return Base64.getEncoder().encodeToString(bytes);
     }
 
 }

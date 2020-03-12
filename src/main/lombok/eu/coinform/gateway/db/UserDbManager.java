@@ -58,7 +58,7 @@ public class UserDbManager {
                                 roleList.stream().map(role -> new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()))));
 
         userRepository.save(dbUser);
-        verificationTokenRepository.save(new VerificationToken(UUID.randomUUID().toString(), user));
+        verificationTokenRepository.save(new VerificationToken(user));
 
         return dbUser;
     }
@@ -105,7 +105,7 @@ public class UserDbManager {
     }
 
     public void createAndSaveVerificationToken(User user, String token){
-        VerificationToken myToken = new VerificationToken(token, user);
+        VerificationToken myToken = new VerificationToken(user);
         VerificationToken t = verificationTokenRepository.save(myToken);
     }
 
@@ -146,12 +146,12 @@ public class UserDbManager {
         log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
         user.setCounter(user.getCounter()+1); // to invalidate the JWT token
         Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
-        String uuid = UUID.randomUUID().toString();
 
         oToken.ifPresent(verificationToken -> verificationTokenRepository.delete(verificationToken));
-        verificationTokenRepository.save(new VerificationToken(uuid, user));
+        VerificationToken token = new VerificationToken(user);
+        verificationTokenRepository.save(token);
         userRepository.save(user);
-        return uuid;
+        return token.getToken();
     }
 
     public Optional<User> getById(Long userid){
