@@ -74,26 +74,11 @@ public class UserController {
             grantedAuthorities.add(authority);
         }
 
-        String jwtToken = (new JwtToken.Builder())
-                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
-                .setKey(signatureKey)
-                .setCounter(user.getCounter())
-                .setExpirationTime(2*60*1000L)
-                .setUser(user.getId())
-                .setRoles(grantedAuthorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .build().getToken();
+        String jwtToken = jwtTokenCreator(user, grantedAuthorities);
 
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
 
-    private Optional<Cookie> findCookie(String key, HttpServletRequest request){
-        if(request.getCookies() == null){
-            return Optional.empty();
-        }
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> key.equals(cookie.getName()))
-                .findAny();
-    }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public LoginResponse login(HttpServletResponse response) {
@@ -114,14 +99,7 @@ public class UserController {
             throw new UserDbAuthenticationException("User not found");
         }
 
-        String token = (new JwtToken.Builder())
-                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
-                .setKey(signatureKey)
-                .setCounter(user.get().getCounter())
-                .setExpirationTime(2*60*1000L)
-                .setUser(userId)
-                .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .build().getToken();
+        String token = jwtTokenCreator(user.get(), new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         SessionToken st = new SessionToken(user.get());
         userDbManager.saveSessionToken(st);
@@ -131,6 +109,26 @@ public class UserController {
         cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
         response.addCookie(cookie);
         return new LoginResponse(token);
+    }
+
+    private Optional<Cookie> findCookie(String key, HttpServletRequest request){
+        if(request.getCookies() == null){
+            return Optional.empty();
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> key.equals(cookie.getName()))
+                .findAny();
+    }
+
+    private String jwtTokenCreator(User user, Collection<GrantedAuthority> authorities){
+        return (new JwtToken.Builder())
+                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
+                .setKey(signatureKey)
+                .setCounter(user.getCounter())
+                .setExpirationTime(2*60*1000L)
+                .setUser(user.getId())
+                .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .build().getToken();
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
