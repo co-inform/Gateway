@@ -151,18 +151,19 @@ public class UserDbManager {
         Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
         String token = "";
 
-        //todo: Logic not entirely correct. The likelihood for no token in repo is large
-        // and need logic for spamming bots....
         if(oToken.isEmpty()){
+            //no token. create one, store it and send to the user
             VerificationToken myToken = new VerificationToken(user);
             verificationTokenRepository.save(myToken);
             token = myToken.getToken();
         } else if(oToken.get().checkExpiryDatePassed(new Date())) {
+            //there is a token but it has expired. create a new one, store it and send it
             verificationTokenRepository.delete(oToken.get());
             VerificationToken myToken = new VerificationToken(user);
             verificationTokenRepository.save(myToken);
             token = myToken.getToken();
         } else if(!oToken.get().checkExpiryDatePassed(new Date())) {
+            //there is a valid token. send that to the user, dont change it
             token = oToken.get().getToken();
         }
 

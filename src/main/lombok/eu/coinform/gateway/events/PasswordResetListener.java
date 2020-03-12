@@ -23,7 +23,7 @@ public class PasswordResetListener extends GatewayEventListener<OnPasswordResetE
         User user = event.getUser();
         String token = userDbManager.resetPassword(user);
         if(token.isEmpty()){
-            log.debug("No such token in DB");
+            log.debug("No such token in DB for {}",user.getPasswordAuth().getEmail());
             return;
         }
         String verifyUrl = url + "/passwordreset?token="+token;
