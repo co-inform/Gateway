@@ -1,8 +1,7 @@
 CREATE TABLE IF NOT EXISTS `verified` (
-    `id` bigint unsigned not null auto_increment unique PRIMARY KEY,
-    `token` varchar(36),
-    `expiry_date` datetime,
-    `user_id` bigint unsigned not null
+    `user_id` bigint unsigned not null unique PRIMARY KEY,
+    `token` varchar(44),
+    `expiry_date` datetime
 );
 
 ALTER TABLE `user` ADD `enabled` bool after `id`;

@@ -87,9 +87,12 @@ public class UserPagesController {
             return "notverified";
         }
 
-        Optional<VerificationToken> oToken = userDbManager.getVerificationToken(token);
+        log.debug("Token: {}", token);
+        //todo: confirmuser above deletes the token.
+        VerificationToken myToken = userDbManager.getAndDeleteVerificationToken(token);
+        log.debug("Token: {}", myToken.getToken());
 
-        oToken.ifPresent(myToken -> model.addAttribute("userid", myToken.getUser().getPasswordAuth().getEmail()));
+        model.addAttribute("userid", myToken.getUser().getPasswordAuth().getEmail());
         return "verified";
     }
 }

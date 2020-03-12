@@ -49,6 +49,11 @@ public class User implements Serializable {
     @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
     private SessionToken sessionToken;
 
+    @Getter
+    @Setter
+    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
+    private VerificationToken verificationToken;
+
     public User(){
         this.enabled = false;
     }

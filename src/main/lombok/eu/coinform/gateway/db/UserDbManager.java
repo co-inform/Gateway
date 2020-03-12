@@ -95,9 +95,14 @@ public class UserDbManager {
         return passwordAuth.get().getUser();
     }
 
-    public void createAndSaveVerificationToken(User user, String token){
-        VerificationToken myToken = new VerificationToken(user);
-        VerificationToken t = verificationTokenRepository.save(myToken);
+    public VerificationToken getAndDeleteVerificationToken(String token){
+        Optional<VerificationToken> oToken = verificationTokenRepository.findByToken(token);
+
+        if(oToken.isPresent()){
+            verificationTokenRepository.delete(oToken.get());
+            return oToken.get();
+        }
+        return null;
     }
 
     public Optional<VerificationToken> getVerificationToken(String token){
@@ -120,7 +125,6 @@ public class UserDbManager {
         User user = myToken.getUser();
         user.setEnabled(true);
         userRepository.save(user);
-        verificationTokenRepository.delete(myToken);
         return true;
     }
 
@@ -145,14 +149,24 @@ public class UserDbManager {
     public String resetPassword(User user){
         log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
         Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
+        String token = "";
 
-        if(oToken.isPresent() && oToken.get().checkExpiryDatePassed(new Date())) {
+        //todo: Logic not entirely correct. The likelihood for no token in repo is large
+        // and need logic for spamming bots....
+        if(oToken.isEmpty()){
+            VerificationToken myToken = new VerificationToken(user);
+            verificationTokenRepository.save(myToken);
+            token = myToken.getToken();
+        } else if(oToken.get().checkExpiryDatePassed(new Date())) {
             verificationTokenRepository.delete(oToken.get());
-            VerificationToken token = new VerificationToken(user);
-            verificationTokenRepository.save(token);
-            return token.getToken();
+            VerificationToken myToken = new VerificationToken(user);
+            verificationTokenRepository.save(myToken);
+            token = myToken.getToken();
+        } else if(!oToken.get().checkExpiryDatePassed(new Date())) {
+            token = oToken.get().getToken();
         }
-        return oToken.get().getToken();
+
+        return token;
     }
 
     public Optional<User> getById(Long userid){

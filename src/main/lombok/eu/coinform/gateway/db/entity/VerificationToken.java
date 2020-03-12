@@ -17,9 +17,9 @@ public class VerificationToken implements Serializable {
     private static final int EXPIRATION = 60*2;
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
     @Getter
     @Setter
+    @Column(name = "user_id")
     private Long id;
 
     @Getter
@@ -28,7 +28,7 @@ public class VerificationToken implements Serializable {
 
     @Getter
     @Setter
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER, optional = true)
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     private User user;
 
