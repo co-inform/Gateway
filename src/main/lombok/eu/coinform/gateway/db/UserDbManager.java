@@ -118,17 +118,18 @@ public class UserDbManager {
     }
 
     public boolean confirmUser(String token) throws LinkTimedOutException{
-        Optional<VerificationToken> myToken = verificationTokenRepository.findByToken(token);
-        if(myToken.isEmpty()){
+        Optional<VerificationToken> oToken = verificationTokenRepository.findByToken(token);
+        if(oToken.isEmpty()){
             throw new NoSuchTokenException(token);
         }
-        User user = myToken.map(VerificationToken::getUser).get();
-        if (myToken.get().checkExpiryDatePassed(new Date())) {
+        VerificationToken myToken = oToken.get();
+        if (myToken.checkExpiryDatePassed(new Date())) {
             throw new LinkTimedOutException("Verification link timed out");
         }
+        User user = myToken.getUser();
         user.setEnabled(true);
         userRepository.save(user);
-        verificationTokenRepository.delete(myToken.get());
+        verificationTokenRepository.delete(myToken);
         return true;
     }
 
@@ -147,11 +148,13 @@ public class UserDbManager {
         user.setCounter(user.getCounter()+1); // to invalidate the JWT token
         Optional<VerificationToken> oToken = verificationTokenRepository.findByUser(user);
 
-        oToken.ifPresent(verificationToken -> verificationTokenRepository.delete(verificationToken));
-        VerificationToken token = new VerificationToken(user);
-        verificationTokenRepository.save(token);
-        userRepository.save(user);
-        return token.getToken();
+        if(oToken.isPresent() && oToken.get().checkExpiryDatePassed(new Date())) {
+            verificationTokenRepository.delete(oToken.get());
+            VerificationToken token = new VerificationToken(user);
+            verificationTokenRepository.save(token);
+            return token.getToken();
+        }
+        return oToken.get().getToken();
     }
 
     public Optional<User> getById(Long userid){
