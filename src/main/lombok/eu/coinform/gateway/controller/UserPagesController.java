@@ -95,6 +95,10 @@ public class UserPagesController {
         }
 
         VerificationToken myToken = userDbManager.getAndDeleteVerificationToken(token);
+        if (myToken == null){
+            model.addAttribute(token, null);
+            return "notverified";
+        }
         model.addAttribute("userid", myToken.getUser().getPasswordAuth().getEmail());
         return "verified";
     }
