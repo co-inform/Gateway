@@ -1,5 +1,6 @@
 package eu.coinform.gateway.util;
 
+import lombok.extern.slf4j.Slf4j;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -7,9 +8,10 @@ import java.util.Base64;
 /**
  * TokenCreator is a utility class for helping in creating tokens that are based on SecureRandom byte arrays.
  * Two static methods where createSafeUrlToken() creates tokens that are safe to use in URLs and
- * createSessionToken() creates a token for session urls
+ * createSessionToken() creates a token for session cookies
  */
 
+@Slf4j
 public class TokenCreator {
 
     /**

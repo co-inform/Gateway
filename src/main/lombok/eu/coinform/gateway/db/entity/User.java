@@ -46,7 +46,7 @@ public class User implements Serializable {
 
     @Getter
     @Setter
-    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private SessionToken sessionToken;
 
     @Getter

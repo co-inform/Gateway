@@ -180,15 +180,15 @@ public class UserDbManager {
 
     /**
      * Logs a user out of the CoInform system. Invalidates both the JWT token and the SessionToken
-     * @param userId the userId for the specific user whom to logout
+     * @param sessionTokenId the userId for the specific user whom to logout
      */
 
-    public void logOut(Long userId){
-        Optional<User> user = userRepository.findById(userId);
-        user.ifPresent(u -> {
-            u.setCounter(u.getCounter()+1);
-            sessionTokenRepository.deleteById(userId);
-            userRepository.save(u);
+    public void logOut(Long sessionTokenId){
+        Optional<SessionToken> sessionToken = sessionTokenRepository.findById(sessionTokenId);
+        sessionToken.ifPresent(token -> {
+            token.getUser().setCounter(token.getUser().getCounter()+1);
+            sessionTokenRepository.deleteById(sessionTokenId);
+            userRepository.save(token.getUser());
         }); // to invalidate the JWT token and remove longlived session
     }
 
@@ -243,7 +243,7 @@ public class UserDbManager {
      * @return an Optional holding the User
      */
 
-    public Optional<User> getById(Long userid){
+    public Optional<User> getUserById(Long userid){
         return userRepository.findById(userid);
     }
 
@@ -285,6 +285,14 @@ public class UserDbManager {
 
     public Optional<SessionToken> getSessionTokenByToken(String token){
         return sessionTokenRepository.findBySessionToken(token);
+    }
+
+    public Optional<User> getBySessionToken(SessionToken token){
+        return userRepository.findById(token.getUser().getId());
+    }
+
+    public Optional<SessionToken> findById(Long id){
+        return sessionTokenRepository.findById(id);
     }
 
 }

@@ -30,15 +30,15 @@ public class JwtToken {
 
     public static class Builder {
 
-        private Long user;
+        private Long sessionTokenId;
         private List<String> roles;
         private Long expirationTime;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
         private int counter;
 
-        public Builder setUser(Long user) {
-            this.user = user;
+        public Builder setSessionTokenId(Long sessionTokenId) {
+            this.sessionTokenId = sessionTokenId;
             return this;
         }
 
@@ -74,7 +74,7 @@ public class JwtToken {
                     .setHeaderParam("typ", TOKEN_TYPE)
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)
-                    .setSubject(user.toString())
+                    .setSubject(sessionTokenId.toString())
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
                     .claim("count", counter)

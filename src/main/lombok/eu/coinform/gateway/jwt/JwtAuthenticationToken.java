@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String token;
-    private Long userId;
+    private Long sessionTokenId;
     private boolean authenticated;
 
     public JwtAuthenticationToken(String token) {
@@ -19,10 +19,10 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
         this.token = token;
     }
 
-    public JwtAuthenticationToken(Long userId, String token, Collection<? extends GrantedAuthority> grantedAuthorities) {
+    public JwtAuthenticationToken(Long sessionTokenId, String token, Collection<? extends GrantedAuthority> grantedAuthorities) {
         super(grantedAuthorities);
         this.authenticated = true;
-        this.userId = userId;
+        this.sessionTokenId = sessionTokenId;
         this.token = token;
     }
 
@@ -33,7 +33,7 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return userId;
+        return sessionTokenId;
     }
 
     @Override

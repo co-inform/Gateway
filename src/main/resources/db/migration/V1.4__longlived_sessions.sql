@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS `sessiontoken` (
-                                          `user_id` bigint unsigned not null unique PRIMARY KEY,
+                                          `id` bigint unsigned not null auto_increment unique PRIMARY KEY,
                                           `session_token` varchar(44),
-                                          `created_at` datetime
+                                          `created_at` datetime,
+                                          `user_id` bigint unsigned not null unique
 );
 
 ALTER TABLE `sessiontoken` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
