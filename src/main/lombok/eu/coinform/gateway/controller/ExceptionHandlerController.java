@@ -66,9 +66,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(LinkTimedOutException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView linkTimedOutException(LinkTimedOutException ex) {
-        ModelAndView mav = new ModelAndView("timedout");
-        mav.addObject("token", ex.getMessage());
-        return mav;
+        return new ModelAndView("timedout");
     }
 
     @ResponseBody
