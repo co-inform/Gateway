@@ -1,5 +1,6 @@
 package eu.coinform.gateway.jwt;
 
+import eu.coinform.gateway.db.entity.SessionToken;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -39,11 +40,16 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .setSigningKey(signingKey)
                     .parseClaimsJws(token.replace(JwtToken.TOKEN_PREFIX, ""));
 
-            String user = parsedToken.getBody().getSubject();
-            Optional<User> u = userDbManager.getById(Long.parseLong(user));
+            String sessionTokenId = parsedToken.getBody().getSubject();
+            Optional<SessionToken> sessionToken = userDbManager.findById(Long.parseLong(sessionTokenId));
+            if(sessionToken.isEmpty()) {
+                throw new UserLoggedOutException();
+            }
+
+            User user = sessionToken.get().getUser();
             int counter =  (int) parsedToken.getBody().get("count");
 
-            if(u.isEmpty() || u.get().getCounter() != counter){
+            if(user == null || user.getCounter() != counter){
                 throw new UserLoggedOutException();
             }
 
@@ -52,8 +58,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
 
-            if (!StringUtils.isEmpty(user)) {
-                Authentication jwtAuth = new JwtAuthenticationToken(Long.parseLong(user), token, authorities);
+            if (!StringUtils.isEmpty(sessionTokenId)) {
+                Authentication jwtAuth = new JwtAuthenticationToken(Long.parseLong(sessionTokenId), token, authorities);
                 return jwtAuth;
             }
         } catch (ExpiredJwtException ex) {

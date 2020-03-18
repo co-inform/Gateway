@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.Date;
 
 @Entity
@@ -15,11 +16,11 @@ public class SessionToken implements Serializable {
     @Getter
     @Setter
     @Id
-    @Column(name = "user_id")
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Getter
-    @Setter
     private String sessionToken;
 
     @Getter
@@ -30,8 +31,8 @@ public class SessionToken implements Serializable {
 
     @Getter
     @Setter
-    @OneToOne(fetch = FetchType.EAGER)
-    @MapsId
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "user_id")
     private User user;
 
     public SessionToken() {
@@ -41,9 +42,7 @@ public class SessionToken implements Serializable {
 
     public SessionToken(User user) {
         this.user = user;
-        this.id = user.getId();
         this.sessionToken = TokenCreator.createSessionToken();
         this.createdAt = new Date();
     }
-
 }

@@ -11,7 +11,6 @@ import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
-import eu.coinform.gateway.jwt.JwtAuthenticationToken;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
@@ -74,7 +73,7 @@ public class UserController {
             grantedAuthorities.add(authority);
         }
 
-        String jwtToken = jwtTokenCreator(user, grantedAuthorities);
+        String jwtToken = jwtTokenCreator(user, ost.get(), grantedAuthorities);
 
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
@@ -85,24 +84,37 @@ public class UserController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
-        Long userId;
+//        Long sessionTokenId;
+        User user = userDbManager.getByEmail(authentication.getName());
 
-        if(authentication instanceof JwtAuthenticationToken){
-            userId = (Long) authentication.getPrincipal();
-        } else {
-            userId = userDbManager.getByEmail(authentication.getName()).getId();
-        }
 
-        Optional<User> user = userDbManager.getById(userId);
 
-        if(user.isEmpty()){
+//        if(authentication instanceof JwtAuthenticationToken){
+//            sessionTokenId = (Long) authentication.getPrincipal();
+//        } else {
+//            sessionTokenId = userDbManager.getByEmail(authentication.getName()).getSessionToken().getId();
+////            sessionTokenId = userDbManager.getByEmail(authentication.getName()).getId();
+//        }
+
+//        Optional<User> user = userDbManager.getBySessionToken()//userDbManager.getById(sessionTokenId);
+
+//        if(user.isEmpty()){
+//            throw new UserDbAuthenticationException("User not found");
+//        }
+
+        if(user == null){
             throw new UserDbAuthenticationException("User not found");
         }
 
-        String token = jwtTokenCreator(user.get(), new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
+        SessionToken st;
+        if(user.getSessionToken() == null) {
+            st = new SessionToken(user);
+            userDbManager.saveSessionToken(st);
+        } else {
+            st = user.getSessionToken();
+        }
+        String token = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
-        SessionToken st = new SessionToken(user.get());
-        userDbManager.saveSessionToken(st);
         final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
         cookie.setHttpOnly(true);
@@ -120,13 +132,13 @@ public class UserController {
                 .findAny();
     }
 
-    private String jwtTokenCreator(User user, Collection<GrantedAuthority> authorities){
+    private String jwtTokenCreator(User user, SessionToken st, Collection<GrantedAuthority> authorities){
         return (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
                 .setCounter(user.getCounter())
                 .setExpirationTime(2*60*1000L)
-                .setUser(user.getId())
+                .setSessionTokenId(st.getId())
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build().getToken();
     }
@@ -181,7 +193,7 @@ public class UserController {
         }
 
         try {
-            User user = userDbManager.getById(userid).get();
+            User user = userDbManager.getUserById(userid).get();
             eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
         } catch (Exception e) {
             log.debug(e.getMessage());
