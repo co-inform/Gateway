@@ -84,23 +84,7 @@ public class UserController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
-//        Long sessionTokenId;
         User user = userDbManager.getByEmail(authentication.getName());
-
-
-
-//        if(authentication instanceof JwtAuthenticationToken){
-//            sessionTokenId = (Long) authentication.getPrincipal();
-//        } else {
-//            sessionTokenId = userDbManager.getByEmail(authentication.getName()).getSessionToken().getId();
-////            sessionTokenId = userDbManager.getByEmail(authentication.getName()).getId();
-//        }
-
-//        Optional<User> user = userDbManager.getBySessionToken()//userDbManager.getById(sessionTokenId);
-
-//        if(user.isEmpty()){
-//            throw new UserDbAuthenticationException("User not found");
-//        }
 
         if(user == null){
             throw new UserDbAuthenticationException("User not found");
