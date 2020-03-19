@@ -66,6 +66,8 @@ public class UserController {
         }
 
         User user = ost.get().getUser();
+        user.setCounter(user.getCounter()+1);
+        userDbManager.saveUser(user);
 
         Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
         for (Role role: user.getRoles()) {
