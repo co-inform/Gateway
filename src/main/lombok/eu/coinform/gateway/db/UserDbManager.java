@@ -291,6 +291,10 @@ public class UserDbManager {
         return userRepository.findById(token.getUser().getId());
     }
 
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
     public Optional<SessionToken> findById(Long id){
         return sessionTokenRepository.findById(id);
     }
