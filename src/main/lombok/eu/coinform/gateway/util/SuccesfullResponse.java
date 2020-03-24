@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum SuccesfullResponse {
-    USERCREATED("User created");
+    USERCREATED("User created"),
+    EVALUATELABEL("User label evaluation received");
 
     @Getter
     private final String status;

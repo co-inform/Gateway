@@ -4,6 +4,7 @@ package eu.coinform.gateway.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.Views;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotEmpty;
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
+@NoArgsConstructor
 public class TweetEvaluationContent implements Serializable {
 
     @NotNull(message = "A tweet evaluation must contain a accuracy label")
