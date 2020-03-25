@@ -13,7 +13,6 @@ import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
-import eu.coinform.gateway.model.TweetLabelEvaluation;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -201,7 +200,7 @@ public class CheckController {
     public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluation tweetLabelEvaluation) {
         // TODO: 2020-03-24 implement logic for sending evaluation to module
         SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentiation = context.getAuthentication();
+        Authentication authentication = context.getAuthentication();
 
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccesfullResponse.EVALUATELABEL);

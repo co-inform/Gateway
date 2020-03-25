@@ -2,10 +2,12 @@ package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.model.Tweet;
+import eu.coinform.gateway.controller.TweetLabelEvaluation;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestException;
+import eu.coinform.gateway.module.iface.TweetLabelEvaluationInterface;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +86,29 @@ public class CheckHandler {
                                 redisHandler.getAndDeleteModuleTransaction(moduleRequest.getTransactionId());
                             }
                         });
+            }
+        }
+    }
+
+    @Async("endpointExecutor")
+    public void tweetLabelEvaluationConsumer(TweetLabelEvaluation tweetLabelEvaluation){
+        log.trace("handle tweetLabelEvaluation: {}", tweetLabelEvaluation);
+        for(Module module: moduleList){
+            log.trace("handle for module: {} -> {}", module.getName(), module);
+            if(module instanceof TweetLabelEvaluationInterface) {
+                log.trace("making tweetLabelEvaluation request for {}", module.getName());
+                ((TweetLabelEvaluationInterface) module)
+                        .tweetLabelEvaluationRequest()
+                        .forEach((func) -> {
+                            ModuleRequest moduleRequest = func.apply(tweetLabelEvaluation);
+
+                            try {
+                                moduleRequest.makeRequest();
+                            } catch (ModuleRequestException e) {
+                                log.error("failed request to {}: {}", module.getName(), e.getMessage());
+                            }
+                        });
+
             }
         }
     }

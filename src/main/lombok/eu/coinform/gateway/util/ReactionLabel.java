@@ -1,4 +1,4 @@
-package eu.coinform.gateway.model;
+package eu.coinform.gateway.util;
 
 public enum ReactionLabel {
     agree,

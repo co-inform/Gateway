@@ -1,7 +1,8 @@
-package eu.coinform.gateway.model;
+package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.util.ReactionLabel;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -18,5 +19,12 @@ public class TweetLabelEvaluation implements Serializable {
     @JsonView(Views.NoDebug.class)
     ReactionLabel reaction;
 
+    @NotNull(message = "rated_moduleResponse cannot be empty")
+    @JsonView(Views.NoDebug.class)
+    String rated_moduleResponse;
+
+    @NotNull(message = "rated credibility cannot be empty")
+    @JsonView(Views.NoDebug.class)
+    String rated_credibility;
 
 }

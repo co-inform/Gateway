@@ -2,9 +2,11 @@ package eu.coinform.gateway.module.claimcredibility;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.model.Tweet;
+import eu.coinform.gateway.controller.TweetLabelEvaluation;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
+import eu.coinform.gateway.module.iface.TweetLabelEvaluationInterface;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
@@ -18,9 +20,10 @@ import java.util.function.Function;
  * ClaimCredibility module extends Module and implements TwitterTweetRequestInterface
  */
 @Slf4j
-public class ClaimCredibility extends Module implements TwitterTweetRequestInterface {
+public class ClaimCredibility extends Module implements TwitterTweetRequestInterface, TweetLabelEvaluationInterface {
 
     private List<Function<Tweet, ModuleRequest>> tweetFuncList;
+    private List<Function<TweetLabelEvaluation, ModuleRequest>> tweetEvaluationFuncList;
 
     /**
      * The constructor of the ClaimCredibility class. Sets up the module and also needs to implement the Functional
@@ -62,6 +65,16 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             }
             return request;
         });
+
+        tweetEvaluationFuncList = new ArrayList<>();
+
+        tweetEvaluationFuncList.add(tweetLabelEvaluation -> {
+            ModuleRequest request = null;
+
+
+
+            return request;
+        });
     }
 
     /**
@@ -70,5 +83,10 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
     @Override
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
         return tweetFuncList;
+    }
+
+    @Override
+    public List<Function<TweetLabelEvaluation, ModuleRequest>> tweetLabelEvaluationRequest() {
+        return tweetEvaluationFuncList;
     }
 }
