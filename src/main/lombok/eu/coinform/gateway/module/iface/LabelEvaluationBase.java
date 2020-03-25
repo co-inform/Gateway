@@ -1,9 +1,10 @@
 package eu.coinform.gateway.module.iface;
 
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 public abstract class LabelEvaluationBase implements Serializable {
 
     private final String context;

@@ -1,6 +1,10 @@
 package eu.coinform.gateway.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.coinform.gateway.controller.TweetLabelEvaluation;
+import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
+import eu.coinform.gateway.util.ReactionLabel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +24,7 @@ public class ModuleRequestFactoryTest {
     ModuleRequest moduleRequest;
     MRCImplementation mrcImplementation;
     String uuid = UUID.randomUUID().toString();
+    ObjectMapper mapper = new ObjectMapper();
 
     @Before
     public void setup(){
@@ -107,7 +112,33 @@ public class ModuleRequestFactoryTest {
 
         moduleRequest.makeRequest();
 
-}
+    }
+
+    @Test
+    public void moduleRequestLabelEvaluation() {
+        TweetLabelEvaluation tle = new TweetLabelEvaluation();
+        tle.setReaction(ReactionLabel.agree);
+        tle.setTweet_id("1181172459325800448");
+        tle.setRated_credibility("not_credible");
+        tle.setRated_moduleResponse("251b6a72cd3a3af314baf748abdfac93c076e54272dabcaef5b7b115eb65c848");
+
+        assertThat(moduleRequestFactory).isNotNull();
+        assertThat(moduleRequestBuilder).isNotNull();
+
+        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tle, UUID.randomUUID().toString());
+
+        try {
+            moduleRequest = moduleRequestBuilder.setPath("/user/accuracy-review").setContent(levi).build();
+            log.debug("LEVI {}", mapper.writeValueAsString(levi));
+        } catch(ModuleRequestBuilderException | JsonProcessingException e){
+            log.error(e.getMessage());
+        }
+
+        assertThat(moduleRequest).isNotNull();
+        log.debug(moduleRequest.toString());
+
+    }
+
 
     private class MRCImplementation extends ModuleRequestContent{
 

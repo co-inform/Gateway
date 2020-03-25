@@ -3,6 +3,7 @@ package eu.coinform.gateway.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.RoleEnum;
+import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.jwt.JwtToken;
@@ -11,6 +12,7 @@ import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
+import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -27,11 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -202,6 +200,12 @@ public class CheckController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
+        Long userId = (Long) authentication.getPrincipal();
+        Optional<User> oUser = userDbManager.getUserById(userId);
+        if(oUser.isEmpty()){
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
+        }
+        checkHandler.tweetLabelEvaluationConsumer(tweetLabelEvaluation, oUser.get().getUuid());
 
         return ResponseEntity.status(HttpStatus.OK).body(SuccesfullResponse.EVALUATELABEL);
     }

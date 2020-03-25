@@ -68,4 +68,15 @@ public class UserDbManager {
         }
         return passwordAuth.get().getUser();
     }
+
+
+    /**
+     * get an Optional holding the User object corresponding to the userId
+     * @param userid a Long identifying the user
+     * @return an Optional holding the User
+     */
+
+    public Optional<User> getUserById(Long userid){
+        return userRepository.findById(userid);
+    }
 }

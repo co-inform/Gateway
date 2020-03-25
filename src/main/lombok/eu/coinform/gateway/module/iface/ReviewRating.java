@@ -1,5 +1,8 @@
 package eu.coinform.gateway.module.iface;
 
+import lombok.Data;
+
+@Data
 public class ReviewRating extends LabelEvaluationBase {
 
     private final String ratingValue;

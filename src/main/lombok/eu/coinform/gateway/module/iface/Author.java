@@ -1,15 +1,17 @@
 package eu.coinform.gateway.module.iface;
 
-import java.io.Serializable;
-import java.util.UUID;
+import lombok.Data;
 
+import java.io.Serializable;
+
+@Data
 public class Author extends LabelEvaluationBase implements Serializable {
 
     private final String identifier;
 
-    Author(UUID identifier){
-        super("https://coinform.eu","CoinforUser");
-        this.identifier = identifier.toString();
+    Author(String uuid){
+        super("https://coinform.eu","CoinformUser");
+        this.identifier = uuid;
 
     }
 }

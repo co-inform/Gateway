@@ -5,6 +5,7 @@ import com.google.common.io.CharStreams;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -24,6 +25,7 @@ import java.util.function.BiFunction;
  * gateway will always be performing POST requests to the modules different API's
  */
 @Slf4j
+@ToString
 public class ModuleRequest extends HttpPost {
 
     /**

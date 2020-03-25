@@ -1,5 +1,6 @@
 CREATE TABLE `user` (
                         `id` bigint unsigned not null auto_increment unique PRIMARY KEY,
+                        `uuid` char(40),
                         `created_at` datetime
 );
 

@@ -15,7 +15,7 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
     private ReviewRating reviewRating;
     private ItemReviewed itemReviewed;
 
-    public LabelEvaluationImplementation(TweetLabelEvaluation tweetLabelEvaluation, UUID user){
+    public LabelEvaluationImplementation(TweetLabelEvaluation tweetLabelEvaluation, String uuid){
         super("https://schema.org", "CoinformUserReview");
         if(tweetLabelEvaluation.getReaction() == ReactionLabel.agree) {
             name = "accurate";
@@ -24,7 +24,7 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
             name = "inaccurate";
             reviewRating = new ReviewRating("inaccurate");
         }
-        author = new Author(user);
+        author = new Author(uuid);
         itemReviewed = new ItemReviewed(tweetLabelEvaluation.getRated_moduleResponse(),
                 tweetLabelEvaluation.getRated_credibility(),
                 tweetLabelEvaluation.getTweet_id());

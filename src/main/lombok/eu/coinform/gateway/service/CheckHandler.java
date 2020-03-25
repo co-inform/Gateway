@@ -91,7 +91,7 @@ public class CheckHandler {
     }
 
     @Async("endpointExecutor")
-    public void tweetLabelEvaluationConsumer(TweetLabelEvaluation tweetLabelEvaluation){
+    public void tweetLabelEvaluationConsumer(TweetLabelEvaluation tweetLabelEvaluation, String uuid){
         log.trace("handle tweetLabelEvaluation: {}", tweetLabelEvaluation);
         for(Module module: moduleList){
             log.trace("handle for module: {} -> {}", module.getName(), module);
@@ -100,7 +100,7 @@ public class CheckHandler {
                 ((TweetLabelEvaluationInterface) module)
                         .tweetLabelEvaluationRequest()
                         .forEach((func) -> {
-                            ModuleRequest moduleRequest = func.apply(tweetLabelEvaluation);
+                            ModuleRequest moduleRequest = func.apply(tweetLabelEvaluation, uuid);
 
                             try {
                                 moduleRequest.makeRequest();

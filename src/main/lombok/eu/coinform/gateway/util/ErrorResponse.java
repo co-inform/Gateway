@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum ErrorResponse {
     USEREXISTS("User already exists"),
     NOSUCHQUERYID("No such query_id"),
+    NOSUCHUSER("No such user exists"),
     NOSUCHTRANSACTIONID("No such transaction_id");
 
     @Getter

@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user")
@@ -19,6 +20,10 @@ public class User implements Serializable {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Getter
+    @Column(name = "uuid")
+    private String uuid;
 
     @Getter
     @Setter
@@ -35,5 +40,9 @@ public class User implements Serializable {
     @Setter
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Role> roles;
+
+    public User() {
+        this.uuid = UUID.randomUUID().toString();
+    }
 
 }
