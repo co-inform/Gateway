@@ -6,13 +6,16 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import eu.coinform.gateway.GatewayApplication;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.PasswordAuthRepository;
 import eu.coinform.gateway.db.RoleRepository;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UserRepository;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
+import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.util.Pair;
+import eu.coinform.gateway.util.ReactionLabel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -32,7 +36,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -338,4 +344,19 @@ public class CheckControllerTest {
         assertThat(response.getModuleResponseCode().size()).isEqualTo(2);
         assertThat(response.getModuleResponseCode().get("first")).isNotNull();
     }
+/*
+    @Test
+    public void restCLientTest() {
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+
+        TweetLabelEvaluation tle = new TweetLabelEvaluation();
+        tle.setReaction(ReactionLabel.agree);
+        tle.setTweet_id("1181172459325800448");
+        tle.setRated_credibility("not_credible");
+        tle.setRated_moduleResponse("251b6a72cd3a3af314baf748abdfac93c076e54272dabcaef5b7b115eb65c848");
+
+        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tle, UUID.randomUUID().toString());
+        RestClient client = new RestClient(HttpMethod.POST, URI.create("https:///www.example.com"),levi);
+        client.sendRequest();
+    }*/
 }

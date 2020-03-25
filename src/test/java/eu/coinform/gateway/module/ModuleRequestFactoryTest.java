@@ -113,7 +113,7 @@ public class ModuleRequestFactoryTest {
         moduleRequest.makeRequest();
 
     }
-
+/*
     @Test
     public void moduleRequestLabelEvaluation() {
         TweetLabelEvaluation tle = new TweetLabelEvaluation();
@@ -139,7 +139,7 @@ public class ModuleRequestFactoryTest {
 
     }
 
-
+*/
     private class MRCImplementation extends ModuleRequestContent{
 
         MRCImplementation(String callbackBaseUrl) {

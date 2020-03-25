@@ -22,10 +22,10 @@ import java.util.function.Function;
  * ClaimCredibility module extends Module and implements TwitterTweetRequestInterface
  */
 @Slf4j
-public class ClaimCredibility extends Module implements TwitterTweetRequestInterface, TweetLabelEvaluationInterface {
+public class ClaimCredibility extends Module implements TwitterTweetRequestInterface { //}, TweetLabelEvaluationInterface {
 
     private List<Function<Tweet, ModuleRequest>> tweetFuncList;
-    private List<BiFunction<TweetLabelEvaluation, String, ModuleRequest>> tweetEvaluationFuncList;
+//    private List<BiFunction<TweetLabelEvaluation, String, ModuleRequest>> tweetEvaluationFuncList;
 
     /**
      * The constructor of the ClaimCredibility class. Sets up the module and also needs to implement the Functional
@@ -67,7 +67,7 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             }
             return request;
         });
-
+/*
         tweetEvaluationFuncList = new ArrayList<>();
 
         tweetEvaluationFuncList.add((tweetLabelEvaluation, uuid) -> {
@@ -87,6 +87,7 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             }
             return request;
         });
+*/
     }
 
     /**
@@ -97,8 +98,8 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
         return tweetFuncList;
     }
 
-    @Override
+/*    @Override
     public List<BiFunction<TweetLabelEvaluation, String, ModuleRequest>> tweetLabelEvaluationRequest() {
         return tweetEvaluationFuncList;
-    }
+    }*/
 }

@@ -19,10 +19,10 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
         super("https://schema.org", "CoinformUserReview");
         if(tweetLabelEvaluation.getReaction() == ReactionLabel.agree) {
             name = "accurate";
-            reviewRating = new ReviewRating("accurate");
+            reviewRating = new ReviewRating(name);
         } else {
             name = "inaccurate";
-            reviewRating = new ReviewRating("inaccurate");
+            reviewRating = new ReviewRating(name);
         }
         author = new Author(uuid);
         itemReviewed = new ItemReviewed(tweetLabelEvaluation.getRated_moduleResponse(),

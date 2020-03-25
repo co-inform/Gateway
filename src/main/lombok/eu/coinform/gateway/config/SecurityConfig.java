@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(userDbAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers("/login", "/twitter/evaluate", "/twitter/evaluate/label").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
+                    .antMatchers("/login", "/twitter/evaluate").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
                     .anyRequest().permitAll();
     }
 
