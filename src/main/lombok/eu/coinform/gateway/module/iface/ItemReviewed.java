@@ -19,7 +19,7 @@ public class ItemReviewed extends LabelEvaluationBase implements Serializable {
         this.name = name;
         this.itemReviewd = new LinkedHashMap<>();
         itemReviewd.put("context", "https://coinform.eu");
-        itemReviewd.put("type","CredibilityReview");
+        itemReviewd.put("type","Tweet");
         itemReviewd.put("identifier", tweetId);
     }
 }
