@@ -11,6 +11,8 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class RestClient {
@@ -29,9 +31,16 @@ public class RestClient {
     }
 
     @Async("endpointExecutor")
-    public void sendRequest() {
+    public int sendRequest() {
         log.debug("Request: {}", request.headers());
-        client.sendAsync(request, BodyHandlers.ofString()).thenAccept(HttpResponse::body).thenAccept(msg -> log.debug("HttpResponse: {}",msg));
+        final int[] ret = new int[0];
+        client.sendAsync(request, BodyHandlers.ofString()).thenApply(HttpResponse::statusCode)
+            .thenAccept(msg -> {
+                    log.debug("HttpResponse: {}",msg);
+                    ret[0] = msg;
+                });
+        return ret[0];
+
     }
 
 }

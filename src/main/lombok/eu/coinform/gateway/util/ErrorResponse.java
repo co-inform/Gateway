@@ -8,6 +8,7 @@ public enum ErrorResponse {
     USEREXISTS("User already exists"),
     NOSUCHQUERYID("No such query_id"),
     NOSUCHUSER("No such user exists"),
+    GENEREIC("Something went wrong"),
     NOSUCHTRANSACTIONID("No such transaction_id");
 
     @Getter

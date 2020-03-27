@@ -15,6 +15,7 @@ import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
+import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -219,9 +220,12 @@ public class CheckController {
         LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, UUID.randomUUID().toString());
         RestClient client = new RestClient(HttpMethod.POST, uri, mapper.writeValueAsString(levi), "Authorization", userInfo);
 
-        client.sendRequest();
+        int status = client.sendRequest();
 
-        return ResponseEntity.status(HttpStatus.OK).body(SuccesfullResponse.EVALUATELABEL);
+        if(status >= 200 && status <=299) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.EVALUATELABEL);
+        }
+        return ResponseEntity.status(status).body(ErrorResponse.NOSUCHQUERYID);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
