@@ -27,4 +27,8 @@ public class TweetLabelEvaluation implements Serializable {
     @JsonView(Views.NoDebug.class)
     String rated_credibility;
 
+    @NotNull(message = "url must point to the actual tweet")
+    @JsonView(Views.NoDebug.class)
+    String url;
+
 }

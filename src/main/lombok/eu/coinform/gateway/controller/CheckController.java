@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.RoleEnum;
-import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.jwt.JwtToken;
@@ -16,7 +15,6 @@ import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
-import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -205,6 +203,7 @@ public class CheckController {
         // TODO: 2020-03-24 implement logic for sending evaluation to module
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
+        // Uncomment below and delete the random UUID line once the entire login/longlived sessions is merged
 /*
         Long userId = (Long) authentication.getPrincipal();
         Optional<User> oUser = userDbManager.getUserById(userId);
