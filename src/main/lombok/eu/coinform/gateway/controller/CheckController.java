@@ -36,6 +36,7 @@ import javax.validation.Valid;
 
 import java.util.*;
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -197,29 +198,31 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
-    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluation tweetLabelEvaluation, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException {
+    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluation tweetLabelEvaluation, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException, ExecutionException, InterruptedException {
         // TODO: 2020-03-24 implement logic for sending evaluation to module
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         // Uncomment below and delete the random UUID line once the entire login/longlived sessions is merged
+        log.debug("Principal: {}", authentication.getPrincipal());
         Long userId = (Long) authentication.getPrincipal();
         Optional<User> oUser = userDbManager.getUserById(userId);
 
         if(oUser.isEmpty()){
+            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
-        log.debug("User: {}", oUser.get());
-        URI uri = URI.create("https://coinform.expertsystemcustomer.com/cc/api/v1");
+        log.debug("User: {}", oUser.get().getPasswordAuth().getEmail());
+        URI uri = URI.create("https://coinform.expertsystemcustomer.com/cc/api/v1/user/accuracy-review");
         ObjectMapper mapper = new ObjectMapper();
         LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid());
-//        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, UUID.randomUUID().toString());
         RestClient client = new RestClient(HttpMethod.POST, uri, mapper.writeValueAsString(levi), "Authorization", userInfo);
 
-        int status = client.sendRequest();
+       int status = client.sendRequest().join();
 
         if(status >= 200 && status <=299) {
             return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.EVALUATELABEL);
         }
+        log.debug("RestClient error: {}", status);
         return ResponseEntity.status(status).body(ErrorResponse.NOSUCHQUERYID);
     }
 
