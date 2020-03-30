@@ -9,6 +9,7 @@ import eu.coinform.gateway.db.RoleEnum;
 import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
+import eu.coinform.gateway.events.UserLabelReviewEvent;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
@@ -22,6 +23,7 @@ import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,17 +51,20 @@ public class CheckController {
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
     private final RuleEngineConnector ruleEngineConnector;
+    private final ApplicationEventPublisher eventPublisher;
     private final UserDbManager userDbManager;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
                     RuleEngineConnector ruleEngineConnector,
                     UserDbManager userDbManager,
+                    ApplicationEventPublisher eventPublisher,
                     @Value("${JWT_KEY}") String signatureKey) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
         this.userDbManager = userDbManager;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -199,10 +204,8 @@ public class CheckController {
 
     @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
     public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluation tweetLabelEvaluation, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException, ExecutionException, InterruptedException {
-        // TODO: 2020-03-24 implement logic for sending evaluation to module
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        // Uncomment below and delete the random UUID line once the entire login/longlived sessions is merged
         log.debug("Principal: {}", authentication.getPrincipal());
         Long userId = (Long) authentication.getPrincipal();
         Optional<User> oUser = userDbManager.getUserById(userId);
@@ -212,18 +215,8 @@ public class CheckController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
         log.debug("User: {}", oUser.get().getPasswordAuth().getEmail());
-        URI uri = URI.create("https://coinform.expertsystemcustomer.com/cc/api/v1/user/accuracy-review");
-        ObjectMapper mapper = new ObjectMapper();
-        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid());
-        RestClient client = new RestClient(HttpMethod.POST, uri, mapper.writeValueAsString(levi), "Authorization", userInfo);
-
-       int status = client.sendRequest().join();
-
-        if(status >= 200 && status <=299) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.EVALUATELABEL);
-        }
-        log.debug("RestClient error: {}", status);
-        return ResponseEntity.status(status).body(ErrorResponse.NOSUCHQUERYID);
+        eventPublisher.publishEvent(new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid()));
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
