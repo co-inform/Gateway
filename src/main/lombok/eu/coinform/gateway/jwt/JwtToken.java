@@ -2,16 +2,21 @@ package eu.coinform.gateway.jwt;
 
 import eu.coinform.gateway.db.Role;
 import eu.coinform.gateway.db.RoleEnum;
+import eu.coinform.gateway.db.User;
+import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class JwtToken {
+
 
     public static final String TOKEN_HEADER = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
@@ -31,14 +36,20 @@ public class JwtToken {
 
     public static class Builder {
 
-        private String user;
+        private Long user;
         private List<String> roles;
         private Long expirationTime;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
+        private int counter;
 
-        public Builder setUser(String user) {
+        public Builder setUser(Long user) {
             this.user = user;
+            return this;
+        }
+
+        public Builder setCounter(int counter){
+            this.counter = counter;
             return this;
         }
 
@@ -63,16 +74,19 @@ public class JwtToken {
         }
 
         public JwtToken build() {
+
             String token = Jwts.builder()
                     .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(key)), signatureAlgorithm)
                     .setHeaderParam("typ", TOKEN_TYPE)
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)
-                    .setSubject(user)
+                    .setSubject(user.toString())
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
+                    .claim("count", counter)
                     .compact();
             return new JwtToken(token);
         }
     }
 }
+

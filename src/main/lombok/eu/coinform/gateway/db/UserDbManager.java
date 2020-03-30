@@ -1,34 +1,36 @@
 package eu.coinform.gateway.db;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.message.AuthException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserDbManager {
 
     private UserRepository userRepository;
     private PasswordAuthRepository passwordAuthRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+    private VerificationTokenRepository verificationTokenRepository;
 
     public UserDbManager(
             UserRepository userRepository,
             PasswordAuthRepository passwordAuthRepository,
             RoleRepository roleRepository,
+            VerificationTokenRepository verificationTokenRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordAuthRepository = passwordAuthRepository;
         this.roleRepository = roleRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -46,15 +48,35 @@ public class UserDbManager {
         passwordAuth.setUser(dbUser);
         passwordAuth.setId(dbUser.getId());
         dbUser.setPasswordAuth(passwordAuth);
-        //dbUser.setRoles(roleList.stream().map(role ->  new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()));
         dbUser.setRoles(
                 Lists.newLinkedList(
                         roleRepository.saveAll(
                                 roleList.stream().map(role -> new Role(dbUser.getId(), dbUser, role)).collect(Collectors.toList()))));
 
         userRepository.save(dbUser);
+        verificationTokenRepository.save(new VerificationToken(UUID.randomUUID().toString(), user));
 
         return dbUser;
+    }
+
+    public boolean passwordReset(User user, String password) {
+        user.getPasswordAuth().setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+
+        return verificationTokenRepository.findByUser(user).map(token -> {
+            verificationTokenRepository.delete(token);
+            return true;
+        }).or(() -> Optional.of(false)).get();
+    }
+
+    public boolean passwordChange(Long userid, String newPassword, String oldPassword){
+        User user = userRepository.findById(userid).get();
+        if(!passwordEncoder.matches(oldPassword, user.getPasswordAuth().getPassword())){
+            return false;
+        }
+        user.getPasswordAuth().setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return true;
     }
 
     public User logIn(String email, String password) throws AuthenticationException {
@@ -66,17 +88,78 @@ public class UserDbManager {
         if (!passwordEncoder.matches(password, passwordAuth.get().getPassword())) {
             throw new BadCredentialsException("Incorrect Password");
         }
+
+        if(!userRepository.findById(passwordAuth.get().getId()).get().isEnabled()){
+            throw new UserNotVerifiedException("User not verified");
+        }
+
+        verificationTokenRepository.findByUser(passwordAuth.get().getUser()).ifPresent(token -> {
+            verificationTokenRepository.delete(token);
+        });
+
         return passwordAuth.get().getUser();
     }
 
+    public void createAndSaveVerificationToken(User user, String token){
+        VerificationToken myToken = new VerificationToken(token, user);
+        VerificationToken t = verificationTokenRepository.save(myToken);
+    }
 
-    /**
-     * get an Optional holding the User object corresponding to the userId
-     * @param userid a Long identifying the user
-     * @return an Optional holding the User
-     */
+    public Optional<VerificationToken> getVerificationToken(String token){
+        return verificationTokenRepository.findByToken(token);
+    }
+
+    public Optional<VerificationToken> getVerificationToken(User user){
+        return verificationTokenRepository.findByUser(user);
+    }
+
+    public boolean confirmUser(String token) throws LinkTimedOutException{
+        Optional<VerificationToken> myToken = verificationTokenRepository.findByToken(token);
+        if(myToken.isEmpty()){
+            throw new NoSuchTokenException(token);
+        }
+        User user = myToken.map(VerificationToken::getUser).get();
+        Calendar cal = Calendar.getInstance();
+        if ((myToken.get().getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
+            throw new LinkTimedOutException("Verification link timed out");
+        }
+        user.setEnabled(true);
+        userRepository.save(user);
+        verificationTokenRepository.delete(myToken.get());
+        return true;
+    }
+
+
+    public void logOut(Long userId){
+        Optional<User> user = userRepository.findById(userId);
+        user.ifPresent(u -> u.setCounter(u.getCounter()+1)); // to invalidate the JWT token
+        userRepository.save(user.get());
+    }
+
+    public String passwordReset(User user){
+        log.debug("Resetting user: {}", user.getPasswordAuth().getEmail());
+        user.setCounter(user.getCounter()+1); // to invalidate the JWT token
+        Optional<VerificationToken> token = verificationTokenRepository.findByUser(user);
+        String uuid = UUID.randomUUID().toString();
+
+        token.ifPresent(verificationToken -> verificationTokenRepository.delete(verificationToken));
+        verificationTokenRepository.save(new VerificationToken(uuid, user));
+        userRepository.save(user);
+        return uuid;
+    }
 
     public Optional<User> getUserById(Long userid){
         return userRepository.findById(userid);
     }
+
+    public String getEmailById(Long userid){
+        return passwordAuthRepository.findById(userid)
+                .map(PasswordAuth::getEmail).get();
+    }
+
+    public User getByEmail(String email){
+        return passwordAuthRepository.getByEmail(email)
+                .map(PasswordAuth::getUser).get();
+    }
+
 }

@@ -6,6 +6,10 @@ import lombok.Getter;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum SuccesfullResponse {
     USERCREATED("User created"),
+    PASSWORDRESET("Password reset, please check your email for reset link"),
+    USERLOGGEDOUT("User succesfully logged out"),
+    PASSWORDCHANGE("Password successfully changed"),
+    USERVERIFIED("User successfully verified"),
     EVALUATELABEL("User label evaluation received");
 
     @Getter

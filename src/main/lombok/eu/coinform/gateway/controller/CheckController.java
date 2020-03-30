@@ -33,11 +33,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import java.net.URI;
 import java.util.*;
+import java.net.URI;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 
 /**
  * The REST Controller defining the endpoints facing towards the users
@@ -48,8 +46,6 @@ public class CheckController {
 
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
-    private final UserDbManager userDbManager;
-    private final String signatureKey;
     private final RuleEngineConnector ruleEngineConnector;
 
     CheckController(RedisHandler redisHandler,
@@ -60,8 +56,6 @@ public class CheckController {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
-        this.userDbManager = userDbManager;
-        this.signatureKey = signatureKey;
     }
 
     /**
@@ -227,31 +221,6 @@ public class CheckController {
         }
         return ResponseEntity.status(status).body(ErrorResponse.NOSUCHQUERYID);
     }
-
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-
-        String token = (new JwtToken.Builder())
-                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
-                .setKey(signatureKey)
-                .setExpirationTime(7*24*60*60*1000L)
-                .setUser(authentication.getName())
-                .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .build().getToken();
-        return new LoginResponse(token);
-    }
-
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
-
-        List<RoleEnum> roles = new LinkedList<>();
-        roles.add(RoleEnum.USER);
-        userDbManager.registerUser(registerForm.email, registerForm.password, roles);
-        return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
-    }
-
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)
     public LinkedHashMap<String, Object> ruleEngineCheck(@Valid @RequestBody RuleEngineTestInput ruleEngineTestInput) {

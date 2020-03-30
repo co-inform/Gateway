@@ -28,8 +28,7 @@ public class ResponseHandler {
     public ResponseHandler(RedisHandler redisHandler,
                            ResponseAggregator responseAggregator,
                            RuleEngineConnector ruleEngine,
-                           List<Module> moduleList
-                           ) {
+                           List<Module> moduleList) {
         this.redisHandler = redisHandler;
         this.responseAggregator = responseAggregator;
         this.ruleEngine = ruleEngine;

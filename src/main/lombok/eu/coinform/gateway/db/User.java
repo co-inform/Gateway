@@ -1,6 +1,5 @@
 package eu.coinform.gateway.db;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,8 +40,19 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Role> roles;
 
-    public User() {
+    @Getter
+    @Setter
+    private boolean enabled;
+
+    @Getter
+    @Setter
+    @Column(name = "counter")
+    private int counter;
+
+    public User(){
+        this.enabled = false;
         this.uuid = UUID.randomUUID().toString();
     }
+
 
 }
