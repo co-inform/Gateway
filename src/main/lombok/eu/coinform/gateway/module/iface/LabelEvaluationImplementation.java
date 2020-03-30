@@ -27,7 +27,8 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
         author = new Author(uuid);
         itemReviewed = new ItemReviewed(tweetLabelEvaluation.getRated_moduleResponse(),
                 tweetLabelEvaluation.getRated_credibility(),
-                tweetLabelEvaluation.getTweet_id());
+                tweetLabelEvaluation.getTweet_id(),
+                tweetLabelEvaluation.getUrl());
 
     }
 
