@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.RoleEnum;
+import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.jwt.JwtToken;
@@ -47,6 +48,7 @@ public class CheckController {
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
     private final RuleEngineConnector ruleEngineConnector;
+    private final UserDbManager userDbManager;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
@@ -56,6 +58,7 @@ public class CheckController {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
+        this.userDbManager = userDbManager;
     }
 
     /**
@@ -199,7 +202,6 @@ public class CheckController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         // Uncomment below and delete the random UUID line once the entire login/longlived sessions is merged
-/*
         Long userId = (Long) authentication.getPrincipal();
         Optional<User> oUser = userDbManager.getUserById(userId);
 
@@ -207,11 +209,10 @@ public class CheckController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
         log.debug("User: {}", oUser.get());
-*/
         URI uri = URI.create("https://coinform.expertsystemcustomer.com/cc/api/v1");
         ObjectMapper mapper = new ObjectMapper();
-//        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid());
-        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, UUID.randomUUID().toString());
+        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid());
+//        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, UUID.randomUUID().toString());
         RestClient client = new RestClient(HttpMethod.POST, uri, mapper.writeValueAsString(levi), "Authorization", userInfo);
 
         int status = client.sendRequest();
