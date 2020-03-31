@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `counter` MEDIUMINT UNSIGNED AFTER `enabled`;

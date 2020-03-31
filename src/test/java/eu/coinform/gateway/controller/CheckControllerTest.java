@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import eu.coinform.gateway.GatewayApplication;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.cache.Views;
-import eu.coinform.gateway.db.PasswordAuthRepository;
-import eu.coinform.gateway.db.RoleRepository;
-import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.UserRepository;
+import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.util.Pair;
@@ -74,7 +71,7 @@ public class CheckControllerTest {
     public static class CheckControllerTestConfig {
         @Bean
         public UserDbManager testUserDbManager() {
-            return new UserDbManager(mock(UserRepository.class), mock(PasswordAuthRepository.class), mock(RoleRepository.class), mock(PasswordEncoder.class));
+            return new UserDbManager(mock(UserRepository.class), mock(PasswordAuthRepository.class), mock(RoleRepository.class), mock(VerificationTokenRepository.class), mock(PasswordEncoder.class));
         }
     }
 
