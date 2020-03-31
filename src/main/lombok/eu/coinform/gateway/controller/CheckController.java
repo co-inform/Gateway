@@ -49,8 +49,7 @@ public class CheckController {
                     CheckHandler checkHandler,
                     RuleEngineConnector ruleEngineConnector,
                     UserDbManager userDbManager,
-                    ApplicationEventPublisher eventPublisher,
-                    @Value("${JWT_KEY}") String signatureKey) {
+                    ApplicationEventPublisher eventPublisher) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
