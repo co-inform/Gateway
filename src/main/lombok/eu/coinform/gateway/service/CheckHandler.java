@@ -2,12 +2,10 @@ package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.model.Tweet;
-import eu.coinform.gateway.controller.TweetLabelEvaluation;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestException;
-import eu.coinform.gateway.module.iface.TweetLabelEvaluationInterface;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +87,7 @@ public class CheckHandler {
             }
         }
     }
-
+/*
     @Async("endpointExecutor")
     public void tweetLabelEvaluationConsumer(TweetLabelEvaluation tweetLabelEvaluation, String uuid){
         log.trace("handle tweetLabelEvaluation: {}", tweetLabelEvaluation);
@@ -112,4 +110,6 @@ public class CheckHandler {
             }
         }
     }
+    */
+
 }

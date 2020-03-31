@@ -15,7 +15,7 @@ import java.net.URI;
 @Component
 public class UserLabelReviewListener implements ApplicationListener<UserLabelReviewEvent> {
 
-    @Value("${claimcredibility.server.scheme}://${claimcredibility.server.url}/${claimcredibility.server.base_endpoint}/user/accuracy-review")
+    @Value("${claimcredibility.server.scheme}://${claimcredibility.server.url}${claimcredibility.server.base_endpoint}/user/accuracy-review")
     String host;
 
     @Value("${CLAIM_CRED_USER_INFO}")
@@ -27,7 +27,8 @@ public class UserLabelReviewListener implements ApplicationListener<UserLabelRev
     public void onApplicationEvent(UserLabelReviewEvent event) {
         RestClient client;
         int status;
-        log.debug("Event: {}", event);
+        log.debug("Event: {}", event.source.toString());
+        log.debug("url: {}", host);
         try {
             client = new RestClient(HttpMethod.POST,
                     URI.create(host),

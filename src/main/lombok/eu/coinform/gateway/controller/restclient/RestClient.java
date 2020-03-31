@@ -35,7 +35,7 @@ public class RestClient {
         final int[] ret = new int[1];
         client.sendAsync(request, BodyHandlers.ofString()).thenApply(HttpResponse::statusCode)
             .thenAccept(msg -> {
-                    log.debug("HttpResponse: {}",msg);
+                    log.debug("HttpStatusCode: {}",msg);
                     ret[0] = msg;
                 });
         return CompletableFuture.completedFuture(ret[0]);

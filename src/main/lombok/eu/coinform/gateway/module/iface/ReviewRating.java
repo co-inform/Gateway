@@ -9,7 +9,7 @@ public class ReviewRating extends LabelEvaluationBase {
     private final String reviewAspect = "accuracy";
 
     ReviewRating(String ratingValue){
-        super("https://coinform.eu","CoinformAccuracyReview");
+        super("https://coinform.eu","CoinformAccuracyRating");
         this.ratingValue = ratingValue;
     }
 
