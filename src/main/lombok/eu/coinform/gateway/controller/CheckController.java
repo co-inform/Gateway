@@ -2,15 +2,10 @@ package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.Views;
-import eu.coinform.gateway.controller.restclient.RestClient;
-import eu.coinform.gateway.db.RoleEnum;
 import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
-import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
@@ -20,15 +15,12 @@ import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.util.*;
-import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
@@ -206,7 +197,6 @@ public class CheckController {
     public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluation tweetLabelEvaluation, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException, ExecutionException, InterruptedException {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        log.debug("Principal: {}", authentication.getPrincipal());
         Long userId = (Long) authentication.getPrincipal();
         Optional<User> oUser = userDbManager.getUserById(userId);
 
@@ -214,8 +204,7 @@ public class CheckController {
             log.debug("No user: {}, {}", userId, authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
-        log.debug("User: {}", oUser.get().getPasswordAuth().getEmail());
-        eventPublisher.publishEvent(new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid()));
+        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid())));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 
