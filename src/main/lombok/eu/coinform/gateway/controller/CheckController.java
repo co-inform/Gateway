@@ -3,11 +3,15 @@ package eu.coinform.gateway.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
+import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
+import eu.coinform.gateway.events.UserTweetEvaluationEvent;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
 import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
@@ -176,12 +180,23 @@ public class CheckController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
-    public EvaluationResponse evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+    public ResponseEntity<?> evaluateTweet(@Valid @RequestBody TweetEvaluationForm tweetEvaluationForm) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+        Optional<User> oUser = userDbManager.getUserById(userId);
+
+        if(oUser.isEmpty()){
+            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
+        }
+
+        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, oUser.get().getUuid())));
 
         //todo: actually do something with the incoming tweet evaluations
-        redisHandler.addToEvaluationList(tweetEvaluation);
-
-        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
+//        redisHandler.addToEvaluationList(tweetEvaluation);
+//        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)
@@ -193,7 +208,7 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
-    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluation tweetLabelEvaluation, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException, ExecutionException, InterruptedException {
+    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException, ExecutionException, InterruptedException {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
@@ -203,7 +218,7 @@ public class CheckController {
             log.debug("No user: {}, {}", userId, authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
-        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluation, oUser.get().getUuid())));
+        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, oUser.get().getUuid())));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 

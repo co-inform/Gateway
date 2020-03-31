@@ -2,13 +2,9 @@ package eu.coinform.gateway.module.claimcredibility;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.model.Tweet;
-import eu.coinform.gateway.controller.TweetLabelEvaluation;
 import eu.coinform.gateway.module.Module;
 import eu.coinform.gateway.module.ModuleRequest;
 import eu.coinform.gateway.module.ModuleRequestBuilderException;
-import eu.coinform.gateway.module.ModuleRequestException;
-import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
-import eu.coinform.gateway.module.iface.TweetLabelEvaluationInterface;
 import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;

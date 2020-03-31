@@ -92,13 +92,13 @@ public class UserController {
         log.debug("Form: {}", form.getEmail());
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOSUCHUSER);
         }
 
         try{
             eventPublisher.publishEvent(new OnPasswordResetEvent(user));
         } catch (Exception e){
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOSUCHUSER);
         }
 
         return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);

@@ -3,7 +3,6 @@ package eu.coinform.gateway.service;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
-import eu.coinform.gateway.model.Evaluation;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.util.Pair;
@@ -274,7 +273,7 @@ public class RedisHandler {
         redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number, 1, TimeUnit.DAYS);
         return CompletableFuture.completedFuture(true);
     }
-
+/*
     @Async("redisExecutor")
     public CompletableFuture<Long> addToEvaluationList(Evaluation evaluation) {
         Long ret =  redisTemplate.opsForList().leftPush(EVALUATION_LIST_KEY, evaluation);
@@ -283,4 +282,6 @@ public class RedisHandler {
         redisTemplate.opsForList().trim(EVALUATION_LIST_KEY, 0, 99);
         return CompletableFuture.completedFuture(ret);
     }
+*/
 }
+

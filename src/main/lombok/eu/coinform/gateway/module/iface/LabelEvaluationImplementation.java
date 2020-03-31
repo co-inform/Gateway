@@ -1,12 +1,9 @@
 package eu.coinform.gateway.module.iface;
 
-import eu.coinform.gateway.controller.TweetLabelEvaluation;
+import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.util.ReactionLabel;
-import lombok.Data;
 import java.io.Serializable;
-import java.util.UUID;
 
-@Data
 public class LabelEvaluationImplementation extends LabelEvaluationBase implements Serializable {
 
     private String name;
@@ -16,21 +13,21 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
     private ItemReviewed itemReviewed;
     private String identifier;
 
-    public LabelEvaluationImplementation(TweetLabelEvaluation tweetLabelEvaluation, String uuid){
+    public LabelEvaluationImplementation(TweetLabelEvaluationForm tweetLabelEvaluationForm, String uuid){
         super("https://schema.org", "CoinformUserReview");
-        if(tweetLabelEvaluation.getReaction() == ReactionLabel.agree) {
+        if(tweetLabelEvaluationForm.getReaction() == ReactionLabel.agree) {
             name = "accurate";
             reviewRating = new ReviewRating(name);
         } else {
             name = "inaccurate";
             reviewRating = new ReviewRating(name);
         }
-        identifier = tweetLabelEvaluation.getRated_moduleResponse();
+        identifier = tweetLabelEvaluationForm.getRated_moduleResponse();
         author = new Author(uuid);
-        itemReviewed = new ItemReviewed(tweetLabelEvaluation.getRated_moduleResponse(),
-                tweetLabelEvaluation.getRated_credibility(),
-                tweetLabelEvaluation.getTweet_id(),
-                tweetLabelEvaluation.getUrl());
+        itemReviewed = new ItemReviewed(tweetLabelEvaluationForm.getRated_moduleResponse(),
+                tweetLabelEvaluationForm.getRated_credibility(),
+                tweetLabelEvaluationForm.getTweet_id(),
+                tweetLabelEvaluationForm.getUrl());
 
     }
 

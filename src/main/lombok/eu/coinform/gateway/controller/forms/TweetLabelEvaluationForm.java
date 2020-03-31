@@ -1,4 +1,4 @@
-package eu.coinform.gateway.controller;
+package eu.coinform.gateway.controller.forms;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.Views;
@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
-public class TweetLabelEvaluation implements Serializable {
+public class TweetLabelEvaluationForm implements Serializable {
 
     @NotNull(message = "tweet_id cannot be empty")
     @JsonView(Views.NoDebug.class)

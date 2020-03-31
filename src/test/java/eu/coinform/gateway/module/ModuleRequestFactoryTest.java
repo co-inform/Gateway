@@ -2,9 +2,6 @@ package eu.coinform.gateway.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.coinform.gateway.controller.TweetLabelEvaluation;
-import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
-import eu.coinform.gateway.util.ReactionLabel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
