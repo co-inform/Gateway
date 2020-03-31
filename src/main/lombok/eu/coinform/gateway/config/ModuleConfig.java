@@ -80,9 +80,17 @@ public class ModuleConfig {
                     log.trace("failing to write content: {}", ex.getMessage());
                 }
             }
-            QueryResponse queryResponse = redisHandler.getQueryResponse(moduleRequest.getQueryId()).join();
-            queryResponse.getModuleResponseCode().put(moduleRequest.getModule().getName().toLowerCase(), httpResponse.getStatusLine().getStatusCode());
-            redisHandler.setQueryResponse(moduleRequest.getQueryId(), queryResponse);
+            Boolean qrAdded;
+            do {
+                QueryResponse queryResponse = redisHandler.getQueryResponse(moduleRequest.getQueryId()).join();
+                long oldVersionHash = queryResponse.getVersionHash();
+                queryResponse.getModuleResponseCode().put(moduleRequest.getModule().getName().toLowerCase(), httpResponse.getStatusLine().getStatusCode());
+                queryResponse.setVersionHash();
+                qrAdded = redisHandler.setQueryResponseAtomic(moduleRequest.getQueryId(), queryResponse, oldVersionHash).join();
+                if (!qrAdded) {
+                    log.debug("standardResponseHandler: setQueryResponseAtomic failed, trying again");
+                }
+            } while (!qrAdded);
             return httpResponse;
         });
     }
