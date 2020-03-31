@@ -33,6 +33,7 @@ public class PolicyEngineConnector implements RuleEngineConnector {
         LinkedHashMap<String, Object> ret = new LinkedHashMap<>();
         ret.put("final_credibility", callback.getFinalCredibility());
         ret.put("module_labels", callback.getModuleCredibility());
+        ret.put("module_values", callback.getValues());
         return ret;
     }
 }
