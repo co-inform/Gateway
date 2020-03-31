@@ -3,10 +3,6 @@ package eu.coinform.gateway.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
-import eu.coinform.gateway.db.RoleEnum;
-import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.UsernameAlreadyExistException;
-import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
@@ -17,13 +13,6 @@ import eu.coinform.gateway.util.RuleEngineHelper;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,8 +20,6 @@ import javax.validation.Valid;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 
 /**
  * The REST Controller defining the endpoints facing towards the users
@@ -43,20 +30,14 @@ public class CheckController {
 
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
-    private final UserDbManager userDbManager;
-    private final String signatureKey;
     private final RuleEngineConnector ruleEngineConnector;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
-                    RuleEngineConnector ruleEngineConnector,
-                    UserDbManager userDbManager,
-                    @Value("${JWT_KEY}") String signatureKey) {
+                    RuleEngineConnector ruleEngineConnector) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
-        this.userDbManager = userDbManager;
-        this.signatureKey = signatureKey;
     }
 
     /**
@@ -187,30 +168,6 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
-    }
-
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-
-        String token = (new JwtToken.Builder())
-                .setSignatureAlgorithm(SignatureAlgorithm.HS512)
-                .setKey(signatureKey)
-                .setExpirationTime(7*24*60*60*1000L)
-                .setUser(authentication.getName())
-                .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .build().getToken();
-        return new LoginResponse(token);
-    }
-
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
-
-        List<RoleEnum> roles = new LinkedList<>();
-        roles.add(RoleEnum.USER);
-        userDbManager.registerUser(registerForm.email, registerForm.password, roles);
-        return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)

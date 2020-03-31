@@ -37,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder builder) {
         builder
                 .authenticationProvider(new UserDbAuthenticationProvider(userDbManager))
-                .authenticationProvider(new JwtAuthenticationProvider(JWT_SECRET));
+                .authenticationProvider(new JwtAuthenticationProvider(userDbManager,JWT_SECRET));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(userDbAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers("/login", "/twitter/evaluate").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
+                    .antMatchers("/login", "/exit", "/twitter/evaluate", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
                     .anyRequest().permitAll();
     }
 
