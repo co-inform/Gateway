@@ -155,27 +155,16 @@ public class UserDbManager {
         return verificationTokenRepository.findByUser(user);
     }
 
-    /**
-     * Memthod to set the enabled flag on a user. Called when a user clicks the link sent to it in the
-     * verification email upon registration
-     * @param token the token sent in the email
-     * @return true if user is successfully verified
-     * @throws LinkTimedOutException
-     */
+    public void confirmUser(VerificationToken token) throws LinkTimedOutException{
 
-    public boolean confirmUser(String token) throws LinkTimedOutException{
-        Optional<VerificationToken> oToken = verificationTokenRepository.findByToken(token);
-        if(oToken.isEmpty()){
-            throw new NoSuchTokenException(token);
-        }
-        VerificationToken myToken = oToken.get();
-        if (myToken.checkExpiryDatePassed(new Date())) {
+        Calendar cal = Calendar.getInstance();
+        if ((token.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
             throw new LinkTimedOutException("Verification link timed out");
         }
-        User user = myToken.getUser();
+        User user = token.getUser();
         user.setEnabled(true);
         userRepository.save(user);
-        return true;
+        verificationTokenRepository.delete(token);
     }
 
     /**
