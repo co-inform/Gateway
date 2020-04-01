@@ -1,11 +1,15 @@
 package eu.coinform.gateway.controller.forms;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class TweetEvaluationForm implements Serializable {
 
     @NotNull(message = "Comment cannot be empty")
@@ -21,5 +25,6 @@ public class TweetEvaluationForm implements Serializable {
     String url;
 
     @NotNull(message = "tweet_id cannot be empty")
-    String tweet_id;
+    @JsonProperty("tweet_id")
+    String tweetId;
 }

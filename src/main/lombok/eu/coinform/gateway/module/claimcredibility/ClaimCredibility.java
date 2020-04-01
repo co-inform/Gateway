@@ -21,7 +21,6 @@ import java.util.function.Function;
 public class ClaimCredibility extends Module implements TwitterTweetRequestInterface { //}, TweetLabelEvaluationInterface {
 
     private List<Function<Tweet, ModuleRequest>> tweetFuncList;
-//    private List<BiFunction<TweetLabelEvaluation, String, ModuleRequest>> tweetEvaluationFuncList;
 
     /**
      * The constructor of the ClaimCredibility class. Sets up the module and also needs to implement the Functional
@@ -46,7 +45,6 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             tweets.add(new ClaimCredibilityTweet(tweet.getTweetId(), tweet.getTweetText()));
             ClaimCredibilityContent content = new ClaimCredibilityContent(callbackBaseUrl, tweets);
             log.debug("send post ClaimCredibility tweet, query_id: {}", tweet.getQueryId());
-  //          log.debug("userinfo {}", this.getUserInfo());
             try {
                 request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/tweet/claim/credibility")
@@ -55,7 +53,6 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
                         .setHeader("Authorization", this.getUserInfo())
                         .build();
 
-//                log.debug("headers: {}", request.getHeaders("Authorization")[0]);
             } catch (JsonProcessingException ex) {
                 log.error("The tweet object could not be parsed, {}", tweet);
             } catch (ModuleRequestBuilderException ex) {
@@ -63,27 +60,6 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             }
             return request;
         });
-/*
-        tweetEvaluationFuncList = new ArrayList<>();
-
-        tweetEvaluationFuncList.add((tweetLabelEvaluation, uuid) -> {
-            ModuleRequest request = null;
-            LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tweetLabelEvaluation, uuid.toString());
-            try {
-                request = getModuleRequestFactory().getRequestBuilder(tweetLabelEvaluation.getRated_moduleResponse())
-                        .setPath("/user/accuracy-review")
-                        .setContent(levi)
-                        .setHeader("accept", "application/json")
-                        .setHeader("Authorization", this.getUserInfo())
-                        .build();
-            } catch (JsonProcessingException e) {
-                log.error("Could not process the object {}", tweetLabelEvaluation);
-            } catch (ModuleRequestBuilderException e) {
-                log.error("Module request error {}", e.getMessage());
-            }
-            return request;
-        });
-*/
     }
 
     /**
@@ -94,8 +70,4 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
         return tweetFuncList;
     }
 
-/*    @Override
-    public List<BiFunction<TweetLabelEvaluation, String, ModuleRequest>> tweetLabelEvaluationRequest() {
-        return tweetEvaluationFuncList;
-    }*/
 }

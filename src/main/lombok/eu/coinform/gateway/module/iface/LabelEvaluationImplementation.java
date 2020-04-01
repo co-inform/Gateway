@@ -2,8 +2,13 @@ package eu.coinform.gateway.module.iface;
 
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.util.ReactionLabel;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.Serializable;
 
+@Slf4j
+@Data
 public class LabelEvaluationImplementation extends LabelEvaluationBase implements Serializable {
 
     private String name;
@@ -15,19 +20,23 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
 
     public LabelEvaluationImplementation(TweetLabelEvaluationForm tweetLabelEvaluationForm, String uuid){
         super("https://schema.org", "CoinformUserReview");
+        log.debug("Form: {}", tweetLabelEvaluationForm);
         if(tweetLabelEvaluationForm.getReaction() == ReactionLabel.agree) {
-            name = "accurate";
-            reviewRating = new ReviewRating(name);
+            log.debug("Accurate?: agree {}", ReactionLabel.agree);
+            this.name = "accurate";
+            this.reviewRating = new ReviewRating(name);
         } else {
-            name = "inaccurate";
-            reviewRating = new ReviewRating(name);
+            log.debug("Accurate?: disagree {}", tweetLabelEvaluationForm.getReaction());
+            this.name = "inaccurate";
+            this.reviewRating = new ReviewRating(name);
         }
-        identifier = tweetLabelEvaluationForm.getRated_moduleResponse();
-        author = new Author(uuid);
-        itemReviewed = new ItemReviewed(tweetLabelEvaluationForm.getRated_moduleResponse(),
+        this.author = new Author(uuid);
+        this.itemReviewed = new ItemReviewed(tweetLabelEvaluationForm.getRated_moduleResponse(),
                 tweetLabelEvaluationForm.getRated_credibility(),
                 tweetLabelEvaluationForm.getTweet_id(),
-                tweetLabelEvaluationForm.getUrl());
+                tweetLabelEvaluationForm.getUrl(),
+                tweetLabelEvaluationForm.getRated_moduleResponse());
+//        log.debug("This: {}", this);
 
     }
 

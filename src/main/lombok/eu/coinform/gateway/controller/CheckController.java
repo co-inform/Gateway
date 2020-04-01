@@ -171,7 +171,6 @@ public class CheckController {
     public void corsHeadersResponse(HttpServletResponse response,
                                     @PathVariable(value = "query_id", required = true) String query_id,
                                     @PathVariable(value = "debug", required = true) String debug) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
@@ -192,10 +191,6 @@ public class CheckController {
         }
 
         eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, oUser.get().getUuid())));
-
-        //todo: actually do something with the incoming tweet evaluations
-//        redisHandler.addToEvaluationList(tweetEvaluation);
-//        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
@@ -208,7 +203,7 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
-    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm, @Value("${CLAIM_CRED_USER_INFO}") String userInfo) throws JsonProcessingException, ExecutionException, InterruptedException {
+    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Long userId = (Long) authentication.getPrincipal();

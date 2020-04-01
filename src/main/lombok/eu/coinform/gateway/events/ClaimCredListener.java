@@ -9,7 +9,6 @@ import org.springframework.lang.NonNull;
 
 abstract public class ClaimCredListener<T extends ApplicationEvent> implements ApplicationListener<T> {
 
-
     @Value("${claimcredibility.server.scheme}://${claimcredibility.server.url}${claimcredibility.server.base_endpoint}/user/accuracy-review")
     protected String host;
 
