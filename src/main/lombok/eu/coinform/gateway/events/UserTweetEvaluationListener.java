@@ -22,7 +22,6 @@ public class UserTweetEvaluationListener extends ClaimCredListener<UserTweetEval
     @Override
     protected void handleEvent(UserTweetEvaluationEvent event){
         HttpResponse<String> status;
-        log.debug("url: {}", host);
         try {
             client = new RestClient(HttpMethod.POST,
                     URI.create(host),

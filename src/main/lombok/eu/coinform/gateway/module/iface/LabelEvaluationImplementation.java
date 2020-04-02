@@ -20,13 +20,10 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
 
     public LabelEvaluationImplementation(TweetLabelEvaluationForm tweetLabelEvaluationForm, String uuid){
         super("https://schema.org", "CoinformUserReview");
-        log.debug("Form: {}", tweetLabelEvaluationForm);
         if(tweetLabelEvaluationForm.getReaction() == ReactionLabel.agree) {
-            log.debug("Accurate?: agree {}", ReactionLabel.agree);
             this.name = "accurate";
             this.reviewRating = new ReviewRating(name);
         } else {
-            log.debug("Accurate?: disagree {}", tweetLabelEvaluationForm.getReaction());
             this.name = "inaccurate";
             this.reviewRating = new ReviewRating(name);
         }
@@ -36,7 +33,6 @@ public class LabelEvaluationImplementation extends LabelEvaluationBase implement
                 tweetLabelEvaluationForm.getTweet_id(),
                 tweetLabelEvaluationForm.getUrl(),
                 tweetLabelEvaluationForm.getRated_moduleResponse());
-//        log.debug("This: {}", this);
 
     }
 

@@ -20,7 +20,6 @@ public class UserLabelReviewListener extends ClaimCredListener<UserLabelReviewEv
     @Override
     public void handleEvent(UserLabelReviewEvent event) {
         HttpResponse<String> status;
-        log.debug("url: {}", host);
         try {
             client = new RestClient(HttpMethod.POST,
                     URI.create(host),
