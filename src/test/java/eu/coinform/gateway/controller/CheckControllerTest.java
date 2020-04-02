@@ -345,19 +345,5 @@ public class CheckControllerTest {
         assertThat(response.getModuleResponseCode().size()).isEqualTo(2);
         assertThat(response.getModuleResponseCode().get("first")).isNotNull();
     }
-/*
-    @Test
-    public void restCLientTest() {
-        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
 
-        TweetLabelEvaluation tle = new TweetLabelEvaluation();
-        tle.setReaction(ReactionLabel.agree);
-        tle.setTweet_id("1181172459325800448");
-        tle.setRated_credibility("not_credible");
-        tle.setRated_moduleResponse("251b6a72cd3a3af314baf748abdfac93c076e54272dabcaef5b7b115eb65c848");
-
-        LabelEvaluationImplementation levi = new LabelEvaluationImplementation(tle, UUID.randomUUID().toString());
-        RestClient client = new RestClient(HttpMethod.POST, URI.create("https:///www.example.com"),levi);
-        client.sendRequest();
-    }*/
 }

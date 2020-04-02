@@ -87,29 +87,5 @@ public class CheckHandler {
             }
         }
     }
-/*
-    @Async("endpointExecutor")
-    public void tweetLabelEvaluationConsumer(TweetLabelEvaluation tweetLabelEvaluation, String uuid){
-        log.trace("handle tweetLabelEvaluation: {}", tweetLabelEvaluation);
-        for(Module module: moduleList){
-            log.trace("handle for module: {} -> {}", module.getName(), module);
-            if(module instanceof TweetLabelEvaluationInterface) {
-                log.trace("making tweetLabelEvaluation request for {}", module.getName());
-                ((TweetLabelEvaluationInterface) module)
-                        .tweetLabelEvaluationRequest()
-                        .forEach((func) -> {
-                            ModuleRequest moduleRequest = func.apply(tweetLabelEvaluation, uuid);
-
-                            try {
-                                moduleRequest.makeRequest();
-                            } catch (ModuleRequestException e) {
-                                log.error("failed request to {}: {}", module.getName(), e.getMessage());
-                            }
-                        });
-
-            }
-        }
-    }
-    */
 
 }

@@ -30,8 +30,8 @@ public class RestClient {
                 .method(method.toString(), BodyPublishers.ofString(body, Charsets.UTF_8)).build();
     }
 
-    public HttpResponse<String> sendRequest() throws IOException, InterruptedException {
-        return client.send(request, BodyHandlers.ofString());
+    public CompletableFuture<HttpResponse<String>> sendRequest() throws IOException, InterruptedException {
+        return client.sendAsync(request, BodyHandlers.ofString());
     }
 
 }

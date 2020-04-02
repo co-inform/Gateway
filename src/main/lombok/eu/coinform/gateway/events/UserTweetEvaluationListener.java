@@ -28,7 +28,7 @@ public class UserTweetEvaluationListener extends ClaimCredListener<UserTweetEval
                     URI.create(host),
                     mapper.writeValueAsString(event.getSource()),
                     "Authorization", userInfo);
-            status = client.sendRequest();
+            status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
                 log.debug("RestClient status: {}", status);
             }
