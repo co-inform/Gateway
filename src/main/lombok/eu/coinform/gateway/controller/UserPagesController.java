@@ -70,14 +70,13 @@ public class UserPagesController {
     @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
     public String confirmRegistration(@RequestParam("token") String token, Model model) throws LinkTimedOutException {
 
-
         Optional<VerificationToken> myToken = userDbManager.getVerificationToken(token);
 
-        if(!userDbManager.confirmUser(token)){
-            model.addAttribute("token", token);
-            return "notverified";
+        if(myToken.isEmpty()){
+            throw new NoSuchTokenException(token);
         }
 
+        userDbManager.confirmUser(myToken.get());
         model.addAttribute("userid", myToken.get().getUser().getPasswordAuth().getEmail());
         return "verified";
     }

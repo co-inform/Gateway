@@ -113,20 +113,16 @@ public class UserDbManager {
         return verificationTokenRepository.findByUser(user);
     }
 
-    public boolean confirmUser(String token) throws LinkTimedOutException{
-        Optional<VerificationToken> myToken = verificationTokenRepository.findByToken(token);
-        if(myToken.isEmpty()){
-            throw new NoSuchTokenException(token);
-        }
-        User user = myToken.map(VerificationToken::getUser).get();
+    public void confirmUser(VerificationToken token) throws LinkTimedOutException{
+
         Calendar cal = Calendar.getInstance();
-        if ((myToken.get().getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
+        if ((token.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0){
             throw new LinkTimedOutException("Verification link timed out");
         }
+        User user = token.getUser();
         user.setEnabled(true);
         userRepository.save(user);
-        verificationTokenRepository.delete(myToken.get());
-        return true;
+        verificationTokenRepository.delete(token);
     }
 
 
