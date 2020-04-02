@@ -15,7 +15,6 @@ public class OnPasswordResetEvent extends ApplicationEvent {
 
     public OnPasswordResetEvent(User user) {
         super(user);
-        log.debug("Constructor: {}", user.getPasswordAuth().getEmail());
         this.user = user;
     }
 }

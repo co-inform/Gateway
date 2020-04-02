@@ -60,7 +60,7 @@ public class UserController {
         String token = (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setCounter(userDbManager.getById(userId).get().getCounter())
+                .setCounter(userDbManager.getUserById(userId).get().getCounter())
                 .setExpirationTime(7*24*60*60*1000L)
                 .setUser(userId)
                 .setRoles(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
@@ -92,13 +92,13 @@ public class UserController {
         log.debug("Form: {}", form.getEmail());
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOSUCHUSER);
         }
 
         try{
             eventPublisher.publishEvent(new OnPasswordResetEvent(user));
         } catch (Exception e){
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOSUCHUSER);
         }
 
         return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
@@ -117,7 +117,7 @@ public class UserController {
         }
 
         try {
-            User user = userDbManager.getById(userid).get();
+            User user = userDbManager.getUserById(userid).get();
             eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
         } catch (Exception e) {
             log.debug(e.getMessage());

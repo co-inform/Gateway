@@ -1,20 +1,39 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
+import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
+import eu.coinform.gateway.db.User;
+import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.events.UserLabelReviewEvent;
+import eu.coinform.gateway.events.UserTweetEvaluationEvent;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
+import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
+import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
+import eu.coinform.gateway.util.SuccesfullResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -27,13 +46,19 @@ public class CheckController {
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
     private final RuleEngineConnector ruleEngineConnector;
+    private final ApplicationEventPublisher eventPublisher;
+    private final UserDbManager userDbManager;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
-                    RuleEngineConnector ruleEngineConnector) {
+                    RuleEngineConnector ruleEngineConnector,
+                    UserDbManager userDbManager,
+                    ApplicationEventPublisher eventPublisher) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
+        this.userDbManager = userDbManager;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -146,7 +171,6 @@ public class CheckController {
     public void corsHeadersResponse(HttpServletResponse response,
                                     @PathVariable(value = "query_id", required = true) String query_id,
                                     @PathVariable(value = "debug", required = true) String debug) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
@@ -155,12 +179,19 @@ public class CheckController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
-    public EvaluationResponse evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+    public ResponseEntity<?> evaluateTweet(@Valid @RequestBody TweetEvaluationForm tweetEvaluationForm) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+        Optional<User> oUser = userDbManager.getUserById(userId);
 
-        //todo: actually do something with the incoming tweet evaluations
-        redisHandler.addToEvaluationList(tweetEvaluation);
+        if(oUser.isEmpty()){
+            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
+        }
 
-        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
+        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, oUser.get().getUuid())));
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)
@@ -169,6 +200,21 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
+    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+        Optional<User> oUser = userDbManager.getUserById(userId);
+
+        if(oUser.isEmpty()){
+            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
+        }
+        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, oUser.get().getUuid())));
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)

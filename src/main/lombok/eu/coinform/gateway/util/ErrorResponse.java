@@ -7,11 +7,12 @@ import lombok.Getter;
 public enum ErrorResponse {
     USEREXISTS("User already exists"),
     NOSUCHQUERYID("No such query_id"),
-    NOSUCHTRANSACTIONID("No such transaction_id"),
     USERNOTVERIFIED("User not verified"),
-    NOUSER("No such user registered"),
     BADCREDENTIALS("Wrong password/username"),
-    JWTEXCEPTION("A JWT token exception");
+    JWTEXCEPTION("A JWT token exception"),
+    NOSUCHUSER("No such user exists"),
+    GENEREIC("Something went wrong"),
+    NOSUCHTRANSACTIONID("No such transaction_id");
 
     @Getter
     private final String error;

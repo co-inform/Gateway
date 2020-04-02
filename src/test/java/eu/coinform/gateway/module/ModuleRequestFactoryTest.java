@@ -1,6 +1,7 @@
 package eu.coinform.gateway.module;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ public class ModuleRequestFactoryTest {
     ModuleRequest moduleRequest;
     MRCImplementation mrcImplementation;
     String uuid = UUID.randomUUID().toString();
+    ObjectMapper mapper = new ObjectMapper();
 
     @Before
     public void setup(){
@@ -107,7 +109,7 @@ public class ModuleRequestFactoryTest {
 
         moduleRequest.makeRequest();
 
-}
+    }
 
     private class MRCImplementation extends ModuleRequestContent{
 

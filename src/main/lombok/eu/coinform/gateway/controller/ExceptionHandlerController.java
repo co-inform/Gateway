@@ -50,7 +50,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(UsernameNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse userNameNotFoundException(UsernameNotFoundException ex) {
-        return ErrorResponse.NOUSER;
+        return ErrorResponse.NOSUCHUSER;
     }
 
     @ResponseBody

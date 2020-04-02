@@ -144,7 +144,7 @@ public class UserDbManager {
         return uuid;
     }
 
-    public Optional<User> getById(Long userid){
+    public Optional<User> getUserById(Long userid){
         return userRepository.findById(userid);
     }
 
