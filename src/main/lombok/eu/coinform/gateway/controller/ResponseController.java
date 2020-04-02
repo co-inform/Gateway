@@ -61,8 +61,8 @@ public class ResponseController {
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
         log.debug("Response from {} to query '{}'", moduleTransaction.getModule(), moduleTransaction.getQueryId());
 
-        Boolean updatedCache = Boolean.FALSE;
-        while (!updatedCache) {
+        Boolean updatedCache;
+        do {
             QueryResponse qr = redisHandler.getQueryResponse(moduleTransaction.getQueryId()).join();
             long oldVersion = qr.getVersionHash();
             qr.setVersionHash();
@@ -89,7 +89,7 @@ public class ResponseController {
             if (!updatedCache) {
                 log.debug("setQueryResponseAtomic collision, trying again");
             }
-        }
+        } while (!updatedCache);
 
     }
 }
