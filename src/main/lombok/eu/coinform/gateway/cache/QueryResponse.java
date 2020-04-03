@@ -111,6 +111,7 @@ public class QueryResponse implements Serializable {
     @Getter
     @JsonProperty("version_hash")
     @JsonView(Views.Debug.class)
+    @EqualsAndHashCode.Exclude
     private long versionHash;
 
     public void setVersionHash() {
