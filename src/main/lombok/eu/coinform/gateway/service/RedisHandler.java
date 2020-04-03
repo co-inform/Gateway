@@ -3,7 +3,6 @@ package eu.coinform.gateway.service;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
-import eu.coinform.gateway.model.Evaluation;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.util.Pair;
@@ -200,14 +199,5 @@ public class RedisHandler {
         log.trace("was previously absent: {}", isAbsent);
 
         return CompletableFuture.completedFuture(moduleTransaction);
-    }
-
-    @Async("redisExecutor")
-    public CompletableFuture<Long> addToEvaluationList(Evaluation evaluation) {
-        Long ret =  redisTemplate.opsForList().leftPush(EVALUATION_LIST_KEY, evaluation);
-        //todo: It currently just stores the last 100 evaluations. When we setup the database connection this should
-        // be handled better
-        redisTemplate.opsForList().trim(EVALUATION_LIST_KEY, 0, 99);
-        return CompletableFuture.completedFuture(ret);
     }
 }

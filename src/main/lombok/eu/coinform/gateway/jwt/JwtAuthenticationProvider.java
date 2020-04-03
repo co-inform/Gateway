@@ -40,7 +40,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .parseClaimsJws(token.replace(JwtToken.TOKEN_PREFIX, ""));
 
             String user = parsedToken.getBody().getSubject();
-            Optional<User> u = userDbManager.getById(Long.parseLong(user));
+            Optional<User> u = userDbManager.getUserById(Long.parseLong(user));
             int counter =  (int) parsedToken.getBody().get("count");
             if(u.get().getCounter() != counter){
                 throw new UserLoggedOutException();

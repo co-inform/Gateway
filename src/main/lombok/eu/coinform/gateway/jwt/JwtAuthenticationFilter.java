@@ -22,7 +22,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         String token = request.getHeader(JwtToken.TOKEN_HEADER);
         return getAuthenticationManager().authenticate(new JwtAuthenticationToken(token));

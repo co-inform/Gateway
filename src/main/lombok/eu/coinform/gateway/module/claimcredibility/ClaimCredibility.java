@@ -18,7 +18,7 @@ import java.util.function.Function;
  * ClaimCredibility module extends Module and implements TwitterTweetRequestInterface
  */
 @Slf4j
-public class ClaimCredibility extends Module implements TwitterTweetRequestInterface {
+public class ClaimCredibility extends Module implements TwitterTweetRequestInterface { //}, TweetLabelEvaluationInterface {
 
     private List<Function<Tweet, ModuleRequest>> tweetFuncList;
 
@@ -45,7 +45,6 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
             tweets.add(new ClaimCredibilityTweet(tweet.getTweetId(), tweet.getTweetText()));
             ClaimCredibilityContent content = new ClaimCredibilityContent(callbackBaseUrl, tweets);
             log.debug("send post ClaimCredibility tweet, query_id: {}", tweet.getQueryId());
-  //          log.debug("userinfo {}", this.getUserInfo());
             try {
                 request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
                         .setPath("/tweet/claim/credibility")
@@ -54,7 +53,6 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
                         .setHeader("Authorization", this.getUserInfo())
                         .build();
 
-//                log.debug("headers: {}", request.getHeaders("Authorization")[0]);
             } catch (JsonProcessingException ex) {
                 log.error("The tweet object could not be parsed, {}", tweet);
             } catch (ModuleRequestBuilderException ex) {
@@ -71,4 +69,5 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
     public List<Function<Tweet, ModuleRequest>> tweetRequest() {
         return tweetFuncList;
     }
+
 }

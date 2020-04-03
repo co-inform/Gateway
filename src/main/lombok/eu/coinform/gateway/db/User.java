@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user")
@@ -18,6 +19,10 @@ public class User implements Serializable {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Getter
+    @Column(name = "uuid")
+    private String uuid;
 
     @Getter
     @Setter
@@ -46,5 +51,8 @@ public class User implements Serializable {
 
     public User(){
         this.enabled = false;
+        this.uuid = UUID.randomUUID().toString();
     }
+
+
 }
