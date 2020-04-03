@@ -7,11 +7,16 @@ import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -25,10 +30,6 @@ import java.util.concurrent.TimeUnit;
 public class RedisHandler {
 
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
-    private static final String AGGREGATOR_QUEUE_KEY = "AQK";
-    private static final String AGGREGATOR_QUEUE_LOCK = "AQK_LOCK";
-    private static final String QUEUED_RESPONSE_COUNTER_PREFIX = "QRC_";
-    private static final String HANDLED_RESPONSE_COUNTER_PREFIX = "HRC_";
     private static final String EVALUATION_LIST_KEY = "EVAL_LST_KEY";
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -47,7 +48,7 @@ public class RedisHandler {
      * cache
      *
      * @param queryId String holding the queryId to query the cache for
-     * @return returns a {@literal CpmpletableFuture<QueryResponse>}
+     * @return returns a {@literal CompletableFuture<QueryResponse>}
      * @throws NoSuchQueryIdException when the queryId returns no QueryResponse
      */
     @Async("redisExecutor")
@@ -60,61 +61,54 @@ public class RedisHandler {
     }
 
     /**
-     * getOrSetIfAbsentQueryResponse() gets the {@link QueryResponse} from the cache that corresponds to the queryId. If the
-     * queryId returns no {@link QueryResponse} a default {@link QueryResponse} object is set in the cache and returned
+     * getQueryResponse() takes a String as parameter holding a queryId that is used to get the {@link QueryResponse} from the
+     * cache and a QueryResponse object to put in the cache if it's empty.
      *
      * @param queryId String holding the queryId to query the cache for
-     * @param defaultResponse a default QueryRepsonse object to use if queryId returns no object
-     * @return A pair of whether the cache where previously empty and the QueryResponse stored in the cache or the default object if the queryId returns nothing as a
-     * {@literal CompletableFuture<Pair<Boolean, QueryResponse>>}
+     * @param ifAbsent The object to put in the cache and return if the cache was empty
+     * @return returns a {@literal CompletableFuture<QueryResponse>}
      */
     @Async("redisExecutor")
-    public CompletableFuture<Pair<Boolean, QueryResponse>> getOrSetIfAbsentQueryResponse(String queryId, QueryResponse defaultResponse) {
-        Boolean existant = Boolean.TRUE;
-        long start = 0;
-        if (log.isTraceEnabled()) {
-            start = System.currentTimeMillis();
-            log.trace("{}: before get QueryResponse", System.currentTimeMillis()-start);
-        }
+    public CompletableFuture<QueryResponse> getQueryResponse(String queryId, QueryResponse ifAbsent) {
         QueryResponse queryResponse = (QueryResponse) redisTemplate.opsForValue().get(queryId);
-        log.trace("{}: after get QueryResponse, got {}", System.currentTimeMillis()-start, queryResponse);
         if (queryResponse == null) {
-            existant = Boolean.FALSE;
-            queryResponse = defaultResponse;
-            setIfAbsentQueryResponse(queryId, defaultResponse);
-            log.trace("{}: after set QueryResponse since it was null", System.currentTimeMillis()-start);
+            if (setQueryResponseAtomic(queryId, ifAbsent, QueryResponse.NO_VERSION_HASH).join()) {
+                queryResponse = ifAbsent;
+            } else {
+                queryResponse = (QueryResponse) redisTemplate.opsForValue().get(queryId);
+            }
         }
-        return CompletableFuture.completedFuture(Pair.of(existant, queryResponse));
-    }
-
-    /**
-     * setQueryResponse() takes two parameters. A {@link String} holding a key and a {@link QueryResponse}. The method sets the key
-     * for the QueryResponse in the RedisCache
-     *
-     * @param key the key to use for the particular QueryReponse
-     * @param queryResponse the QueryResponse top store in the cache
-     * @return returns a {@literal CompletableFuture<QueryResponse>} holding the QueryReponse stored in the RedisCahce
-     */
-    @Async("redisExecutor")
-    public CompletableFuture<QueryResponse> setQueryResponse(String key, QueryResponse queryResponse) {
-        redisTemplate.opsForValue().set(key, queryResponse, 1, TimeUnit.DAYS);
-        log.trace("query response, {} -> {}",key, queryResponse);
         return CompletableFuture.completedFuture(queryResponse);
     }
 
     /**
-     * setIfAbsentQueryResponse() takes two parameters, a {@link String} holding a key and a {@link QueryResponse} to store in the
-     * RedisCache
-     *
-     * @param key the key to use for the particular QueryReponse
-     * @param queryResponse the QueryResponse top store in the cache
-     * @return a {@literal CompletableFuture<Boolean>} holding the truthiness of the successfullness of the operation of storing
-     * the QueryResponse in the cache
+     * Set a QueryResponse with a atomic method. It only updates the cache if the oldVersionHash correlates with the versionHash of the object in the cache.
+     * @param key The key in the cache
+     * @param queryResponse The new QueryResponse, make sure a new versionHash has been set with the setVersionHash method
+     * @param oldVersionHash The old versionHash of the queryResponse initially found in the cache.
+     * @return True when it updates the cache, False otherwise
      */
     @Async("redisExecutor")
-    public CompletableFuture<Boolean> setIfAbsentQueryResponse(String key, QueryResponse queryResponse) {
-        Boolean set = redisTemplate.opsForValue().setIfAbsent(key, queryResponse, 1, TimeUnit.DAYS);
-        return CompletableFuture.completedFuture(set);
+    public CompletableFuture<Boolean> setQueryResponseAtomic(String key, QueryResponse queryResponse, long oldVersionHash) {
+        List<Object> execRet = redisTemplate.execute(new SessionCallback<List<Object>>() {
+            @Override
+            public List<Object> execute(RedisOperations redisOperations) throws DataAccessException {
+                redisOperations.watch(key);
+                QueryResponse qr = (QueryResponse) redisOperations.opsForValue().get(key);
+                if (qr == null && oldVersionHash != QueryResponse.NO_VERSION_HASH || qr != null && qr.getVersionHash() != oldVersionHash) {
+                    redisOperations.unwatch();
+                    return new LinkedList<>();
+                }
+                redisOperations.multi();
+                redisOperations.opsForValue().set(key, queryResponse, 1, TimeUnit.DAYS);
+                return redisOperations.exec();
+            }
+        });
+
+        if (execRet.isEmpty()) {
+            log.debug("collision handled by watch");
+        }
+        return CompletableFuture.completedFuture(execRet.isEmpty() ? Boolean.FALSE : Boolean.TRUE);
     }
 
     /**
@@ -206,82 +200,4 @@ public class RedisHandler {
 
         return CompletableFuture.completedFuture(moduleTransaction);
     }
-
-    /**
-     * Push an time stamp and 'query_id' pair to the {@link ResponseAggregator} queue.
-     * @param timeQueryIdPair Pair of time stamp and 'query_id'
-     * @return The length of the queue after the operation
-     */
-    @Async("redisExecutor")
-    public CompletableFuture<Long> expireQueuePush(Pair<Long, String> timeQueryIdPair) {
-        Long ret = redisTemplate.opsForList().rightPush(AGGREGATOR_QUEUE_KEY, timeQueryIdPair);
-        log.trace("expireQueuePush {}, {}", ret, timeQueryIdPair);
-        return CompletableFuture.completedFuture(ret);
-    }
-
-    /**
-     * Trys to grab the {@link ResponseAggregator} queue's lock and pull the first element.
-     * @return null if queue was locked or empty, the time stamp, 'query_id' pair.
-     */
-    @SuppressWarnings("unchecked")
-    @Async("redisExecutor")
-    public CompletableFuture<Pair<Long, String>> expireQueueTryPull() {
-        log.trace("expireQueueTryPull");
-        String lock = UUID.randomUUID().toString();
-        log.trace("lock: {}", redisTemplate.opsForValue().get(AGGREGATOR_QUEUE_LOCK));
-        Boolean hasLock = redisTemplate.opsForValue().setIfAbsent(AGGREGATOR_QUEUE_LOCK, lock);
-        log.trace("hasLock: {}", hasLock);
-        if (!hasLock) {
-            return CompletableFuture.completedFuture(null);
-        }
-        Pair<Long, String> ret = (Pair<Long, String>) redisTemplate.opsForList().leftPop(AGGREGATOR_QUEUE_KEY);
-        redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
-
-        return CompletableFuture.completedFuture(ret);
-    }
-
-    @Async("redisExecutor")
-    public CompletableFuture<Boolean> resetAggregatorQueueLock() {
-        log.trace("reset AggregatorQueue lock");
-        redisTemplate.delete(AGGREGATOR_QUEUE_LOCK);
-        return CompletableFuture.completedFuture(Boolean.TRUE);
-    }
-
-    @Async("redisExecutor")
-    public CompletableFuture<Integer> getQueuedResponseCounter(String queryId) {
-        log.trace("getQueuedResponseCounter {}", queryId);
-        return CompletableFuture.completedFuture((Integer) redisTemplate.opsForValue().get(String.format("%s%s",QUEUED_RESPONSE_COUNTER_PREFIX, queryId)));
-    }
-
-    @Async("redisExecutor")
-    public CompletableFuture<Long> incrementQueuedResponseCounter(String queryId) {
-        log.trace("incrementQueuedResponseCounter {}", queryId);
-        Long ret = redisTemplate.opsForValue().increment(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId));
-        redisTemplate.expire(String.format("%s%s", QUEUED_RESPONSE_COUNTER_PREFIX, queryId), 1, TimeUnit.DAYS);
-        return CompletableFuture.completedFuture(ret);
-    }
-
-    @Async("redisExecutor")
-    public CompletableFuture<Integer> getHandledResponseCounter(String queryId) {
-        log.trace("getHandledResponseCounter {}", queryId);
-        return CompletableFuture.completedFuture((Integer) redisTemplate.opsForValue().get(String.format("%s%s",HANDLED_RESPONSE_COUNTER_PREFIX, queryId)));
-    }
-
-    @Async("redisExecutor")
-    public CompletableFuture<Boolean> setHandledResponseCounter(String queryId, Long number) {
-        log.trace("setHandledResponseCounter {} {}", queryId, number);
-        redisTemplate.opsForValue().set(String.format("%s%s", HANDLED_RESPONSE_COUNTER_PREFIX, queryId), number, 1, TimeUnit.DAYS);
-        return CompletableFuture.completedFuture(true);
-    }
-/*
-    @Async("redisExecutor")
-    public CompletableFuture<Long> addToEvaluationList(Evaluation evaluation) {
-        Long ret =  redisTemplate.opsForList().leftPush(EVALUATION_LIST_KEY, evaluation);
-        //todo: It currently just stores the last 100 evaluations. When we setup the database connection this should
-        // be handled better
-        redisTemplate.opsForList().trim(EVALUATION_LIST_KEY, 0, 99);
-        return CompletableFuture.completedFuture(ret);
-    }
-*/
 }
-

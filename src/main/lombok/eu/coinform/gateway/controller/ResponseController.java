@@ -2,13 +2,20 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
+import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.module.Module;
+import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.RedisHandler;
-import eu.coinform.gateway.service.ResponseHandler;
+import eu.coinform.gateway.util.RuleEngineHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -21,12 +28,17 @@ public class ResponseController {
 
 
     private final RedisHandler redisHandler;
-    private final ResponseHandler responseHandler;
+    private final RuleEngineConnector ruleEngine;
+
+    private final List<Module> moduleList;
 
     ResponseController(RedisHandler redisHandler,
-                       ResponseHandler responseHandler) {
-        this.responseHandler = responseHandler;
+                       RuleEngineConnector ruleEngine,
+                       List<Module> moduleList
+                       ) {
         this.redisHandler = redisHandler;
+        this.ruleEngine = ruleEngine;
+        this.moduleList = moduleList;
     }
 
     /**
@@ -41,8 +53,43 @@ public class ResponseController {
         log.debug("Response received with transaction_id: {}", transaction_id);
         CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
         CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getAndDeleteModuleTransaction(transaction_id);
-        responseHandler.responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());
+        responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());
         return ResponseEntity.ok().build();
     };
 
+    @Async("endpointExecutor")
+    public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
+        log.debug("Response from {} to query '{}'", moduleTransaction.getModule(), moduleTransaction.getQueryId());
+
+        Boolean updatedCache;
+        do {
+            QueryResponse qr = redisHandler.getQueryResponse(moduleTransaction.getQueryId()).join();
+            long oldVersion = qr.getVersionHash();
+            qr.setVersionHash();
+            if (qr.getResponse() == null) {
+                qr.setResponse(new LinkedHashMap<>());
+            }
+
+            Map<String, ModuleResponse> moduleResponseMap = redisHandler.getModuleResponses(moduleTransaction.getQueryId()).join();
+            LinkedHashMap<String, Object> flatResponseMap = new LinkedHashMap<>();
+            for (Map.Entry<String, ModuleResponse> moduleResponseEntry : moduleResponseMap.entrySet()) {
+                RuleEngineHelper.flatResponseMap(moduleResponseEntry.getValue(), flatResponseMap, moduleResponseEntry.getKey().toLowerCase(), "_");
+            }
+            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponseMap, flatResponseMap.keySet());
+
+            if (moduleResponseMap.entrySet().size() == moduleList.size()) {
+                qr.setStatus(QueryResponse.Status.done);
+            } else {
+                qr.setStatus(QueryResponse.Status.partly_done);
+            }
+
+            qr.getResponse().put(QueryResponse.RULE_ENGINE_KEY, ruleEngineResult);
+
+            updatedCache = redisHandler.setQueryResponseAtomic(moduleTransaction.getQueryId(), qr, oldVersion).join();
+            if (!updatedCache) {
+                log.debug("setQueryResponseAtomic collision, trying again");
+            }
+        } while (!updatedCache);
+
+    }
 }
