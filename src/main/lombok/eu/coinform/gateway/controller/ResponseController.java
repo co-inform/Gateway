@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 
 /**
@@ -75,7 +76,9 @@ public class ResponseController {
             for (Map.Entry<String, ModuleResponse> moduleResponseEntry : moduleResponseMap.entrySet()) {
                 RuleEngineHelper.flatResponseMap(moduleResponseEntry.getValue(), flatResponseMap, moduleResponseEntry.getKey().toLowerCase(), "_");
             }
-            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(flatResponseMap, flatResponseMap.keySet());
+            LinkedHashMap<String, Object> ruleEngineResult = ruleEngine.evaluateResults(
+                    flatResponseMap,
+                    moduleResponseMap.keySet().stream().map(String::toLowerCase).collect(Collectors.toSet()));
 
             if (moduleResponseMap.entrySet().size() == moduleList.size()) {
                 qr.setStatus(QueryResponse.Status.done);
