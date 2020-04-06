@@ -1,4 +1,4 @@
-package lombok.eu.coinform.gateway.events;
+package eu.coinform.gateway.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
