@@ -2,10 +2,10 @@ package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.ModuleResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
+import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.User;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
@@ -18,14 +18,12 @@ import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.ErrorResponse;
-import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import eu.coinform.gateway.util.RuleEngineHelper;
-import eu.coinform.gateway.util.SuccesfullResponse;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -36,8 +34,12 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -52,6 +54,9 @@ public class CheckController {
     private final RuleEngineConnector ruleEngineConnector;
     private final ApplicationEventPublisher eventPublisher;
     private final UserDbManager userDbManager;
+
+//    @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
+//    private String misInfoMeUrl;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
@@ -214,6 +219,40 @@ public class CheckController {
         }
         eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, oUser.get().getUuid())));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
+    }
+
+    @RequestMapping(value = "/check-url", method = RequestMethod.GET)
+    public ResponseEntity<?> checkUrl(@RequestParam(value = "source", required = true) String source){
+
+        if(!validUrl(source)){
+            return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
+        }
+        String misInfoMeUrl = "https://socsem.kmi.open.ac.uk/misinfo/api/credibility/sources/?source=%s";
+
+        HttpResponse<String> status;
+        try {
+            RestClient client = new RestClient(HttpMethod.GET,URI.create(String.format(misInfoMeUrl, source)),"");
+            status = client.sendRequest().join();
+            if(status.statusCode() < 200 || status.statusCode() > 299){
+                log.debug("Http error: {}", status);
+                return ResponseEntity.status(status.statusCode()).body(status.body());
+            }
+            return ResponseEntity.ok(status.body());
+
+        } catch (InterruptedException | IOException e) {
+            log.debug("Something went wrong: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
+        }
+    }
+
+    private boolean validUrl(String url){
+        try{
+            URL u = new URL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            log.debug("Invalid url: {}", url);
+            return false;
+        }
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)

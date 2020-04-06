@@ -2,7 +2,6 @@ package eu.coinform.gateway.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.controller.restclient.RestClient;
-import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
