@@ -11,6 +11,7 @@ public enum ErrorResponse {
     USERNOTVERIFIED("User not verified"),
     NOUSER("No such user registered"),
     BADCREDENTIALS("Wrong password/username"),
+    USERLOGGEDOUT("User is logged out"),
     JWTEXCEPTION("A JWT token exception");
 
     @Getter
