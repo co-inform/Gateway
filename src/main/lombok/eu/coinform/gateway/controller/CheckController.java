@@ -36,6 +36,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.util.*;
@@ -246,9 +247,9 @@ public class CheckController {
 
     private boolean validUrl(String url){
         try{
-            new URL(url);
+            new URL(url).toURI().parseServerAuthority();
             return true;
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | URISyntaxException e) {
             log.debug("Invalid url: {}", url);
             return false;
         }
