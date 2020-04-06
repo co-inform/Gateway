@@ -21,7 +21,6 @@ import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import eu.coinform.gateway.util.RuleEngineHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -222,10 +221,10 @@ public class CheckController {
     }
 
     @RequestMapping(value = "/check-url", method = RequestMethod.GET)
-    public ResponseEntity<?> checkUrl(@RequestParam(value = "source", required = true) String source){
+    public ResponseEntity<?> checkUrl(@RequestParam(value = "source") String source){
 
         if(!validUrl(source)){
-            return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
+            return ResponseEntity.badRequest().body(String.format(ErrorResponse.FORMATTED.getError(),"URL: " + source));
         }
         String misInfoMeUrl = "https://socsem.kmi.open.ac.uk/misinfo/api/credibility/sources/?source=%s";
 
@@ -241,13 +240,13 @@ public class CheckController {
 
         } catch (InterruptedException | IOException e) {
             log.debug("Something went wrong: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
+            return ResponseEntity.badRequest().body(String.format(ErrorResponse.FORMATTED.getError(), e.getMessage()));
         }
     }
 
     private boolean validUrl(String url){
         try{
-            URL u = new URL(url);
+            new URL(url);
             return true;
         } catch (MalformedURLException e) {
             log.debug("Invalid url: {}", url);

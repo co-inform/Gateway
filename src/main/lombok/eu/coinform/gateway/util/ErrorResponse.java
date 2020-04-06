@@ -12,6 +12,7 @@ public enum ErrorResponse {
     JWTEXCEPTION("A JWT token exception"),
     NOSUCHUSER("No such user exists"),
     GENERIC("Something went wrong"),
+    FORMATTED("{\"error\": \"%s\"}"),
     NOSUCHTRANSACTIONID("No such transaction_id");
 
     @Getter
