@@ -100,7 +100,12 @@ public class ModuleRequestBuilder {
         httpEntity = new StringEntity(objectMapper.writeValueAsString(content), ContentType.APPLICATION_JSON);
         return this;
     }
-
+/*
+    public ModuleRequestBuilder setContent(LabelEvaluationImplementation content) throws JsonProcessingException {
+        headers.put("content-type", "application/json");
+        httpEntity = new StringEntity(objectMapper.writeValueAsString(content), ContentType.APPLICATION_JSON);
+        return this;
+    }*/
     /**
      * setHeader takes two Strings and puts them into the headers map which is later turned into actual Http headers
      * @param key the http header Key, ie "Content-type"

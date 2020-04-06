@@ -7,9 +7,16 @@ import eu.coinform.gateway.GatewayApplication;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.controller.restclient.RestClient;
+import eu.coinform.gateway.db.PasswordAuthRepository;
+import eu.coinform.gateway.db.RoleRepository;
+import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.db.UserRepository;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
+import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.util.Pair;
+import eu.coinform.gateway.util.ReactionLabel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +29,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -29,7 +37,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -340,4 +350,5 @@ public class CheckControllerTest {
         assertThat(response.getModuleResponseCode().size()).isEqualTo(2);
         assertThat(response.getModuleResponseCode().get("first")).isNotNull();
     }
+
 }

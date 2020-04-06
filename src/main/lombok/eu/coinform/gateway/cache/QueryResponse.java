@@ -8,17 +8,36 @@ import org.springframework.data.redis.core.RedisHash;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.Random;
 
 /**
  * A class for holding the data of the query status and responses
  */
 @RedisHash("queryId")
-@AllArgsConstructor
-@NoArgsConstructor
 @ToString
 @EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QueryResponse implements Serializable {
+
+    public static final String RULE_ENGINE_KEY = "rule_engine";
+    public static final long NO_VERSION_HASH = 0;
+
+    public QueryResponse() {
+        setVersionHash();
+    }
+    public QueryResponse(String queryId,
+                         Status status,
+                         LinkedHashMap<String, Object> response,
+                         LinkedHashMap<String, Object> moduleResponseCode,
+                         LinkedHashMap<String, Object> flattenedModuleResponses) {
+        this.queryId = queryId;
+        this.status = status;
+        this.response = response;
+        this.moduleResponseCode = moduleResponseCode;
+        this.flattenedModuleResponses = flattenedModuleResponses;
+        setVersionHash();
+    }
+
 
     /**
      * The 'query_id'
@@ -31,6 +50,7 @@ public class QueryResponse implements Serializable {
     @JsonProperty("query_id")
     @JsonView(Views.NoDebug.class)
     private String queryId;
+
     /**
      * The {@link Status} of the query
      * -- SETTER --
@@ -46,6 +66,7 @@ public class QueryResponse implements Serializable {
     @Getter
     @JsonView(Views.NoDebug.class)
     private Status status;
+
     /**
      * The response to give to the users why query the gateway.
      * -- GETTER --
@@ -86,6 +107,18 @@ public class QueryResponse implements Serializable {
     @JsonProperty("flattened_module_responses")
     @JsonView(Views.Debug.class)
     private LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap<>();
+
+    @Getter
+    @JsonProperty("version_hash")
+    @JsonView(Views.Debug.class)
+    @EqualsAndHashCode.Exclude
+    private long versionHash;
+
+    public void setVersionHash() {
+        do {
+            versionHash = new Random().nextLong();
+        } while (versionHash == NO_VERSION_HASH);
+    }
 
     /**
      * The status states for queries to the gateway server.

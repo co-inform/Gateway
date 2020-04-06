@@ -1,20 +1,43 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import eu.coinform.gateway.cache.ModuleResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
+import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
+import eu.coinform.gateway.db.entity.User;
+import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.events.UserLabelReviewEvent;
+import eu.coinform.gateway.events.UserTweetEvaluationEvent;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
+import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
+import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.Pair;
+import eu.coinform.gateway.util.SuccesfullResponse;
+import eu.coinform.gateway.util.RuleEngineHelper;
+import eu.coinform.gateway.util.SuccesfullResponse;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -27,13 +50,19 @@ public class CheckController {
     private final CheckHandler checkHandler;
     private final RedisHandler redisHandler;
     private final RuleEngineConnector ruleEngineConnector;
+    private final ApplicationEventPublisher eventPublisher;
+    private final UserDbManager userDbManager;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
-                    RuleEngineConnector ruleEngineConnector) {
+                    RuleEngineConnector ruleEngineConnector,
+                    UserDbManager userDbManager,
+                    ApplicationEventPublisher eventPublisher) {
         this.redisHandler = redisHandler;
         this.checkHandler = checkHandler;
         this.ruleEngineConnector = ruleEngineConnector;
+        this.userDbManager = userDbManager;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -78,26 +107,15 @@ public class CheckController {
     }
 
 
-    //todo: known bug. If multiple request are very close to each other in time the gateway can send 2 duplicate queries to the modules.
     private QueryResponse queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         log.trace("query received with query_id '{}'", queryObject.getQueryId());
-        long start = System.currentTimeMillis();
-        log.trace("{}: query handling start, {}", System.currentTimeMillis() - start, queryObject);
-        //response par is a pair {Existant, queryResponse}. Existant is true is there already exists a query response with the queryId specified
-        Pair<Boolean, QueryResponse> responsePair = redisHandler.getOrSetIfAbsentQueryResponse(queryObject.getQueryId(),
-                new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>())).join();
-        QueryResponse queryResponse = responsePair.getValue();
-        log.trace("{}: got query response {}", System.currentTimeMillis() - start, queryResponse);
-        if (queryResponse.getStatus() == QueryResponse.Status.done || queryResponse.getStatus() == QueryResponse.Status.partly_done) {
-            //todo: We're ignoring the modules. Some logic for when to send them queries must be made.
-            // Like if the cache is older than some threshold it is handled as a new query.
-            // The information of results directly from cache must also be saved/sent somewhere for the modules to know.
-            return queryResponse;
-        } else if (!responsePair.getKey()) {
+        QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
+        QueryResponse response = redisHandler.getQueryResponse(queryObject.getQueryId(), qrIfAbsent).join();
+        if (response.getVersionHash() == qrIfAbsent.getVersionHash()) {
+            //We only send out new requests for new Queries
             queryObjectConsumer.accept(queryObject);
-            log.trace("{}: query sent of to handler", System.currentTimeMillis() - start);
         }
-        return queryResponse;
+        return response;
     }
 
     /**
@@ -135,6 +153,12 @@ public class CheckController {
         log.trace("query for response received with query_id '{}'", query_id);
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
+        Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(query_id).join();
+        LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap();
+        for (Map.Entry<String, ModuleResponse> entry : moduleResponses.entrySet()) {
+            queryResponse.getResponse().put(entry.getKey(), entry.getValue());
+            RuleEngineHelper.flatResponseMap(entry.getValue(), flattenedModuleResponses, entry.getKey().toLowerCase(), "_");
+        }
 
         log.trace("findById: {}", queryResponse);
 
@@ -146,7 +170,6 @@ public class CheckController {
     public void corsHeadersResponse(HttpServletResponse response,
                                     @PathVariable(value = "query_id", required = true) String query_id,
                                     @PathVariable(value = "debug", required = true) String debug) {
-        //response.addHeader("Access-Control-Allow-Origin", "https://twitter.com, chrome://**, chrome-extension://**");
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
@@ -155,12 +178,19 @@ public class CheckController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
-    public EvaluationResponse evaluateTweet(@Valid @RequestBody TweetEvaluation tweetEvaluation) {
+    public ResponseEntity<?> evaluateTweet(@Valid @RequestBody TweetEvaluationForm tweetEvaluationForm) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+        Optional<User> oUser = userDbManager.getUserById(userId);
 
-        //todo: actually do something with the incoming tweet evaluations
-        redisHandler.addToEvaluationList(tweetEvaluation);
+        if(oUser.isEmpty()){
+            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
+        }
 
-        return new EvaluationResponse(tweetEvaluation.getEvaluationId());
+        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, oUser.get().getUuid())));
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.OPTIONS)
@@ -169,6 +199,21 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
+    public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+        Optional<User> oUser = userDbManager.getUserById(userId);
+
+        if(oUser.isEmpty()){
+            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
+        }
+        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, oUser.get().getUuid())));
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 
     @RequestMapping(value = "/ruleengine/test", method = RequestMethod.POST)

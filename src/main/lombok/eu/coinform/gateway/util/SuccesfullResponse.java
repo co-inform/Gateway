@@ -9,6 +9,8 @@ public enum SuccesfullResponse {
     PASSWORDRESET("Password reset, please check your email for reset link"),
     USERLOGGEDOUT("User succesfully logged out"),
     PASSWORDCHANGE("Password successfully changed"),
+    EVALUATETWEET("Tweet sent of for evaluation"),
+    EVALUATELABEL("User label evaluation received"),
     TOKENRENEWED("Token renewed"),
     USERVERIFIED("User successfully verified");
 

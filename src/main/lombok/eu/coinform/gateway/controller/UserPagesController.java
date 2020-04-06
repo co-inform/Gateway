@@ -54,6 +54,11 @@ public class UserPagesController {
             return "mismatch";
         }
 
+        if(form.getPw1().length() < 6 ) {
+            return "toshort";
+        }
+
+//        VerificationToken token = userDbManager.getVerificationToken(form.getToken()).map(t -> t).get();
         Optional<VerificationToken> oToken = userDbManager.getVerificationToken(form.getToken());
 
         if(oToken.isEmpty()){

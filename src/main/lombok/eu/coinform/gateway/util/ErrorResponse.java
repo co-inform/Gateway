@@ -7,10 +7,11 @@ import lombok.Getter;
 public enum ErrorResponse {
     USEREXISTS("User already exists"),
     NOSUCHQUERYID("No such query_id"),
-    NOSUCHTRANSACTIONID("No such transaction_id"),
     USERNOTVERIFIED("User not verified"),
-    NOUSER("No such user registered"),
     BADCREDENTIALS("Wrong password/username"),
+    NOSUCHUSER("No such user exists"),
+    GENEREIC("Something went wrong"),
+    NOSUCHTRANSACTIONID("No such transaction_id"),
     USERLOGGEDOUT("User is logged out"),
     JWTEXCEPTION("A JWT token exception");
 

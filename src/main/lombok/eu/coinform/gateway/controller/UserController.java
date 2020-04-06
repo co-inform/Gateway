@@ -153,14 +153,14 @@ public class UserController {
         User user = userDbManager.getByEmail(form.getEmail());
         if(user == null) {
             log.debug("user null");
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOSUCHUSER);
         }
 
         try{
             eventPublisher.publishEvent(new OnPasswordResetEvent(user));
         } catch (Exception e){
             log.debug(e.getMessage());
-            return ResponseEntity.badRequest().body(ErrorResponse.NOUSER);
+            return ResponseEntity.badRequest().body(ErrorResponse.NOSUCHUSER);
         }
 
         return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
