@@ -4,6 +4,7 @@ import eu.coinform.gateway.db.entity.RoleEnum;
 import eu.coinform.gateway.db.UserDbAuthenticationFilter;
 import eu.coinform.gateway.db.UserDbAuthenticationProvider;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.jwt.JwtAuthenticationFailureHandler;
 import eu.coinform.gateway.jwt.JwtAuthenticationFilter;
 import eu.coinform.gateway.jwt.JwtAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(userDbAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers("/login", "/exit", "/twitter/evaluate.*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
+                    .antMatchers("/login", "/exit","/twitter/evaluate", "/twitter/evaluate/*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
                     .anyRequest().permitAll();
     }
 
@@ -53,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception{
-        return new JwtAuthenticationFilter(authenticationManager());
+        return new JwtAuthenticationFilter(authenticationManager(), new JwtAuthenticationFailureHandler());
     }
 }
 
