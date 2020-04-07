@@ -2,7 +2,6 @@ package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import eu.coinform.gateway.cache.ModuleResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
@@ -18,13 +17,9 @@ import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.ErrorResponse;
-import eu.coinform.gateway.util.Pair;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import eu.coinform.gateway.util.RuleEngineHelper;
-import eu.coinform.gateway.util.SuccesfullResponse;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
