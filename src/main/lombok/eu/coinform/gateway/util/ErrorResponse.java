@@ -11,7 +11,8 @@ public enum ErrorResponse {
     BADCREDENTIALS("Wrong password/username"),
     JWTEXCEPTION("A JWT token exception"),
     NOSUCHUSER("No such user exists"),
-    GENEREIC("Something went wrong"),
+    GENERIC("Something went wrong"),
+    FORMATTED("{\"error\": \"%s\"}"),
     NOSUCHTRANSACTIONID("No such transaction_id");
 
     @Getter

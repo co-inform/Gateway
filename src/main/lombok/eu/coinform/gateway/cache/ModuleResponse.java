@@ -24,6 +24,7 @@ public class ModuleResponse implements Serializable {
      * @return the response object
      */
     @Getter
+    @Setter
     @NotEmpty(message = "The Module Response must contain an response object")
     @JsonView(Views.Debug.class)
     private LinkedHashMap<String, Object> response;
