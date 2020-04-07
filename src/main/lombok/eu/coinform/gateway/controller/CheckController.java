@@ -1,6 +1,7 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
@@ -54,6 +55,7 @@ public class CheckController {
     private final RuleEngineConnector ruleEngineConnector;
     private final ApplicationEventPublisher eventPublisher;
     private final UserDbManager userDbManager;
+    private final ObjectMapper objectMapper;
 
 //    @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
 //    private String misInfoMeUrl;
@@ -68,6 +70,7 @@ public class CheckController {
         this.ruleEngineConnector = ruleEngineConnector;
         this.userDbManager = userDbManager;
         this.eventPublisher = eventPublisher;
+        this.objectMapper = new ObjectMapper();
     }
 
     /**
@@ -221,6 +224,8 @@ public class CheckController {
         return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 
+
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/check-url", method = RequestMethod.GET)
     public ResponseEntity<?> checkUrl(@RequestParam(value = "source") String source){
 
@@ -237,12 +242,23 @@ public class CheckController {
                 log.debug("Http error: {}", status);
                 return ResponseEntity.status(status.statusCode()).body(status.body());
             }
-            return ResponseEntity.ok(status.body());
+            LinkedHashMap<String, Object> answer = objectMapper.readValue(status.body(), LinkedHashMap.class);
+            return ResponseEntity.ok(checkUrlRuleEngine(answer));
 
         } catch (InterruptedException | IOException e) {
             log.debug("Something went wrong: {}", e.getMessage());
             return ResponseEntity.badRequest().body(String.format(ErrorResponse.FORMATTED.getError(), e.getMessage()));
         }
+    }
+
+    private LinkedHashMap<String, Object> checkUrlRuleEngine(LinkedHashMap<String, Object> misinfomeAnswer) {
+        LinkedHashMap<String, Object> flatMap = new LinkedHashMap<>();
+        ModuleResponse moduleResponse = new ModuleResponse();
+        moduleResponse.setResponse(misinfomeAnswer);
+        RuleEngineHelper.flatResponseMap(moduleResponse, flatMap, "misinfome", "_");
+        Set<String> modules = new HashSet<>();
+        modules.add("misinfome");
+        return ruleEngineConnector.evaluateResults(flatMap, modules);
     }
 
     private boolean validUrl(String url){
