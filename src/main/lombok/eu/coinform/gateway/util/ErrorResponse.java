@@ -10,8 +10,10 @@ public enum ErrorResponse {
     USERNOTVERIFIED("User not verified"),
     BADCREDENTIALS("Wrong password/username"),
     NOSUCHUSER("No such user exists"),
-    GENEREIC("Something went wrong"),
+    GENERIC("Something went wrong"),
+    FORMATTED("{\"error\": \"%s\"}"),
     NOSUCHTRANSACTIONID("No such transaction_id"),
+    GENEREIC("Something went wrong"),
     USERLOGGEDOUT("User is logged out"),
     JWTEXCEPTION("A JWT token exception");
 

@@ -30,6 +30,14 @@ public class RestClient {
                 .method(method.toString(), BodyPublishers.ofString(body, Charsets.UTF_8)).build();
     }
 
+    public RestClient(HttpMethod method, URI uri, String body){
+        client = HttpClient.newHttpClient();
+        request = HttpRequest.newBuilder(uri)
+                .header("content-type", "application/json")
+                .timeout(Duration.ofMinutes(1))
+                .method(method.toString(), BodyPublishers.ofString(body, Charsets.UTF_8)).build();
+    }
+
     public CompletableFuture<HttpResponse<String>> sendRequest() throws IOException, InterruptedException {
         return client.sendAsync(request, BodyHandlers.ofString());
     }
