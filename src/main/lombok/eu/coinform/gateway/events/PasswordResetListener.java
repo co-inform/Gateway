@@ -1,8 +1,7 @@
 package eu.coinform.gateway.events;
 
-import eu.coinform.gateway.db.User;
+import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.db.VerificationTokenRepository;
 import eu.coinform.gateway.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,8 +21,11 @@ public class PasswordResetListener extends GatewayEventListener<OnPasswordResetE
     @Override
     protected void handleEvent(OnPasswordResetEvent event) {
         User user = event.getUser();
-        log.debug("HandleEvent user: {}", user.getPasswordAuth().getEmail());
-        String token = userDbManager.passwordReset(user);
+        String token = userDbManager.resetPassword(user);
+        if(token.isEmpty()){
+            log.debug("Something went wrong when fetching token for {}", user.getPasswordAuth().getEmail());
+            return;
+        }
         String verifyUrl = url + "/passwordreset?token="+token;
         emailService.sendPasswordResetMessage(user.getPasswordAuth().getEmail(),verifyUrl);
     }

@@ -2,6 +2,7 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.jwt.JwtAuthenticationException;
+import eu.coinform.gateway.jwt.UserLoggedOutException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.util.ErrorResponse;
@@ -66,9 +67,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(LinkTimedOutException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView linkTimedOutException(LinkTimedOutException ex) {
-        ModelAndView mav = new ModelAndView("timedout");
-        mav.addObject("token", ex.getMessage());
-        return mav;
+        return new ModelAndView("timedout");
     }
 
     @ResponseBody
@@ -84,4 +83,12 @@ public class ExceptionHandlerController {
     public ErrorResponse badCredentialsException(BadCredentialsException ex){
         return ErrorResponse.BADCREDENTIALS;
     }
+
+    @ResponseBody
+    @ExceptionHandler(UserLoggedOutException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse userLoggedOutException(UserLoggedOutException ex){
+        return ErrorResponse.USERLOGGEDOUT;
+    }
+
 }

@@ -81,7 +81,12 @@ public class CheckControllerTest {
     public static class CheckControllerTestConfig {
         @Bean
         public UserDbManager testUserDbManager() {
-            return new UserDbManager(mock(UserRepository.class), mock(PasswordAuthRepository.class), mock(RoleRepository.class), mock(VerificationTokenRepository.class), mock(PasswordEncoder.class));
+            return new UserDbManager(mock(UserRepository.class),
+                    mock(PasswordAuthRepository.class),
+                    mock(RoleRepository.class),
+                    mock(VerificationTokenRepository.class),
+                    mock(SessionTokenRepository.class),
+                    mock(PasswordEncoder.class));
         }
     }
 

@@ -1,4 +1,4 @@
-package eu.coinform.gateway.db;
+package eu.coinform.gateway.db.entity;
 
 public enum RoleEnum {
     ADMIN,

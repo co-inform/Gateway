@@ -9,11 +9,13 @@ public enum ErrorResponse {
     NOSUCHQUERYID("No such query_id"),
     USERNOTVERIFIED("User not verified"),
     BADCREDENTIALS("Wrong password/username"),
-    JWTEXCEPTION("A JWT token exception"),
     NOSUCHUSER("No such user exists"),
     GENERIC("Something went wrong"),
     FORMATTED("{\"error\": \"%s\"}"),
-    NOSUCHTRANSACTIONID("No such transaction_id");
+    NOSUCHTRANSACTIONID("No such transaction_id"),
+    GENEREIC("Something went wrong"),
+    USERLOGGEDOUT("User is logged out"),
+    JWTEXCEPTION("A JWT token exception");
 
     @Getter
     private final String error;

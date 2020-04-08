@@ -1,6 +1,6 @@
 package eu.coinform.gateway.config;
 
-import eu.coinform.gateway.db.RoleEnum;
+import eu.coinform.gateway.db.entity.RoleEnum;
 import eu.coinform.gateway.db.UserDbAuthenticationFilter;
 import eu.coinform.gateway.db.UserDbAuthenticationProvider;
 import eu.coinform.gateway.db.UserDbManager;

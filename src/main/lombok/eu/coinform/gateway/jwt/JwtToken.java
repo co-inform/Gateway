@@ -1,19 +1,13 @@
 package eu.coinform.gateway.jwt;
 
-import eu.coinform.gateway.db.Role;
-import eu.coinform.gateway.db.RoleEnum;
-import eu.coinform.gateway.db.User;
-import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class JwtToken {
 
@@ -36,15 +30,15 @@ public class JwtToken {
 
     public static class Builder {
 
-        private Long user;
+        private Long sessionTokenId;
         private List<String> roles;
         private Long expirationTime;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
         private int counter;
 
-        public Builder setUser(Long user) {
-            this.user = user;
+        public Builder setSessionTokenId(Long sessionTokenId) {
+            this.sessionTokenId = sessionTokenId;
             return this;
         }
 
@@ -80,7 +74,7 @@ public class JwtToken {
                     .setHeaderParam("typ", TOKEN_TYPE)
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)
-                    .setSubject(user.toString())
+                    .setSubject(sessionTokenId.toString())
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
                     .claim("count", counter)

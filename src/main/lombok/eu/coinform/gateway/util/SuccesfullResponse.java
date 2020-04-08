@@ -1,7 +1,6 @@
 package eu.coinform.gateway.util;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import eu.coinform.gateway.model.Tweet;
 import lombok.Getter;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -10,9 +9,10 @@ public enum SuccesfullResponse {
     PASSWORDRESET("Password reset, please check your email for reset link"),
     USERLOGGEDOUT("User succesfully logged out"),
     PASSWORDCHANGE("Password successfully changed"),
-    USERVERIFIED("User successfully verified"),
     EVALUATETWEET("Tweet sent of for evaluation"),
-    EVALUATELABEL("User label evaluation received");
+    EVALUATELABEL("User label evaluation received"),
+    TOKENRENEWED("Token renewed"),
+    USERVERIFIED("User successfully verified");
 
     @Getter
     private final String status;
