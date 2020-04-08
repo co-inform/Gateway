@@ -22,6 +22,7 @@ import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import eu.coinform.gateway.util.RuleEngineHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -57,8 +58,8 @@ public class CheckController {
     private final UserDbManager userDbManager;
     private final ObjectMapper objectMapper;
 
-//    @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
-//    private String misInfoMeUrl;
+    @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
+    private String misInfoMeUrl;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
@@ -232,7 +233,6 @@ public class CheckController {
         if(!validUrl(source)){
             return ResponseEntity.badRequest().body(String.format(ErrorResponse.FORMATTED.getError(),"URL: " + source));
         }
-        String misInfoMeUrl = "https://socsem.kmi.open.ac.uk/misinfo/api/credibility/sources/?source=%s";
 
         HttpResponse<String> status;
         try {
