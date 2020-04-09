@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableJpaRepositories(basePackages = "eu.coinform.gateway.db.entity")
+@EnableJpaRepositories(basePackages = "eu.coinform.gateway.db")
 public class DbConfig {
 
     @Bean
