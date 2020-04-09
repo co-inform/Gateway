@@ -34,6 +34,7 @@ public class VerificationToken implements Serializable {
 
     @Getter
     @Setter
+    @Temporal(TemporalType.DATE)
     @Column(name = "expiry_date")
     private Date expiryDate;
 
