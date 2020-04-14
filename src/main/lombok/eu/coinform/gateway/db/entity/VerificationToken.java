@@ -1,6 +1,6 @@
 package eu.coinform.gateway.db.entity;
 
-//import eu.coinform.gateway.util.TokenCreator;
+import eu.coinform.gateway.util.TokenCreator;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Table(name = "verified")
@@ -40,14 +39,12 @@ public class VerificationToken implements Serializable {
     private Date expiryDate;
 
     public VerificationToken() {
-        this.token = UUID.randomUUID().toString();
-//        this.token = TokenCreator.createSafeUrlToken();
+        this.token = TokenCreator.createSafeUrlToken();
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
     public VerificationToken(final User user) {
-//        this.token = TokenCreator.createSafeUrlToken();
-        this.token = UUID.randomUUID().toString();
+        this.token = TokenCreator.createSafeUrlToken();
         this.expiryDate = calculateExpiryDate(EXPIRATION);
         this.user = user;
         this.id = user.getId();

@@ -1,13 +1,12 @@
 package eu.coinform.gateway.db.entity;
 
-//import eu.coinform.gateway.util.TokenCreator;
+import eu.coinform.gateway.util.TokenCreator;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Table(name = "sessiontoken")
@@ -36,15 +35,13 @@ public class SessionToken implements Serializable {
     private User user;
 
     public SessionToken() {
-//        this.sessionToken = TokenCreator.createSessionToken();
-        this.sessionToken = UUID.randomUUID().toString();
+        this.sessionToken = TokenCreator.createSessionToken();
         this.createdAt = new Date();
     }
 
     public SessionToken(User user) {
         this.user = user;
-//        this.sessionToken = TokenCreator.createSessionToken();
-        this.sessionToken = UUID.randomUUID().toString();
+        this.sessionToken = TokenCreator.createSessionToken();
         this.createdAt = new Date();
     }
 }
