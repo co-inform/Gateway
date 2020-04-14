@@ -40,6 +40,9 @@ public class UserController {
     private final int RENEWAL_TOKEN_MAXAGE = 60*60*24*90;
     private final String RENEWAL_TOKEN_DOMAIN = "coinform.eu";
 
+    @Value("${gateway.session_token.secure:true}")
+    private boolean secureCookie;
+
     private final UserDbManager userDbManager;
     private final ApplicationEventPublisher eventPublisher;
     private final String signatureKey;
@@ -105,6 +108,9 @@ public class UserController {
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
+        if (secureCookie) {
+            cookie.setSecure(true);
+        }
         response.addCookie(cookie);
         return new LoginResponse(token);
     }
