@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>eu.coinform</groupId>
 	<artifactId>gateway</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>gateway</name>
 	<description>Co-inform gateway</description>
 	<packaging>jar</packaging>
