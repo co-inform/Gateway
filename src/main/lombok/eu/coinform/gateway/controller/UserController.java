@@ -108,6 +108,7 @@ public class UserController {
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
+        cookie.setPath("/renew-token");
         if (secureCookie) {
             cookie.setSecure(true);
         }
