@@ -38,9 +38,9 @@ public class UserController {
 
     private final String RENEWAL_TOKEN_NAME = "renew-token";
     private final int RENEWAL_TOKEN_MAXAGE = 60*60*24*90;
-    private final String RENEWAL_TOKEN_DOMAIN = "coinform.eu";
-
-    @Value("${gateway.session_token.secure:true}")
+    @Value("${gateway.renewaltoken.domain}")
+    private String RENEWAL_TOKEN_DOMAIN;
+    @Value("${gateway.renewaltoken.secure:true}")
     private boolean secureCookie;
 
     private final UserDbManager userDbManager;
@@ -88,6 +88,7 @@ public class UserController {
     public LoginResponse login(HttpServletResponse response) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
+        log.debug("auth: {}", authentication.toString());
 
         User user = userDbManager.getByEmail(authentication.getName());
 

@@ -7,6 +7,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -18,7 +21,11 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationFailureHandler failureHandler) {
-        super(new RequestHeaderRequestMatcher("Authorization"));
+        super(
+            new AndRequestMatcher(
+                new RequestHeaderRequestMatcher("Authorization"),
+                new NegatedRequestMatcher(
+                    new RegexRequestMatcher("/login.*", "POST", true))));
         setAuthenticationManager(authenticationManager);
         setAuthenticationFailureHandler(failureHandler);
     }
