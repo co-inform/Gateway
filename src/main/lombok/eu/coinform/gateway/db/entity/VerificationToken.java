@@ -34,7 +34,7 @@ public class VerificationToken implements Serializable {
 
     @Getter
     @Setter
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "expiry_date")
     private Date expiryDate;
 
@@ -56,9 +56,8 @@ public class VerificationToken implements Serializable {
 
     private Date calculateExpiryDate(int expiryTimeInMinutes) {
         Calendar cal = Calendar.getInstance();
-        cal.setTime(new Timestamp(cal.getTime().getTime()));
         cal.add(Calendar.MINUTE, expiryTimeInMinutes);
-        return new Date(cal.getTime().getTime());
+        return cal.getTime();
     }
 
 }
