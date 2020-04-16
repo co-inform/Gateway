@@ -1,5 +1,7 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
+import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
 import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
 import eu.coinform.gateway.controller.forms.RegisterForm;
@@ -59,13 +61,13 @@ public class UserController {
     public ResponseEntity<?> renewToken(HttpServletRequest request) {
         Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
         if(cookie.isEmpty()){
-            return ResponseEntity.notFound().build();
+            throw new MissingRenewToken();
         }
         String token = cookie.get().getValue();
         Optional<SessionToken> ost = userDbManager.getSessionTokenByToken(token);
 
         if(ost.isEmpty()) {
-           return ResponseEntity.notFound().build();
+           throw new NoSuchRenewToken();
         }
 
         User user = ost.get().getUser();

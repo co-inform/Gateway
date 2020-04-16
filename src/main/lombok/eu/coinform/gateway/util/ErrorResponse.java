@@ -15,7 +15,9 @@ public enum ErrorResponse {
     NOSUCHTRANSACTIONID("No such transaction_id"),
     GENEREIC("Something went wrong"),
     USERLOGGEDOUT("User is logged out"),
-    JWTEXCEPTION("A JWT token exception");
+    JWTEXCEPTION("A JWT token exception"),
+    MISSINGRENEWTOKEN("No renew-token cookie supplied"),
+    NOSUCHRENEWTOKEN("No such renew-token");
 
     @Getter
     private final String error;
