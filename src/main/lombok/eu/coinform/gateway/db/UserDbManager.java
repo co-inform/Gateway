@@ -172,13 +172,14 @@ public class UserDbManager {
      * @param sessionTokenId the userId for the specific user whom to logout
      */
 
-    public void logOut(Long sessionTokenId){
+    public Optional<SessionToken> logOut(Long sessionTokenId){
         Optional<SessionToken> sessionToken = sessionTokenRepository.findById(sessionTokenId);
         sessionToken.ifPresent(token -> {
             token.getUser().setCounter(token.getUser().getCounter()+1);
             sessionTokenRepository.deleteById(sessionTokenId);
             userRepository.save(token.getUser());
         }); // to invalidate the JWT token and remove longlived session
+        return sessionToken;
     }
 
     /**

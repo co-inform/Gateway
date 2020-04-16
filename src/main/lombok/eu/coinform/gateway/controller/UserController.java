@@ -200,11 +200,15 @@ public class UserController {
     public ResponseEntity<?> logout(HttpServletResponse response){
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        userDbManager.logOut((Long) authentication.getPrincipal());
-        final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, "");
+        Optional<SessionToken> sessionToken = userDbManager.logOut((Long) authentication.getPrincipal());
+        final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, sessionToken.get().getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
+        cookie.setPath("/renew-token");
+        if (secureCookie) {
+            cookie.setSecure(true);
+        }
         response.addCookie(cookie);
         return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
     }
