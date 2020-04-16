@@ -69,7 +69,7 @@ public class UserController {
         }
 
         User user = ost.get().getUser();
-        user.setCounter(user.getCounter()+1);
+        ost.get().setCounter(ost.get().getCounter()+1);
         userDbManager.saveUser(user);
 
         Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
@@ -97,12 +97,11 @@ public class UserController {
         }
 
         SessionToken st;
-        if(user.getSessionToken() == null) {
-            st = new SessionToken(user);
-            userDbManager.saveSessionToken(st);
-        } else {
-            st = user.getSessionToken();
+        if(user.getSessionTokenList() == null) {
+            user.setSessionTokenList(new LinkedList<>());
         }
+        st = new SessionToken(user);
+        userDbManager.saveSessionToken(st);
         String token = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
@@ -130,7 +129,7 @@ public class UserController {
         return (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setCounter(user.getCounter())
+                .setCounter(st.getCounter())
                 .setExpirationTime(2*60*60*1000L)
                 .setSessionTokenId(st.getId())
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
@@ -200,11 +199,13 @@ public class UserController {
     public ResponseEntity<?> logout(HttpServletResponse response){
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        userDbManager.logOut((Long) authentication.getPrincipal());
-        final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, "");
+        log.debug("logout principal {}", authentication.getPrincipal());
+        SessionToken sessionToken = userDbManager.logOut((Long) authentication.getPrincipal()).get();
+        final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, sessionToken.getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
+        cookie.setPath("/renew-token");
         response.addCookie(cookie);
         return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
     }

@@ -30,9 +30,14 @@ public class SessionToken implements Serializable {
 
     @Getter
     @Setter
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Getter
+    @Setter
+    @Column(name = "counter")
+    private int counter;
 
     public SessionToken() {
         this.sessionToken = TokenCreator.createSessionToken();

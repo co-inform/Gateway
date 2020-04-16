@@ -46,13 +46,8 @@ public class User implements Serializable {
 
     @Getter
     @Setter
-    @Column(name = "counter")
-    private int counter;
-
-    @Getter
-    @Setter
-    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private SessionToken sessionToken;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<SessionToken> sessionTokenList;
 
     @Getter
     @Setter
