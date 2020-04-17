@@ -1,5 +1,7 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
+import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.jwt.JwtAuthenticationException;
 import eu.coinform.gateway.jwt.UserLoggedOutException;
@@ -91,4 +93,17 @@ public class ExceptionHandlerController {
         return ErrorResponse.USERLOGGEDOUT;
     }
 
+    @ResponseBody
+    @ExceptionHandler(MissingRenewToken.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse missingRenewToken(MissingRenewToken ex) {
+        return ErrorResponse.MISSINGRENEWTOKEN;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(NoSuchRenewToken.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse noSuchRenewToken(NoSuchRenewToken ex) {
+        return ErrorResponse.NOSUCHRENEWTOKEN;
+    }
 }

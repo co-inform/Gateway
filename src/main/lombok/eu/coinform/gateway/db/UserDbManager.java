@@ -174,7 +174,6 @@ public class UserDbManager {
 
     public Optional<SessionToken> logOut(Long sessionTokenId) {
         Optional<SessionToken> sessionToken = sessionTokenRepository.findById(sessionTokenId);
-        log.debug("delete session id {}", sessionTokenId);
         sessionTokenRepository.deleteById(sessionTokenId);
         return sessionToken;
     }

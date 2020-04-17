@@ -1,5 +1,7 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
+import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
 import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
 import eu.coinform.gateway.controller.forms.RegisterForm;
@@ -59,13 +61,13 @@ public class UserController {
     public ResponseEntity<?> renewToken(HttpServletRequest request) {
         Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
         if(cookie.isEmpty()){
-            return ResponseEntity.notFound().build();
+            throw new MissingRenewToken();
         }
         String token = cookie.get().getValue();
         Optional<SessionToken> ost = userDbManager.getSessionTokenByToken(token);
 
         if(ost.isEmpty()) {
-           return ResponseEntity.notFound().build();
+           throw new NoSuchRenewToken();
         }
 
         User user = ost.get().getUser();
@@ -88,7 +90,6 @@ public class UserController {
     public LoginResponse login(HttpServletResponse response) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        log.debug("auth: {}", authentication.toString());
 
         User user = userDbManager.getByEmail(authentication.getName());
 
@@ -129,10 +130,11 @@ public class UserController {
         return (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setCounter(st.getCounter())
+                .setCounter(user.getCounter())
                 .setExpirationTime(2*60*60*1000L)
                 .setSessionTokenId(st.getId())
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .setUser(user)
                 .build().getToken();
     }
 
@@ -206,6 +208,9 @@ public class UserController {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         cookie.setPath("/renew-token");
+        if (secureCookie) {
+            cookie.setSecure(true);
+        }
         response.addCookie(cookie);
         return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
     }
