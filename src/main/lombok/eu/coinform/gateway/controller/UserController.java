@@ -131,7 +131,7 @@ public class UserController {
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
                 .setExpirationTime(2*60*60*1000L)
-                .setSessionTokenId(st.getId())
+                .setSessionToken(st)
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .setUser(user)
                 .build().getToken();

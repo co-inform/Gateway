@@ -1,5 +1,6 @@
 package eu.coinform.gateway.jwt;
 
+import eu.coinform.gateway.db.entity.SessionToken;
 import eu.coinform.gateway.db.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,16 +27,15 @@ public class JwtToken {
 
     public static class Builder {
 
-        private Long sessionTokenId;
+        private SessionToken sessionToken;
         private List<String> roles;
         private Long expirationTime;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
-        private int counter;
         private Map<String, String> user;
 
-        public Builder setSessionTokenId(Long sessionTokenId) {
-            this.sessionTokenId = sessionTokenId;
+        public Builder setSessionToken(SessionToken sessionToken) {
+            this.sessionToken = sessionToken;
             return this;
         }
 
@@ -63,7 +63,6 @@ public class JwtToken {
             this.user = new HashMap<>();
             this.user.put("uuid", user.getUuid());
             this.user.put("email", user.getPasswordAuth().getEmail());
-            this.counter = user.getCounter();
             return this;
         }
 
@@ -74,10 +73,10 @@ public class JwtToken {
                     .setHeaderParam("typ", TOKEN_TYPE)
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)
-                    .setSubject(sessionTokenId.toString())
+                    .setSubject(sessionToken.getId().toString())
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
-                    .claim("count", counter)
+                    .claim("count", sessionToken.getCounter())
                     .claim("user", user)
                     .compact();
             return new JwtToken(token);

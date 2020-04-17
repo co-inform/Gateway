@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
             String sessionTokenId = parsedToken.getBody().getSubject();
             SessionToken sessionToken = userDbManager.findById(Long.parseLong(sessionTokenId)).orElseThrow(UserLoggedOutException::new);
+
+            String uuid = (String) ((Map) parsedToken.getBody().get("user")).get("uuid");
+            if (!sessionToken.getUser().getUuid().equals(uuid)) {
+                throw new JwtAuthenticationException(String.format("User uuid does not match the session token user uuid, token: {}", token));
+            }
 
             int counter =  (int) parsedToken.getBody().get("count");
 
