@@ -90,7 +90,6 @@ public class UserController {
     public LoginResponse login(HttpServletResponse response) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        log.debug("auth: {}", authentication.toString());
 
         User user = userDbManager.getByEmail(authentication.getName());
 
