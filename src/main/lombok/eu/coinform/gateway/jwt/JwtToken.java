@@ -1,13 +1,12 @@
 package eu.coinform.gateway.jwt;
 
+import eu.coinform.gateway.db.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class JwtToken {
 
@@ -22,11 +21,8 @@ public class JwtToken {
         this.token = token;
     }
 
-    private JwtToken() {
-    }
-
     @Getter
-    private String token;
+    private final String token;
 
     public static class Builder {
 
@@ -36,14 +32,10 @@ public class JwtToken {
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
         private int counter;
+        private Map<String, String> user;
 
         public Builder setSessionTokenId(Long sessionTokenId) {
             this.sessionTokenId = sessionTokenId;
-            return this;
-        }
-
-        public Builder setCounter(int counter){
-            this.counter = counter;
             return this;
         }
 
@@ -67,6 +59,14 @@ public class JwtToken {
             return this;
         }
 
+        public Builder setUser(User user) {
+            this.user = new HashMap<>();
+            this.user.put("uuid", user.getUuid());
+            this.user.put("email", user.getPasswordAuth().getEmail());
+            this.counter = user.getCounter();
+            return this;
+        }
+
         public JwtToken build() {
 
             String token = Jwts.builder()
@@ -78,6 +78,7 @@ public class JwtToken {
                     .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                     .claim("rol", roles)
                     .claim("count", counter)
+                    .claim("user", user)
                     .compact();
             return new JwtToken(token);
         }

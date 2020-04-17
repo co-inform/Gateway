@@ -132,10 +132,10 @@ public class UserController {
         return (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setCounter(user.getCounter())
                 .setExpirationTime(2*60*60*1000L)
                 .setSessionTokenId(st.getId())
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .setUser(user)
                 .build().getToken();
     }
 
