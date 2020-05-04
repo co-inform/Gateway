@@ -190,15 +190,15 @@ public class CheckController {
     public ResponseEntity<?> evaluateTweet(@Valid @RequestBody TweetEvaluationForm tweetEvaluationForm) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        Long userId = (Long) authentication.getPrincipal();
-        Optional<User> oUser = userDbManager.getUserById(userId);
+        Long sessionId = (Long) authentication.getPrincipal();
+        Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
 
-        if(oUser.isEmpty()){
-            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+        if(user.isEmpty()){
+            log.debug("No user with sessionId: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
 
-        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, oUser.get().getUuid())));
+        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid())));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
@@ -214,14 +214,14 @@ public class CheckController {
     public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        Long userId = (Long) authentication.getPrincipal();
-        Optional<User> oUser = userDbManager.getUserById(userId);
+        Long sessionId = (Long) authentication.getPrincipal();
+        Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
 
-        if(oUser.isEmpty()){
-            log.debug("No user: {}, {}", userId, authentication.getPrincipal());
+        if(user.isEmpty()){
+            log.debug("No user: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
-        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, oUser.get().getUuid())));
+        eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, user.get().getUuid())));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
     }
 

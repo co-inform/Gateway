@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -41,16 +42,17 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .parseClaimsJws(token.replace(JwtToken.TOKEN_PREFIX, ""));
 
             String sessionTokenId = parsedToken.getBody().getSubject();
-            Optional<SessionToken> sessionToken = userDbManager.findById(Long.parseLong(sessionTokenId));
-            if(sessionToken.isEmpty()) {
-                throw new UserLoggedOutException();
+            SessionToken sessionToken = userDbManager.findById(Long.parseLong(sessionTokenId)).orElseThrow(UserLoggedOutException::new);
+
+            String uuid = (String) ((Map) parsedToken.getBody().get("user")).get("uuid");
+            if (!sessionToken.getUser().getUuid().equals(uuid)) {
+                throw new JwtAuthenticationException(String.format("User uuid does not match the session token user uuid, token: {}", token));
             }
 
-            User user = sessionToken.get().getUser();
             int counter =  (int) parsedToken.getBody().get("count");
 
-            if(user == null || user.getCounter() != counter){
-                throw new UserLoggedOutException();
+            if(sessionToken.getCounter() != counter){
+                throw new JwtAuthenticationException(String.format("Request to parse replaced JWT: %s", token));
             }
 
             List<SimpleGrantedAuthority> authorities = ((List<String>) parsedToken.getBody().get("rol"))
@@ -74,6 +76,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             throw new JwtAuthenticationException(String.format("Request to parse JWT with invalid signature : %s", token));
         } catch (IllegalArgumentException ex) {
             throw new JwtAuthenticationException(String.format("Request to parse empty or null JWT : %s", token));
+        } catch (JwtAuthenticationException ex) {
+            throw ex;
         }
         return null;
     }
