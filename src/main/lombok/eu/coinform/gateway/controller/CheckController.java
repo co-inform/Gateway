@@ -210,6 +210,7 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.POST)
     public ResponseEntity<?> evaluateLabel(@Valid @RequestBody TweetLabelEvaluationForm tweetLabelEvaluationForm) {
         SecurityContext context = SecurityContextHolder.getContext();
@@ -223,6 +224,14 @@ public class CheckController {
         }
         eventPublisher.publishEvent(new UserLabelReviewEvent(new LabelEvaluationImplementation(tweetLabelEvaluationForm, user.get().getUuid())));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATELABEL);
+    }
+
+    @RequestMapping(value = "/twitter/evaluate/label", method = RequestMethod.OPTIONS)
+    public void corsHeadersEvaluateLabel(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
     }
 
 
