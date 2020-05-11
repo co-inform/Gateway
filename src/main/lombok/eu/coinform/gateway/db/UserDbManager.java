@@ -74,19 +74,31 @@ public class UserDbManager {
     }
 
     /**
-     * Change password for the user belonging to the passed userid.
-     * @param userid Long holding the userid
+     * Change password for the user belonging to the passed sessionTokenId.
+     * @param sessionTokenId Long holding the sessionTokenId
      * @param newPassword the new password for the user
      * @param oldPassword the old password that is stored in the database
      * @return true if password successfully changed, otherwise false
      */
 
-    public boolean passwordChange(Long userid, String newPassword, String oldPassword){
-        User user = userRepository.findById(userid).get();
+    public boolean passwordChange(Long sessionTokenId, String newPassword, String oldPassword){
+        User user = sessionTokenRepository.findById(sessionTokenId).get().getUser();
         if(!passwordEncoder.matches(oldPassword, user.getPasswordAuth().getPassword())){
             return false;
         }
         user.getPasswordAuth().setPassword(passwordEncoder.encode(newPassword));
+        List<SessionToken> list = user.getSessionTokenList();
+        for(Iterator<SessionToken> iterator = list.iterator(); iterator.hasNext(); ) {
+            SessionToken st = iterator.next();
+            if(!st.getId().equals(sessionTokenId)) {
+                iterator.remove();
+                sessionTokenRepository.delete(st);
+            } else {
+                st.setCounter(st.getCounter()+1);
+                sessionTokenRepository.save(st);
+            }
+        }
+        user.setSessionTokenList(list);
         userRepository.save(user);
         return true;
     }
@@ -250,7 +262,7 @@ public class UserDbManager {
      * @param user the User for whom to find a SessionToken
      * @return A SessionToken object that corresponds to the User
      */
-    public SessionToken getSessionTokenByUser(User user) {
+    public List<SessionToken> getSessionTokenByUser(User user) {
         return sessionTokenRepository.findByUser(user).get();
     }
 

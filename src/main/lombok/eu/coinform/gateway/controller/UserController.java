@@ -110,9 +110,7 @@ public class UserController {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
         cookie.setPath("/renew-token");
-        if (secureCookie) {
-            cookie.setSecure(true);
-        }
+        cookie.setSecure(secureCookie);
         response.addCookie(cookie);
         return new LoginResponse(token);
     }
@@ -180,20 +178,23 @@ public class UserController {
         SecurityContext ctx = SecurityContextHolder.getContext();
         Authentication authentication = ctx.getAuthentication();
 
-        Long userid = (Long) authentication.getPrincipal();
+        Long sessionTokenId = (Long) authentication.getPrincipal();
 
-        if(!userDbManager.passwordChange(userid, form.getNewPassword(), form.getOldPassword())){
+        if(!userDbManager.passwordChange(sessionTokenId, form.getNewPassword(), form.getOldPassword())){
             throw new UserDbAuthenticationException("User has given a mismatching password");
         }
 
+        User user = userDbManager.getBySessionTokenId(sessionTokenId).get();
+        SessionToken st = user.getSessionTokenList().get(0);
+        String jwtToken = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
+
         try {
-            User user = userDbManager.getUserById(userid).get();
             eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
         } catch (Exception e) {
             log.debug(e.getMessage());
         }
 
-        return ResponseEntity.ok(SuccesfullResponse.PASSWORDCHANGE);
+        return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
 
     @RequestMapping(value = "/exit", method = RequestMethod.GET)
