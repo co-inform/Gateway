@@ -88,7 +88,6 @@ public class UserDbManager {
         }
         user.getPasswordAuth().setPassword(passwordEncoder.encode(newPassword));
         List<SessionToken> list = user.getSessionTokenList();
-        log.debug("ST List size before: {}", list.size());
         for(Iterator<SessionToken> iterator = list.iterator(); iterator.hasNext(); ) {
             SessionToken st = iterator.next();
             if(!st.getId().equals(sessionTokenId)) {
