@@ -110,9 +110,7 @@ public class UserController {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
         cookie.setPath("/renew-token");
-        if (secureCookie) {
-            cookie.setSecure(true);
-        }
+        cookie.setSecure(secureCookie);
         response.addCookie(cookie);
         return new LoginResponse(token);
     }
