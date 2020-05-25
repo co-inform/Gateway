@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.module.iface.SomaEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.events.SendToSomaEvent;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
 import eu.coinform.gateway.events.UserTweetEvaluationEvent;
 import eu.coinform.gateway.model.*;
@@ -199,6 +201,7 @@ public class CheckController {
         }
 
         eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid())));
+        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm()));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 

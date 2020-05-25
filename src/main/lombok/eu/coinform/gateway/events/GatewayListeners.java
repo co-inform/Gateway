@@ -35,6 +35,12 @@ public class GatewayListeners {
     @Value("${gateway.scheme}://${gateway.url}")
     protected String gatewayUrl;
 
+    @Value("${soma.url")
+    protected String somaUrl;
+
+    @Value("${soma.jwt")
+    protected String somaJWT;
+
     protected ObjectMapper mapper = new ObjectMapper();
 
     GatewayListeners(EmailService emailService, UserDbManager userDbManager){
@@ -121,6 +127,28 @@ public class GatewayListeners {
         } catch (InterruptedException | IOException e) {
             log.debug("HTTP error: {}", e.getMessage());
         }
+    }
+
+    @Async
+    @EventListener
+    public void userTweetEvaluationListener(SendToSomaEvent event){
+        HttpResponse<String> status;
+
+        try {
+            RestClient client = new RestClient(HttpMethod.POST,
+                    URI.create(somaUrl),
+                    mapper.writeValueAsString(event.getSource().getValue()),
+                    "Authorization", somaJWT);
+            status = client.sendRequest().join();
+            if(status.statusCode() < 200 || status.statusCode() > 299){
+                log.debug("RestClient status: {}", status);
+            }
+        } catch (JsonProcessingException e) {
+            log.debug("JSON error: {}", e.getMessage());
+        } catch (InterruptedException | IOException e) {
+            log.debug("HTTP error: {}", e.getMessage());
+        }
+
     }
 
 
