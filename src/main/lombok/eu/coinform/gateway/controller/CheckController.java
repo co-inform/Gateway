@@ -201,7 +201,7 @@ public class CheckController {
         }
 
         eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid())));
-        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm()));
+        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm(tweetEvaluationForm)));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 

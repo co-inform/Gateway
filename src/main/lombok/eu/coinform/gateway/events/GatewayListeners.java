@@ -96,7 +96,7 @@ public class GatewayListeners {
     @EventListener
     public void userLabelReviewListener(UserLabelReviewEvent event){
         try {
-            sendToClaimCred(mapper.writeValueAsString(event.getSource()));
+            sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost, userInfo);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
@@ -106,50 +106,44 @@ public class GatewayListeners {
     @EventListener
     public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
-            sendToClaimCred(mapper.writeValueAsString(event.getSource()));
+            sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost, userInfo);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
     }
 
-    private void sendToClaimCred(String body){
-        HttpResponse<String> status;
 
-        try {
-            RestClient client = new RestClient(HttpMethod.POST,
-                    URI.create(claimCredHost),
-                            body,
-                            "Authorization", userInfo);
-            status = client.sendRequest().join();
-            if(status.statusCode() < 200 || status.statusCode() > 299){
-                log.debug("RestClient status: {}", status);
-            }
-        } catch (InterruptedException | IOException e) {
-            log.debug("HTTP error: {}", e.getMessage());
-        }
-    }
+    // Methods below are evaluations sent to external partners
 
     @Async
     @EventListener
     public void userTweetEvaluationListener(SendToSomaEvent event){
-        HttpResponse<String> status;
 
         try {
-            RestClient client = new RestClient(HttpMethod.POST,
-                    URI.create(somaUrl),
-                    mapper.writeValueAsString(event.getSource().getValue()),
-                    "Authorization", somaJWT);
-            status = client.sendRequest().join();
-            if(status.statusCode() < 200 || status.statusCode() > 299){
-                log.debug("RestClient status: {}", status);
-            }
+            sendToModule(mapper.writeValueAsString(event.getSource()), somaUrl, somaJWT);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
-        } catch (InterruptedException | IOException e) {
-            log.debug("HTTP error: {}", e.getMessage());
         }
 
     }
 
+    // Method below is the generic method to send evaluations to modules/partners
+
+    private void sendToModule(String body, String url, String auth){
+        HttpResponse<String> status;
+
+        try {
+            RestClient client = new RestClient(HttpMethod.POST,
+                    URI.create(url),
+                    body,
+                    "Authorization", auth);
+            status = client.sendRequest().join();
+            if(status.statusCode() < 200 || status.statusCode() > 299){
+                log.debug("RestClient status: {}", status);
+            }
+        } catch (InterruptedException | IOException e) {
+            log.debug("HTTP error: {}", e.getMessage());
+        }
+    }
 
 }

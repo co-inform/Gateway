@@ -16,7 +16,7 @@ public class SomaEvaluationForm implements Serializable {
     @Getter
     private String value;
 
-    SomaEvaluationForm(TweetEvaluationForm form){
+    public SomaEvaluationForm(TweetEvaluationForm form){
         this.inputType = "url";
         this.collectionId = "coinform"; //todo: this needs to be changed to actual collection id given from SOMA
         this.value = form.getUrl();
