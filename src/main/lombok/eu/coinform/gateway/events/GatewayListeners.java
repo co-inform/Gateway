@@ -36,7 +36,6 @@ public class GatewayListeners {
     protected String gatewayUrl;
 
     protected ObjectMapper mapper = new ObjectMapper();
-    protected RestClient client;
 
     GatewayListeners(EmailService emailService, UserDbManager userDbManager){
         this.emailService = emailService;
@@ -84,6 +83,9 @@ public class GatewayListeners {
         emailService.sendSuccessMessage(user.getPasswordAuth().getEmail());
     }
 
+
+    // Methods below are evaluations sent of to ClaimCred module
+
     @Async
     @EventListener
     public void userLabelReviewListener(UserLabelReviewEvent event){
@@ -92,7 +94,6 @@ public class GatewayListeners {
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
-
     }
 
     @Async
