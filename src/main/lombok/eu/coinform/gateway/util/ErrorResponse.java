@@ -13,7 +13,6 @@ public enum ErrorResponse {
     GENERIC("Something went wrong"),
     FORMATTED("{\"error\": \"%s\"}"),
     NOSUCHTRANSACTIONID("No such transaction_id"),
-    GENEREIC("Something went wrong"),
     USERLOGGEDOUT("User is logged out"),
     JWTEXCEPTION("A JWT token exception"),
     MISSINGRENEWTOKEN("No renew-token cookie supplied"),
