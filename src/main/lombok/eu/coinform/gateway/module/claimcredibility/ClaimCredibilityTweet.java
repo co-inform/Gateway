@@ -11,4 +11,5 @@ public class ClaimCredibilityTweet {
     @JsonProperty("tweet_id")
     private long tweetId;
     private String content;
+    private String url;
 }

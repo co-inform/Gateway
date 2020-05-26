@@ -21,6 +21,7 @@ import java.util.function.Function;
 public class ClaimCredibility extends Module implements TwitterTweetRequestInterface { //}, TweetLabelEvaluationInterface {
 
     private List<Function<Tweet, ModuleRequest>> tweetFuncList;
+    private String tweetUrl = "https://twitter.com/%s/status/%s";
 
     /**
      * The constructor of the ClaimCredibility class. Sets up the module and also needs to implement the Functional
@@ -42,7 +43,8 @@ public class ClaimCredibility extends Module implements TwitterTweetRequestInter
         tweetFuncList.add((tweet) -> {
             ModuleRequest request = null;
             ArrayList<ClaimCredibilityTweet> tweets = new ArrayList<>();
-            tweets.add(new ClaimCredibilityTweet(tweet.getTweetId(), tweet.getTweetText()));
+            String author = tweet.getTweetAuthor().startsWith("@") ? tweet.getTweetAuthor().substring(1) : tweet.getTweetAuthor();
+            tweets.add(new ClaimCredibilityTweet(tweet.getTweetId(), tweet.getTweetText(), String.format(tweetUrl,author,tweet.getTweetId())));
             ClaimCredibilityContent content = new ClaimCredibilityContent(callbackBaseUrl, tweets);
             log.debug("send post ClaimCredibility tweet, query_id: {}", tweet.getQueryId());
             try {
