@@ -35,11 +35,14 @@ public class GatewayListeners {
     @Value("${gateway.scheme}://${gateway.url}")
     protected String gatewayUrl;
 
-    @Value("${soma.url")
+    @Value("${soma.url}")
     protected String somaUrl;
 
-    @Value("${soma.jwt")
+    @Value("${soma.jwt}")
     protected String somaJWT;
+
+    @Value("${soma.collectionid}")
+    protected String collectionId;
 
     protected ObjectMapper mapper = new ObjectMapper();
 
@@ -118,9 +121,10 @@ public class GatewayListeners {
     @Async
     @EventListener
     public void userTweetEvaluationListener(SendToSomaEvent event){
-
+        //todo: THis could be changed to catch an event returned from one of the above method instead.
+        // Will investigate once soma integration is worked on.
         try {
-            sendToModule(mapper.writeValueAsString(event.getSource()), somaUrl, somaJWT);
+            String result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
         }
@@ -129,7 +133,7 @@ public class GatewayListeners {
 
     // Method below is the generic method to send evaluations to modules/partners
 
-    private void sendToModule(String body, String url, String auth){
+    private String sendToModule(String body, String url, String auth){
         HttpResponse<String> status;
 
         try {
@@ -140,10 +144,13 @@ public class GatewayListeners {
             status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
                 log.debug("RestClient status: {}", status);
+                return "";
             }
+            return status.body();
         } catch (InterruptedException | IOException e) {
             log.debug("HTTP error: {}", e.getMessage());
         }
+        return "";
     }
 
 }

@@ -2,6 +2,7 @@ package eu.coinform.gateway.module.iface;
 
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Serializable;
 
@@ -11,6 +12,7 @@ public class SomaEvaluationForm implements Serializable {
     private String inputType;
 
     @Getter
+    @Value("${soma.collectionid}")
     private String collectionId;
 
     @Getter
@@ -18,7 +20,6 @@ public class SomaEvaluationForm implements Serializable {
 
     public SomaEvaluationForm(TweetEvaluationForm form){
         this.inputType = "url";
-        this.collectionId = "coinform"; //todo: this needs to be changed to actual collection id given from SOMA
         this.value = form.getUrl();
     }
 
