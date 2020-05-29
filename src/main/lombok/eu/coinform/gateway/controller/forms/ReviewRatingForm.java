@@ -3,10 +3,11 @@ package eu.coinform.gateway.controller.forms;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class ReviewRatingForm {
+public class ReviewRatingForm implements Serializable {
 
     @NotEmpty
     String context;
