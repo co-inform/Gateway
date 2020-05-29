@@ -9,6 +9,7 @@ import eu.coinform.gateway.jwt.JwtAuthenticationFilter;
 import eu.coinform.gateway.jwt.JwtAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,7 +46,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(userDbAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                    .antMatchers("/login", "/exit","/twitter/evaluate", "/twitter/evaluate/*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
+                    .antMatchers(HttpMethod.POST, "/login", "/exit","/twitter/evaluate", "/twitter/evaluate/*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
+                    .antMatchers(HttpMethod.GET, "/login", "/exit","/twitter/evaluate", "/twitter/evaluate/*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
                     .anyRequest().permitAll();
     }
 
