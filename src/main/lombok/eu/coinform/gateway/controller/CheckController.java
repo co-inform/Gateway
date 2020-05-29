@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
 import eu.coinform.gateway.module.iface.SomaEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
@@ -235,6 +236,12 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
+    public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
+
+        return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
     }
 
 
