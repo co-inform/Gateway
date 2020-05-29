@@ -241,6 +241,7 @@ public class CheckController {
     @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
     public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
 
+        log.debug("Form: {}", externalEvaluationForm);
         return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
     }
 

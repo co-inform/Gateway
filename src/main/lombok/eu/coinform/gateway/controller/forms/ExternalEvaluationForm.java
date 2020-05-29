@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -19,7 +20,7 @@ public class ExternalEvaluationForm implements Serializable {
     @NotEmpty
     String url;
 
-    @NotEmpty
+    @NotNull
     AuthorForm author;
 
     @NotEmpty
@@ -28,13 +29,13 @@ public class ExternalEvaluationForm implements Serializable {
     @NotEmpty
     String name;
 
-    @NotEmpty
+    @NotNull
     ReviewRatingForm reviewRating;
 
-    @NotEmpty
+    @NotNull
     ItemReviewedForm itemReviewed;
 
-    @NotEmpty
+    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     Date dateCreated;
 }
