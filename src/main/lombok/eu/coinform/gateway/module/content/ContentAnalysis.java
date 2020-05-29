@@ -37,30 +37,8 @@ public class ContentAnalysis extends Module implements TwitterTweetRequestInterf
     public ContentAnalysis(String name, String scheme, String url, String baseEndpoint, int port, BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
         super(name, scheme, url, baseEndpoint, port, standardResponseHandler);
 
-        // tweetFuncList is defined in the Module class
         tweetFuncList = new ArrayList<>();
 
-        // adding a Functional object to the list
-        /*
-        tweetFuncList.add((tweet) -> {
-            ModuleRequest request = null;
-            ContentAnalysisContent content = new ContentAnalysisContent(callbackBaseUrl);
-
-            log.debug("send post with content: {}", content.toString());
-
-            try {
-                request = getModuleRequestFactory().getRequestBuilder(tweet.getQueryId())
-                        .setPath("/post/veracity/"+tweet.getTweetId().toString())
-                        .setContent(content)
-                        .setHeader("accept", "application/json")
-                        .build();
-            } catch (ModuleRequestBuilderException | JsonProcessingException e) {
-                log.error("{} threw {}", methodName.apply(StackWalker.getInstance()), e.getMessage());
-            }
-
-            return request;
-        });
-        */
         // adding a Functional object to the list
         tweetFuncList.add((tweet) -> {
 
