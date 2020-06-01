@@ -125,6 +125,7 @@ public class GatewayListeners {
         // Will investigate once soma integration is worked on.
         try {
             String result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
+            log.info("SOMA: {}", result);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
         }
@@ -143,8 +144,7 @@ public class GatewayListeners {
                     "Authorization", auth);
             status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
-                log.debug("RestClient status: {}", status);
-                return "";
+                log.info("RestClient status: {}", status);
             }
             return status.body();
         } catch (InterruptedException | IOException e) {
