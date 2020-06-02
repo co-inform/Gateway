@@ -1,5 +1,6 @@
 package eu.coinform.gateway.controller;
 
+import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
 import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
 import eu.coinform.gateway.controller.forms.PasswordChangeForm;
@@ -14,6 +15,7 @@ import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
 import eu.coinform.gateway.jwt.JwtToken;
+import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -57,6 +59,7 @@ public class UserController {
         this.signatureKey = signatureKey;
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/renew-token", method = RequestMethod.GET)
     public ResponseEntity<?> renewToken(HttpServletRequest request) {
         Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
@@ -85,7 +88,16 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
 
+    @RequestMapping(value = "/renew-token", method = RequestMethod.OPTIONS)
+    public void corsHeadersRenew(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
 
+
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public LoginResponse login(HttpServletResponse response) {
         SecurityContext context = SecurityContextHolder.getContext();
@@ -115,6 +127,14 @@ public class UserController {
         return new LoginResponse(token);
     }
 
+    @RequestMapping(value = "/login", method = RequestMethod.OPTIONS)
+    public void corsHeadersLogin(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
     private Optional<Cookie> findCookie(String key, HttpServletRequest request){
         if(request.getCookies() == null){
             return Optional.empty();
@@ -135,6 +155,7 @@ public class UserController {
                 .build().getToken();
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity<?> register(@RequestBody @Valid RegisterForm registerForm) throws UsernameAlreadyExistException {
 
@@ -152,8 +173,16 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
 
+    @RequestMapping(value = "/register", method = RequestMethod.OPTIONS)
+    public void corsHeadersRegister(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
 
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/reset-password", method = RequestMethod.POST)
     public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetForm form) {
         User user = userDbManager.getByEmail(form.getEmail());
@@ -172,6 +201,15 @@ public class UserController {
         return ResponseEntity.ok(SuccesfullResponse.PASSWORDRESET);
     }
 
+    @RequestMapping(value = "/reset-password", method = RequestMethod.OPTIONS)
+    public void corsHeadersResetPassword(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/change-password", method = RequestMethod.POST)
     public ResponseEntity<?> passwordChange(@RequestBody @Valid PasswordChangeForm form){
 
@@ -197,6 +235,15 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
 
+    @RequestMapping(value = "/change-password", method = RequestMethod.OPTIONS)
+    public void corsHeadersChangePassword(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/exit", method = RequestMethod.GET)
     public ResponseEntity<?> logout(HttpServletResponse response){
         SecurityContext context = SecurityContextHolder.getContext();
@@ -215,5 +262,12 @@ public class UserController {
         return ResponseEntity.ok(SuccesfullResponse.USERLOGGEDOUT);
     }
 
+    @RequestMapping(value = "/exit", method = RequestMethod.OPTIONS)
+    public void corsHeadersExit(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
 
 }

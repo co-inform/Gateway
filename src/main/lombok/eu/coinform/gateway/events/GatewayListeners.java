@@ -35,6 +35,15 @@ public class GatewayListeners {
     @Value("${gateway.scheme}://${gateway.url}")
     protected String gatewayUrl;
 
+    @Value("${soma.url}")
+    protected String somaUrl;
+
+    @Value("${soma.jwt}")
+    protected String somaJWT;
+
+    @Value("${soma.collectionid}")
+    protected String collectionId;
+
     protected ObjectMapper mapper = new ObjectMapper();
 
     GatewayListeners(EmailService emailService, UserDbManager userDbManager){
@@ -42,7 +51,7 @@ public class GatewayListeners {
         this.userDbManager = userDbManager;
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void passwordResetListener(OnPasswordResetEvent event){
         User user = event.getUser();
@@ -55,14 +64,14 @@ public class GatewayListeners {
         emailService.sendPasswordResetMessage(user.getPasswordAuth().getEmail(), verifyUrl);
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void passwordChangeListener(PasswordChangeEvent event) {
         User user = event.getUser();
         emailService.sendSuccessMessage(user.getPasswordAuth().getEmail());
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void registrationCompleteListener(OnRegistrationCompleteEvent event){
         User user = event.getUser();
@@ -76,7 +85,7 @@ public class GatewayListeners {
         emailService.sendVerifyEmailMessage(toAddress,verifyUrl);
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void successfulPasswordResetListener(SuccessfulPasswordResetEvent event){
         User user = event.getUser();
@@ -86,42 +95,62 @@ public class GatewayListeners {
 
     // Methods below are evaluations sent of to ClaimCred module
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void userLabelReviewListener(UserLabelReviewEvent event){
         try {
-            sendToClaimCred(mapper.writeValueAsString(event.getSource()));
+            sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost, userInfo);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
-            sendToClaimCred(mapper.writeValueAsString(event.getSource()));
+            sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost, userInfo);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
     }
 
-    private void sendToClaimCred(String body){
+
+    // Methods below are evaluations sent to external partners
+
+    @Async("endpointExecutor")
+    @EventListener
+    public void userTweetEvaluationListener(SendToSomaEvent event){
+        //todo: THis could be changed to catch an event returned from one of the above method instead.
+        // Will investigate once soma integration is worked on.
+        try {
+            String result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
+            log.info("SOMA: {}", result);
+        } catch (JsonProcessingException e) {
+            log.debug("JSON error: {}", e.getMessage());
+        }
+
+    }
+
+    // Method below is the generic method to send evaluations to modules/partners
+
+    private String sendToModule(String body, String url, String auth){
         HttpResponse<String> status;
 
         try {
             RestClient client = new RestClient(HttpMethod.POST,
-                    URI.create(claimCredHost),
-                            body,
-                            "Authorization", userInfo);
+                    URI.create(url),
+                    body,
+                    "Authorization", auth);
             status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
-                log.debug("RestClient status: {}", status);
+                log.info("RestClient status: {}", status);
             }
+            return status.body();
         } catch (InterruptedException | IOException e) {
             log.debug("HTTP error: {}", e.getMessage());
         }
+        return "";
     }
-
 
 }

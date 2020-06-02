@@ -12,6 +12,7 @@ public enum SuccesfullResponse {
     EVALUATETWEET("Tweet sent of for evaluation"),
     EVALUATELABEL("User label evaluation received"),
     TOKENRENEWED("Token renewed"),
+    EXTERNAL("External review received"),
     USERVERIFIED("User successfully verified");
 
     @Getter
