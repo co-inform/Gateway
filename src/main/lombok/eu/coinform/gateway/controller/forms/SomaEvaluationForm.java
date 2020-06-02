@@ -1,6 +1,5 @@
-package eu.coinform.gateway.module.iface;
+package eu.coinform.gateway.controller.forms;
 
-import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 

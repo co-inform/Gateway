@@ -51,7 +51,7 @@ public class GatewayListeners {
         this.userDbManager = userDbManager;
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void passwordResetListener(OnPasswordResetEvent event){
         User user = event.getUser();
@@ -64,14 +64,14 @@ public class GatewayListeners {
         emailService.sendPasswordResetMessage(user.getPasswordAuth().getEmail(), verifyUrl);
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void passwordChangeListener(PasswordChangeEvent event) {
         User user = event.getUser();
         emailService.sendSuccessMessage(user.getPasswordAuth().getEmail());
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void registrationCompleteListener(OnRegistrationCompleteEvent event){
         User user = event.getUser();
@@ -85,7 +85,7 @@ public class GatewayListeners {
         emailService.sendVerifyEmailMessage(toAddress,verifyUrl);
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void successfulPasswordResetListener(SuccessfulPasswordResetEvent event){
         User user = event.getUser();
@@ -95,7 +95,7 @@ public class GatewayListeners {
 
     // Methods below are evaluations sent of to ClaimCred module
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void userLabelReviewListener(UserLabelReviewEvent event){
         try {
@@ -105,7 +105,7 @@ public class GatewayListeners {
         }
     }
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
@@ -118,7 +118,7 @@ public class GatewayListeners {
 
     // Methods below are evaluations sent to external partners
 
-    @Async
+    @Async("endpointExecutor")
     @EventListener
     public void userTweetEvaluationListener(SendToSomaEvent event){
         //todo: THis could be changed to catch an event returned from one of the above method instead.

@@ -36,7 +36,7 @@ public class ModuleConfig {
 
         return new MisInfoMe(name, scheme, url, baseEndpoint, port, standardResponseHandler);
     }
-/*
+
     @Bean
     @Qualifier("contentanalysis")
     public Module contentanalysisModule(@Value("${contentanalysis.name}") String name,
@@ -47,7 +47,7 @@ public class ModuleConfig {
                                   BiFunction<ModuleRequest, HttpResponse, HttpResponse> standardResponseHandler) {
         return new ContentAnalysis(name, scheme, url, baseEndpoint, port, standardResponseHandler);
     }
-*/
+
     @Bean
     @Qualifier("claimcredibility")
     public Module claimCredibilityModule(@Value("${claimcredibility.name}") String name,

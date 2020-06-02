@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
 import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
-import eu.coinform.gateway.module.iface.SomaEvaluationForm;
+import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.db.entity.User;
