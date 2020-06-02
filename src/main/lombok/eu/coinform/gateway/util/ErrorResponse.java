@@ -16,6 +16,7 @@ public enum ErrorResponse {
     USERLOGGEDOUT("User is logged out"),
     JWTEXCEPTION("A JWT token exception"),
     MISSINGRENEWTOKEN("No renew-token cookie supplied"),
+    MISSINGARGUMENT("Request body missing mandatory field/parameter"),
     NOSUCHRENEWTOKEN("No such renew-token");
 
     @Getter

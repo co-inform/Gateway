@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
+import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.events.SendToSomaEvent;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
 import eu.coinform.gateway.events.UserTweetEvaluationEvent;
 import eu.coinform.gateway.model.*;
@@ -199,6 +202,7 @@ public class CheckController {
         }
 
         eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid())));
+        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm(tweetEvaluationForm)));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
@@ -232,6 +236,13 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
+    public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
+
+        log.debug("Form: {}", externalEvaluationForm);
+        return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
     }
 
 
