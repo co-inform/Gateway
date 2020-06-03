@@ -1,0 +1,1 @@
+ALTER TABLE gateway_db.role CHANGE role role ENUM('ADMIN', 'USER', 'MODULE');

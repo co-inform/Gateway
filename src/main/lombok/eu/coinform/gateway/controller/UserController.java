@@ -42,6 +42,7 @@ public class UserController {
 
     private final String RENEWAL_TOKEN_NAME = "renew-token";
     private final int RENEWAL_TOKEN_MAXAGE = 60*60*24*90;
+    private final int RENEWAL_TOKEN_MAXAGE_MODULE = 60*60*24*365*50;
     @Value("${gateway.renewaltoken.domain}")
     private String RENEWAL_TOKEN_DOMAIN;
     @Value("${gateway.renewaltoken.secure:true}")
@@ -120,7 +121,14 @@ public class UserController {
         final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
+        if (authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(RoleEnum.MODULE.name()::equals)) {
+            cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE_MODULE);
+        } else {
+            cookie.setMaxAge(RENEWAL_TOKEN_MAXAGE);
+        }
         cookie.setPath("/renew-token");
         cookie.setSecure(secureCookie);
         response.addCookie(cookie);
@@ -145,10 +153,18 @@ public class UserController {
     }
 
     private String jwtTokenCreator(User user, SessionToken st, Collection<GrantedAuthority> authorities){
+        long expirationTime;
+        if (authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(RoleEnum.MODULE.name()::equals)) {
+            expirationTime = RENEWAL_TOKEN_MAXAGE_MODULE;
+        } else {
+            expirationTime = 2*60*60L;
+        }
         return (new JwtToken.Builder())
                 .setSignatureAlgorithm(SignatureAlgorithm.HS512)
                 .setKey(signatureKey)
-                .setExpirationTime(2*60*60*1000L)
+                .setExpirationTime(expirationTime)
                 .setSessionToken(st)
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .setUser(user)
