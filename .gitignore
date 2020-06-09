@@ -32,3 +32,4 @@ build/
 .mvn/
 
 docs/
+/docker-compose.yml
