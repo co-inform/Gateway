@@ -240,9 +240,16 @@ public class CheckController {
 
     @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
     public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
-
-        log.info("Form: {}", externalEvaluationForm);
+        log.debug("Form: {}", externalEvaluationForm);
         return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
+    }
+
+    @RequestMapping(value = "/external/evaluation", method = RequestMethod.OPTIONS)
+    public void corsHeadersExternalEvaluation(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
     }
 
 
