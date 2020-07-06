@@ -125,6 +125,7 @@ public class GatewayListeners {
         //todo: THis could be changed to catch an event returned from one of the above method instead.
         // Will investigate once soma integration is worked on.
         try {
+            event.getSource().setCollectionId(collectionId);
             String result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
             log.info("SOMA: {}", result);
         } catch (JsonProcessingException e) {
