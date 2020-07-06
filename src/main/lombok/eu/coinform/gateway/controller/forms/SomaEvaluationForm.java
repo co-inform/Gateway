@@ -1,7 +1,7 @@
 package eu.coinform.gateway.controller.forms;
 
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ public class SomaEvaluationForm implements Serializable {
     private String inputType;
 
     @Getter
-    @Value("${soma.collectionid}")
+    @Setter
     private String collectionId;
 
     @Getter

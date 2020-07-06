@@ -109,7 +109,8 @@ public class GatewayListeners {
     @EventListener
     public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
-            sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost, userInfo);
+            String result = sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost, userInfo);
+            log.info("CLAIM REVIEW: {}", result);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
@@ -124,6 +125,7 @@ public class GatewayListeners {
         //todo: THis could be changed to catch an event returned from one of the above method instead.
         // Will investigate once soma integration is worked on.
         try {
+            event.getSource().setCollectionId(collectionId);
             String result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
             log.info("SOMA: {}", result);
         } catch (JsonProcessingException e) {
@@ -145,6 +147,9 @@ public class GatewayListeners {
             status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
                 log.info("RestClient status: {}", status);
+                log.info("Body: {}", body);
+                log.info("Url: {}", url);
+                log.info("Auth: {}", auth);
             }
             return status.body();
         } catch (InterruptedException | IOException e) {
