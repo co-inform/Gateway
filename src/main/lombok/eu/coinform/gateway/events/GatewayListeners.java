@@ -144,7 +144,7 @@ public class GatewayListeners {
             event.getSource().setCollectionId(collectionId);
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
             log.info("SOMA: {}", result);
-            if(result != null && (result.statusCode() >= 200 || result.statusCode() <= 299)){
+            if(result != null && (result.statusCode() >= 200 && result.statusCode() <= 299)){
                 List<FactChecker> fcList = List.of(new FactChecker("Organization","Truly-Media","http://truly.media"));
                 ItemToReview itReview = new ItemToReview("SocialMediaPost", event.getSource().getValue());
                 RecordRequestForm rrform = new RecordRequestForm(fcList, itReview);

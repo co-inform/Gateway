@@ -1,7 +1,12 @@
 package eu.coinform.gateway.module.iface;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
+@Getter
+@Setter
 public abstract class TypeBase implements Serializable {
 
     private final String type;
@@ -16,6 +21,4 @@ public abstract class TypeBase implements Serializable {
         this.type = type;
         this.url = url;
     }
-
-
 }
