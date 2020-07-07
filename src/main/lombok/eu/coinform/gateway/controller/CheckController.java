@@ -11,6 +11,7 @@ import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.events.ExternalReviewReceivedEvent;
 import eu.coinform.gateway.events.SendToSomaEvent;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
 import eu.coinform.gateway.events.UserTweetEvaluationEvent;
@@ -241,6 +242,7 @@ public class CheckController {
     @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
     public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
         log.debug("Form: {}", externalEvaluationForm);
+        eventPublisher.publishEvent(new ExternalReviewReceivedEvent(externalEvaluationForm));
         return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
     }
 
