@@ -144,10 +144,11 @@ public class GatewayListeners {
             event.getSource().setCollectionId(collectionId);
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
             log.info("SOMA: {}", result);
-            if(result != null && (result.statusCode() >= 200 && result.statusCode() <= 299)){
+            if(result != null){
                 List<FactChecker> fcList = List.of(new FactChecker("Organization","Truly-Media","http://truly.media"));
                 ItemToReview itReview = new ItemToReview("SocialMediaPost", event.getSource().getValue());
                 RecordRequestForm rrform = new RecordRequestForm(fcList, itReview);
+                log.debug("RRFORM: {}", rrform);
                 HttpResponse<String> ccresult = sendToModule(mapper.writeValueAsString(rrform), claimCredHost+"/factchecker/recordRequest", userInfo);
                 log.info("CC RESULT: {}", ccresult);
             }
@@ -161,7 +162,6 @@ public class GatewayListeners {
 
     private HttpResponse<String> sendToModule(String body, String url, String auth){
         HttpResponse<String> status;
-
         try {
             RestClient client = new RestClient(HttpMethod.POST,
                     URI.create(url),
