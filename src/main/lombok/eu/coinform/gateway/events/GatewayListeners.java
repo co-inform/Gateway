@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.db.entity.ModuleInfo;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.entity.VerificationToken;
 import eu.coinform.gateway.service.EmailService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
+import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -113,6 +115,21 @@ public class GatewayListeners {
             log.info("CLAIM REVIEW: {}", result);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
+        }
+    }
+
+    @Async("endpointExecutor")
+    @EventListener
+    public void failedModuleRequestListener(FailedModuleRequestEvent event){
+        log.debug("Sending email to {} owner about failed request", event.getModule());
+        ModuleInfo moduleInfo = userDbManager.findByModulename(event.getModule()).get();
+        Date now = new Date();
+        long threshold = 1000*60*60*24L;
+        if(now.getTime() - moduleInfo.getFailtime().getTime() > threshold){
+            log.info("More than 24 hours since last failed request. Sending email to module owner");
+            emailService.sendFailedModuleRequestEmail(moduleInfo.getUser().getPasswordAuth().getEmail(),moduleInfo.getModulename(),event.getMessage(),now);
+            moduleInfo.setFailtime(now);
+            userDbManager.saveModuleInfo(moduleInfo);
         }
     }
 

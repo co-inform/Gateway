@@ -22,6 +22,7 @@ public class UserDbManager {
     private PasswordEncoder passwordEncoder;
     private VerificationTokenRepository verificationTokenRepository;
     private SessionTokenRepository sessionTokenRepository;
+    private ModuleInfoRepository moduleInfoRepository;
 
     public UserDbManager(
             UserRepository userRepository,
@@ -29,6 +30,7 @@ public class UserDbManager {
             RoleRepository roleRepository,
             VerificationTokenRepository verificationTokenRepository,
             SessionTokenRepository sessionTokenRepository,
+            ModuleInfoRepository moduleInfoRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordAuthRepository = passwordAuthRepository;
@@ -36,6 +38,7 @@ public class UserDbManager {
         this.verificationTokenRepository = verificationTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.sessionTokenRepository = sessionTokenRepository;
+        this.moduleInfoRepository = moduleInfoRepository;
     }
 
     /**
@@ -301,5 +304,14 @@ public class UserDbManager {
     public Optional<SessionToken> findById(Long id){
         return sessionTokenRepository.findById(id);
     }
+
+    public Optional<ModuleInfo> findByModulename(String name) {
+        return moduleInfoRepository.getByModulename(name);
+    }
+
+    public ModuleInfo saveModuleInfo(ModuleInfo module){
+        return moduleInfoRepository.save(module);
+    }
+
 
 }
