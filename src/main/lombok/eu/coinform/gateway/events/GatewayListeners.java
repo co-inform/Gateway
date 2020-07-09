@@ -121,8 +121,13 @@ public class GatewayListeners {
     @Async("endpointExecutor")
     @EventListener
     public void failedModuleRequestListener(FailedModuleRequestEvent event){
-        log.debug("Sending email to {} owner about failed request", event.getModule());
-        ModuleInfo moduleInfo = userDbManager.findByModulename(event.getModule()).get();
+        log.info("Sending email to {} owner about failed request", event.getModule());
+        Optional<ModuleInfo> oModuleInfo = userDbManager.findByModulename(event.getModule());
+        if(oModuleInfo.isEmpty()){
+            log.error("No ModuleInfo found for {}", event.getModule());
+            return;
+        }
+        ModuleInfo moduleInfo = oModuleInfo.get();
         Date now = new Date();
         long threshold = 1000*60*60*24L;
         if(now.getTime() - moduleInfo.getFailtime().getTime() > threshold){
