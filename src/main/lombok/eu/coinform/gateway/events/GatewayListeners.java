@@ -56,7 +56,6 @@ public class GatewayListeners {
         this.userDbManager = userDbManager;
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void passwordResetListener(OnPasswordResetEvent event){
         User user = event.getUser();
@@ -69,14 +68,12 @@ public class GatewayListeners {
         emailService.sendPasswordResetMessage(user.getPasswordAuth().getEmail(), verifyUrl);
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void passwordChangeListener(PasswordChangeEvent event) {
         User user = event.getUser();
         emailService.sendSuccessMessage(user.getPasswordAuth().getEmail());
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void registrationCompleteListener(OnRegistrationCompleteEvent event){
         User user = event.getUser();
@@ -90,7 +87,6 @@ public class GatewayListeners {
         emailService.sendVerifyEmailMessage(toAddress,verifyUrl);
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void successfulPasswordResetListener(SuccessfulPasswordResetEvent event){
         User user = event.getUser();
@@ -100,7 +96,6 @@ public class GatewayListeners {
 
     // Methods below are evaluations sent of to ClaimCred module
 
-    @Async("endpointExecutor")
     @EventListener
     public void userLabelReviewListener(UserLabelReviewEvent event){
         try {
@@ -111,7 +106,6 @@ public class GatewayListeners {
         }
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
@@ -124,7 +118,6 @@ public class GatewayListeners {
 //        return new SendToSomaEvent(new SomaEvaluationForm(event.getForm()), event.getForm().isRequestFactcheck());
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void externalReviewReceivedListener(ExternalReviewReceivedEvent event){
         try {
@@ -141,7 +134,6 @@ public class GatewayListeners {
 
     // Methods below are evaluations sent to external partners
 
-    @Async("endpointExecutor")
     @EventListener
     public void sendToSomaEventListener(SendToSomaEvent event){
         //todo: THis could be changed to catch an event returned from one of the above method instead.
@@ -159,7 +151,7 @@ public class GatewayListeners {
             log.info("SOMA: {}", result.body());
             if(result != null){
                 List<FactChecker> fcList = List.of(new FactChecker("Organization","Truly-Media","http://truly.media"));
-                ItemToReview itReview = new ItemToReview("SocialMediaPost", event.getSource().getValue());
+                ItemToReview itReview = new ItemToReview("SocialMediaPosting", event.getSource().getValue());
                 RecordRequestForm rrform = new RecordRequestForm(fcList, itReview);
                 log.debug("RRFORM: {}", rrform);
                 // Store the request of a review with SOMA with our backend
