@@ -128,7 +128,7 @@ public class GatewayListeners {
     @EventListener
     public void externalReviewReceivedListener(ExternalReviewReceivedEvent event){
         try {
-            // The review from SOMA has arrived, store it with our backend
+            // The review from EXTERNAL partner has arrived, store it with our backend
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost+"/factchecker/review", userInfo);
             //todo: Here we should receive a list of uuids connected to users who has requested a review for this tweet.
             // logic for emailing them a link to the review needs to be implemented.
