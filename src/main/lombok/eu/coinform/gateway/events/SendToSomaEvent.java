@@ -1,6 +1,7 @@
 package eu.coinform.gateway.events;
 
 import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
+import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEvent;
@@ -11,8 +12,12 @@ public class SendToSomaEvent extends ApplicationEvent {
     @Getter
     private SomaEvaluationForm source;
 
-    public SendToSomaEvent(SomaEvaluationForm source) {
+    @Getter
+    private boolean isRequestFactcheck;
+
+    public SendToSomaEvent(SomaEvaluationForm source, boolean isRequestFactcheck) {
         super(source);
         this.source = source;
+        this.isRequestFactcheck = isRequestFactcheck;
     }
 }

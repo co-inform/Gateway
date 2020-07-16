@@ -3,6 +3,7 @@ package eu.coinform.gateway.events;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.controller.forms.RecordRequestForm;
+import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.entity.User;
@@ -104,7 +105,7 @@ public class GatewayListeners {
     public void userLabelReviewListener(UserLabelReviewEvent event){
         try {
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost+"/user/accuracy-review", userInfo);
-            log.info("REVIEW: {}", result);
+            log.info("LABEL REVIEW: {}", result.body());
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
@@ -112,21 +113,26 @@ public class GatewayListeners {
 
     @Async("endpointExecutor")
     @EventListener
-    public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
+    public SendToSomaEvent userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
-            HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost+"/user/accuracy-review", userInfo);
-            log.info("CLAIM REVIEW: {}", result);
+            String url = claimCredHost + "/user/accuracy-review"; //?factCheckRequested=" + event.getForm().isRequestFactcheck();
+            HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), url, userInfo);
+            log.info("CLAIM REVIEW: {}", result.body());
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
+        return new SendToSomaEvent(new SomaEvaluationForm(event.getForm()), event.getForm().isRequestFactcheck());
     }
 
     @Async("endpointExecutor")
     @EventListener
     public void externalReviewReceivedListener(ExternalReviewReceivedEvent event){
         try {
+            // The review from SOMA has arrived, store it with our backend
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), claimCredHost+"/factchecker/review", userInfo);
-            log.info("EXTERNAL REVIEW: {}", result);
+            //todo: Here we should receive a list of uuids connected to users who has requested a review for this tweet.
+            // logic for emailing them a link to the review needs to be implemented.
+            log.info("EXTERNAL REVIEW: {}", result.body());
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
         }
@@ -137,20 +143,28 @@ public class GatewayListeners {
 
     @Async("endpointExecutor")
     @EventListener
-    public void userTweetEvaluationListener(SendToSomaEvent event){
+    public void sendToSomaEventListener(SendToSomaEvent event){
         //todo: THis could be changed to catch an event returned from one of the above method instead.
         // Will investigate once soma integration is worked on.
+
+        if(!event.isRequestFactcheck()){
+            log.info("No factcheck requested by user");
+            return;
+        }
+
         try {
             event.getSource().setCollectionId(collectionId);
+            // Send the tweet of the SOMA for external review
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
-            log.info("SOMA: {}", result);
+            log.info("SOMA: {}", result.body());
             if(result != null){
                 List<FactChecker> fcList = List.of(new FactChecker("Organization","Truly-Media","http://truly.media"));
                 ItemToReview itReview = new ItemToReview("SocialMediaPost", event.getSource().getValue());
                 RecordRequestForm rrform = new RecordRequestForm(fcList, itReview);
                 log.debug("RRFORM: {}", rrform);
+                // Store the request of a review with SOMA with our backend
                 HttpResponse<String> ccresult = sendToModule(mapper.writeValueAsString(rrform), claimCredHost+"/factchecker/recordRequest", userInfo);
-                log.info("CC RESULT: {}", ccresult);
+                log.info("CC RESULT: {}", ccresult.body());
             }
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());

@@ -201,9 +201,10 @@ public class CheckController {
             log.debug("No user with sessionId: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
+        log.debug("FORM: {}", tweetEvaluationForm);
 
-        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid())));
-        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm(tweetEvaluationForm)));
+        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid()), tweetEvaluationForm));
+//        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm(tweetEvaluationForm)));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
