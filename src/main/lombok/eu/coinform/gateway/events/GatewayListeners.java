@@ -113,7 +113,7 @@ public class GatewayListeners {
 
     @Async("endpointExecutor")
     @EventListener
-    public SendToSomaEvent userTweetEvaluationListener(UserTweetEvaluationEvent event){
+    public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
             String url = claimCredHost + "/user/accuracy-review"; //?factCheckRequested=" + event.getForm().isRequestFactcheck();
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), url, userInfo);
@@ -121,7 +121,7 @@ public class GatewayListeners {
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
-        return new SendToSomaEvent(new SomaEvaluationForm(event.getForm()), event.getForm().isRequestFactcheck());
+//        return new SendToSomaEvent(new SomaEvaluationForm(event.getForm()), event.getForm().isRequestFactcheck());
     }
 
     @Async("endpointExecutor")
@@ -154,7 +154,7 @@ public class GatewayListeners {
 
         try {
             event.getSource().setCollectionId(collectionId);
-            // Send the tweet of the SOMA for external review
+            // Send the tweet of to SOMA for external review
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
             log.info("SOMA: {}", result.body());
             if(result != null){

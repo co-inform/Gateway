@@ -17,6 +17,7 @@ public class SendToSomaEvent extends ApplicationEvent {
 
     public SendToSomaEvent(SomaEvaluationForm source, boolean isRequestFactcheck) {
         super(source);
+        log.debug("SendToSomaEvent: {}, {}", source, isRequestFactcheck);
         this.source = source;
         this.isRequestFactcheck = isRequestFactcheck;
     }
