@@ -11,6 +11,7 @@ import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.events.ExternalReviewReceivedEvent;
 import eu.coinform.gateway.events.SendToSomaEvent;
 import eu.coinform.gateway.events.UserLabelReviewEvent;
 import eu.coinform.gateway.events.UserTweetEvaluationEvent;
@@ -200,9 +201,10 @@ public class CheckController {
             log.debug("No user with sessionId: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
+        log.debug("FORM: {}", tweetEvaluationForm);
 
-        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid())));
-        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm(tweetEvaluationForm)));
+        eventPublisher.publishEvent(new UserTweetEvaluationEvent(new AccuracyEvaluationImplementation(tweetEvaluationForm, user.get().getUuid()), tweetEvaluationForm));
+        eventPublisher.publishEvent(new SendToSomaEvent(new SomaEvaluationForm(tweetEvaluationForm), tweetEvaluationForm.isRequestFactcheck()));
         return ResponseEntity.ok(SuccesfullResponse.EVALUATETWEET);
     }
 
@@ -240,9 +242,17 @@ public class CheckController {
 
     @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
     public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
-
-        log.info("Form: {}", externalEvaluationForm);
+        log.debug("Form: {}", externalEvaluationForm);
+        eventPublisher.publishEvent(new ExternalReviewReceivedEvent(externalEvaluationForm));
         return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
+    }
+
+    @RequestMapping(value = "/external/evaluation", method = RequestMethod.OPTIONS)
+    public void corsHeadersExternalEvaluation(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
     }
 
 
