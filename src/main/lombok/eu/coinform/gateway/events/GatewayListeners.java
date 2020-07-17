@@ -2,6 +2,7 @@ package eu.coinform.gateway.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
 import eu.coinform.gateway.controller.forms.RecordRequestForm;
 import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
 import eu.coinform.gateway.controller.restclient.RestClient;
