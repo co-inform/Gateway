@@ -130,7 +130,7 @@ public class GatewayListeners {
         ModuleInfo moduleInfo = oModuleInfo.get();
         Date now = new Date();
         long threshold = 1000*60*60*24L;
-        if(now.getTime() - moduleInfo.getFailtime().getTime() > threshold){
+        if(moduleInfo.getFailtime() == null || now.getTime() - moduleInfo.getFailtime().getTime() > threshold){
             log.info("More than 24 hours since last failed request. Sending email to module owner");
             emailService.sendFailedModuleRequestEmail(moduleInfo.getUser().getPasswordAuth().getEmail(),moduleInfo.getModulename(),event.getMessage(),now);
             moduleInfo.setFailtime(now);

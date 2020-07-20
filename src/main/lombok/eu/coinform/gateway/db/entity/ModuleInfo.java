@@ -12,7 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name ="module")
+@Table(name ="moduleinfo")
 @Getter
 @Setter
 public class ModuleInfo implements Serializable {
