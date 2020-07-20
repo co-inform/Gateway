@@ -1,6 +1,7 @@
 package eu.coinform.gateway.service;
 
 import eu.coinform.gateway.cache.ModuleTransaction;
+import eu.coinform.gateway.events.FailedModuleRequestEvent;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.module.Module;
@@ -10,6 +11,7 @@ import eu.coinform.gateway.module.iface.TwitterTweetRequestInterface;
 import eu.coinform.gateway.module.iface.TwitterUserRequestInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,12 @@ public class CheckHandler {
      */
     @Autowired
     RedisHandler redisHandler;
+
+    /**
+     * The Eventpublisher for publishing events on failed requests
+     */
+    @Autowired
+    ApplicationEventPublisher eventPublisher;
 
     /**
      * The method responsible for performing the requests to all the modules that needs to take a TwitterUser
@@ -81,6 +89,7 @@ public class CheckHandler {
                                 moduleRequest.makeRequest(); // make the request as specified by the function
                             } catch (ModuleRequestException ex) {
                                 log.error("failed request to {}: {}", module.getName(), ex.getMessage());
+                                eventPublisher.publishEvent(new FailedModuleRequestEvent(module.getName(), ex.getMessage()));
                                 redisHandler.getAndDeleteModuleTransaction(moduleRequest.getTransactionId());
                             }
                         });

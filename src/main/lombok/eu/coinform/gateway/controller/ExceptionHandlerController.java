@@ -2,16 +2,18 @@ package eu.coinform.gateway.controller;
 
 import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
 import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
-import eu.coinform.gateway.db.*;
+import eu.coinform.gateway.db.LinkTimedOutException;
+import eu.coinform.gateway.db.NoSuchTokenException;
+import eu.coinform.gateway.db.UserNotVerifiedException;
+import eu.coinform.gateway.db.UsernameAlreadyExistException;
 import eu.coinform.gateway.jwt.JwtAuthenticationException;
 import eu.coinform.gateway.jwt.UserLoggedOutException;
-import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
+import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import eu.coinform.gateway.util.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,7 +63,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(NoSuchTokenException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView noSuchTokenException(NoSuchTokenException ex) {
-        ModelAndView mav = new ModelAndView("notverified");
+        ModelAndView mav = new ModelAndView("alreadyverified");
         mav.addObject("token", ex.getMessage());
         return mav;
     }

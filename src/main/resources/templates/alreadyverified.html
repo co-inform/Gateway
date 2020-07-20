@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Unknow verificationtoken</title>
+</head>
+<body>
+<!--/*@thymesVar id="token" type=""*/-->
+<p th:text="'Token ' + ${token} + ' is unknown. If you clicked the link in the verification email, you should now be able to login via the plugin. If you see this message, your organizational email may have followed links in emails automatically to protect from spam/phishing.'">
+
+</body>
+</html>

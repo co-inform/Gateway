@@ -3,7 +3,6 @@ package eu.coinform.gateway.controller.restclient;
 import com.google.common.base.Charsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
-import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
 import java.net.URI;

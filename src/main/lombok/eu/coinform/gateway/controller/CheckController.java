@@ -241,7 +241,7 @@ public class CheckController {
     @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
     public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
 
-        log.debug("Form: {}", externalEvaluationForm);
+        log.info("Form: {}", externalEvaluationForm);
         return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
     }
 
@@ -263,6 +263,13 @@ public class CheckController {
                 return ResponseEntity.status(status.statusCode()).body(status.body());
             }
             LinkedHashMap<String, Object> answer = objectMapper.readValue(status.body(), LinkedHashMap.class);
+            //todo: remove workshop hack
+            log.debug("checkurl answer ${}: ${}", source, answer);
+            if (source.matches("^https?(://|%3A%2F%2F)www.breitbart.com.*")) {
+                log.debug("matches breitbart");
+                ((Map) answer.get("credibility")).put("value", Math.max((Double) ((Map) answer.get("credibility")).get("value")-1, -1));
+                log.debug("checkurl answer: ${}", answer);
+            }
             return ResponseEntity.ok(checkUrlRuleEngine(answer));
 
         } catch (InterruptedException | IOException e) {

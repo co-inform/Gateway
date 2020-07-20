@@ -6,6 +6,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 @Slf4j
 public class EmailService {
@@ -57,6 +59,15 @@ public class EmailService {
         message.setTo(to);
         message.setSubject("Password successfully changed for the CoInform system");
         message.setText(String.format(success,to));
+        emailSender.send(message);
+    }
+
+    public void sendFailedModuleRequestEmail(String to, String module, String info, Date date){
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Coinform Gateway failed a request to " + module);
+        message.setText("The Coinform API GateWay failed a request to your module at "+ date +".\n\nPlease check the availability of your service. More info about the request below: \n\n"+ info);
         emailSender.send(message);
     }
 
