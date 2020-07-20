@@ -7,6 +7,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 public class JwtToken {
@@ -29,7 +31,7 @@ public class JwtToken {
 
         private SessionToken sessionToken;
         private List<String> roles;
-        private Long expirationTime;
+        private Date expiration;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
         private Map<String, String> user;
@@ -45,7 +47,8 @@ public class JwtToken {
         }
 
         public Builder setExpirationTime(Long expirationTime) {
-            this.expirationTime = expirationTime;
+            LocalDateTime time = LocalDateTime.now().plusSeconds(expirationTime);
+            this.expiration = Date.from(time.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
             return this;
         }
 
@@ -74,7 +77,7 @@ public class JwtToken {
                     .setIssuer(TOKEN_ISSUER)
                     .setAudience(TOKEN_AUDIENCE)
                     .setSubject(sessionToken.getId().toString())
-                    .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                    .setExpiration(expiration)
                     .claim("rol", roles)
                     .claim("count", sessionToken.getCounter())
                     .claim("user", user)

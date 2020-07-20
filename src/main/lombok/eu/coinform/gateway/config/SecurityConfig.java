@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationProvider(new JwtAuthenticationProvider(userDbManager,JWT_SECRET));
     }
 
+    //todo: make the /module and /external endpoints demand the module authority
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -48,7 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                     .antMatchers(HttpMethod.POST, "/login", "/exit","/twitter/evaluate", "/twitter/evaluate/*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
                     .antMatchers(HttpMethod.GET, "/login", "/exit","/twitter/evaluate", "/twitter/evaluate/*", "/change-password").hasAnyAuthority(RoleEnum.USER.name(), RoleEnum.ADMIN.name())
-                    .anyRequest().permitAll();
+                    //.antMatchers(HttpMethod.POST, "/module/*", "/external/*").hasAnyAuthority(RoleEnum.MODULE.name())
+                .anyRequest().permitAll();
     }
 
     private UserDbAuthenticationFilter userDbAuthenticationFilter() throws Exception {

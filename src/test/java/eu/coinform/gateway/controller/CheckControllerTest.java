@@ -10,6 +10,7 @@ import eu.coinform.gateway.db.PasswordAuthRepository;
 import eu.coinform.gateway.db.RoleRepository;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.UserRepository;
+import eu.coinform.gateway.db.entity.ModuleInfo;
 import eu.coinform.gateway.model.Tweet;
 import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.util.Pair;
@@ -78,6 +79,7 @@ public class CheckControllerTest {
                     mock(RoleRepository.class),
                     mock(VerificationTokenRepository.class),
                     mock(SessionTokenRepository.class),
+                    mock(ModuleInfoRepository.class),
                     mock(PasswordEncoder.class));
         }
     }
@@ -122,9 +124,9 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(userUrl)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonTU)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .accept(MediaType.APPLICATION_JSON))
                         .andReturn().getResponse();
 
         // then
@@ -148,9 +150,9 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonTW)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .accept(MediaType.APPLICATION_JSON))
                         .andReturn().getResponse();
 
         // then
@@ -174,9 +176,9 @@ public class CheckControllerTest {
 
         // when
         mockMvc.perform(post(userUrl)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonTW)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .accept(MediaType.APPLICATION_JSON))
 
         // then
                         .andDo(print()).andExpect(status().is4xxClientError());
@@ -195,9 +197,9 @@ public class CheckControllerTest {
 
         // when
         mockMvc.perform(post(tweetUrl)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonTU)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
 
         // then
                 .andDo(print()).andExpect((status().is4xxClientError()));
@@ -217,7 +219,7 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
-                    .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .accept(MediaType.APPLICATION_JSON))
                     .andReturn().getResponse();
 
         QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
@@ -243,7 +245,7 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         // then
@@ -267,9 +269,9 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(post(tweetUrl)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonTW)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         // then
@@ -298,7 +300,7 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         QueryResponse response = mapper.readValue(httpResponse.getContentAsString(), QueryResponse.class);
@@ -331,7 +333,7 @@ public class CheckControllerTest {
 
         // when
         MockHttpServletResponse httpResponse = mockMvc.perform(get(url)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         log.debug("Response: {}", httpResponse.getContentAsString());

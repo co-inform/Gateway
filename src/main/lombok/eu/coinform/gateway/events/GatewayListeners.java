@@ -7,6 +7,7 @@ import eu.coinform.gateway.controller.forms.RecordRequestForm;
 import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
+import eu.coinform.gateway.db.entity.ModuleInfo;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.entity.VerificationToken;
 import eu.coinform.gateway.module.iface.FactChecker;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -129,6 +131,26 @@ public class GatewayListeners {
             log.info("EXTERNAL REVIEW: {}", result.body());
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
+        }
+    }
+
+    @Async("endpointExecutor")
+    @EventListener
+    public void failedModuleRequestListener(FailedModuleRequestEvent event){
+        log.info("Sending email to {} owner about failed request", event.getModule());
+        Optional<ModuleInfo> oModuleInfo = userDbManager.findByModulename(event.getModule());
+        if(oModuleInfo.isEmpty()){
+            log.error("No ModuleInfo found for {}", event.getModule());
+            return;
+        }
+        ModuleInfo moduleInfo = oModuleInfo.get();
+        Date now = new Date();
+        long threshold = 1000*60*60*24L;
+        if(moduleInfo.getFailtime() == null || now.getTime() - moduleInfo.getFailtime().getTime() > threshold){
+            log.info("More than 24 hours since last failed request. Sending email to module owner");
+            emailService.sendFailedModuleRequestEmail(moduleInfo.getUser().getPasswordAuth().getEmail(),moduleInfo.getModulename(),event.getMessage(),now);
+            moduleInfo.setFailtime(now);
+            userDbManager.saveModuleInfo(moduleInfo);
         }
     }
 
