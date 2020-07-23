@@ -34,6 +34,7 @@ public class PolicyEngineConnector implements RuleEngineConnector {
         ret.put("final_credibility", callback.getFinalCredibility());
         ret.put("module_labels", callback.getModuleCredibility());
         ret.put("module_values", callback.getValues());
+        ret.put("module_explanations", callback.getModuleExplanation());
         return ret;
     }
 }
