@@ -48,7 +48,7 @@ public class JwtToken {
 
         public Builder setExpirationTime(Long expirationTime) {
             LocalDateTime time = LocalDateTime.now().plusSeconds(expirationTime);
-            this.expiration = Date.from(time.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.expiration = Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
             return this;
         }
 
