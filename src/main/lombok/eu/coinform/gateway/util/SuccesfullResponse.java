@@ -13,7 +13,8 @@ public enum SuccesfullResponse {
     EVALUATELABEL("User label evaluation received"),
     TOKENRENEWED("Token renewed"),
     EXTERNAL("External review received"),
-    USERVERIFIED("User successfully verified");
+    USERVERIFIED("User successfully verified"),
+    EVALUATIONLOGRECIEVED("The evaluation log have been recieved");
 
     @Getter
     private final String status;

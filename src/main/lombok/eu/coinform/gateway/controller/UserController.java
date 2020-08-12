@@ -5,6 +5,7 @@ import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
 import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
 import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
+import eu.coinform.gateway.controller.forms.PluginEvaluationLog;
 import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.db.entity.Role;
@@ -104,7 +105,8 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login(HttpServletResponse response, @RequestParam(required = false, name = "plugin_version") String pluginVersion ) {
+    public LoginResponse login(HttpServletResponse response,
+                               @RequestParam(required = false, name = "plugin_version") String pluginVersion ) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
@@ -292,4 +294,25 @@ public class UserController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/user/evaluation-log", method = RequestMethod.POST)
+    public ResponseEntity<?> evaluationLog(HttpServletResponse response, @RequestBody @Valid List<PluginEvaluationLog> pluginEvaluationLogs) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+
+        SessionToken st = userDbManager.getSessionToken((Long) authentication.getPrincipal()).get();
+        log.debug("We recieved the following evaluation-logs from {} on plugin_version {}:",
+                st.getUser().getUuid(), st.getPluginVersion());
+        pluginEvaluationLogs.forEach((pel) -> log.debug("\t{}", pel));
+
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATIONLOGRECIEVED);
+    }
+
+    @RequestMapping(value = "/user/evaluation-log", method = RequestMethod.OPTIONS)
+    public void corsHeadersEvaluationLog(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
 }
