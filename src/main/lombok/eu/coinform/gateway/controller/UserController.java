@@ -62,7 +62,8 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/renew-token", method = RequestMethod.GET)
-    public ResponseEntity<?> renewToken(HttpServletRequest request) {
+    public ResponseEntity<?> renewToken(HttpServletRequest request,
+                                        @RequestParam(required = false, name = "plugin_version") String pluginVersion ) {
         Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
         if(cookie.isEmpty()){
             throw new MissingRenewToken();
@@ -76,6 +77,9 @@ public class UserController {
 
         User user = ost.get().getUser();
         ost.get().setCounter(ost.get().getCounter()+1);
+        if (pluginVersion != null) {
+            ost.get().setPluginVersion(pluginVersion);
+        }
         userDbManager.saveUser(user);
 
         Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
@@ -84,7 +88,7 @@ public class UserController {
             grantedAuthorities.add(authority);
         }
 
-        String jwtToken = jwtTokenCreator(user, ost.get(), grantedAuthorities);
+        String jwtToken = jwtTokenCreator(ost.get(), grantedAuthorities);
 
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
@@ -100,7 +104,7 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login(HttpServletResponse response) {
+    public LoginResponse login(HttpServletResponse response, @RequestParam(required = false, name = "plugin_version") String pluginVersion ) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
@@ -115,8 +119,11 @@ public class UserController {
             user.setSessionTokenList(new LinkedList<>());
         }
         st = new SessionToken(user);
+        if (pluginVersion != null) {
+            st.setPluginVersion(pluginVersion);
+        }
         userDbManager.saveSessionToken(st);
-        String token = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
+        String token = jwtTokenCreator(st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
@@ -152,7 +159,7 @@ public class UserController {
                 .findAny();
     }
 
-    private String jwtTokenCreator(User user, SessionToken st, Collection<GrantedAuthority> authorities){
+    private String jwtTokenCreator(SessionToken st, Collection<GrantedAuthority> authorities){
         long expirationTime;
         if (authorities.stream()
                 .map(GrantedAuthority::getAuthority)
@@ -167,7 +174,6 @@ public class UserController {
                 .setExpirationTime(expirationTime)
                 .setSessionToken(st)
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .setUser(user)
                 .build().getToken();
     }
 
@@ -240,7 +246,7 @@ public class UserController {
 
         User user = userDbManager.getBySessionTokenId(sessionTokenId).get();
         SessionToken st = user.getSessionTokenList().get(0);
-        String jwtToken = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
+        String jwtToken = jwtTokenCreator(st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         try {
             eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
