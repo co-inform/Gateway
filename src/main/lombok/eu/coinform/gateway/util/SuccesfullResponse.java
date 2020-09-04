@@ -13,6 +13,7 @@ public enum SuccesfullResponse {
     EVALUATELABEL("User label evaluation received"),
     TOKENRENEWED("Token renewed"),
     EXTERNAL("External review received"),
+    SETTINGSCHANGED("Settings changed"),
     USERVERIFIED("User successfully verified");
 
     @Getter

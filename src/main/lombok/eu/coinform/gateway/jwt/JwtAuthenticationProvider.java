@@ -1,7 +1,6 @@
 package eu.coinform.gateway.jwt;
 
 import eu.coinform.gateway.db.entity.SessionToken;
-import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.UserDbManager;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +18,6 @@ import org.springframework.util.StringUtils;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,7 +40,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                     .parseClaimsJws(token.replace(JwtToken.TOKEN_PREFIX, ""));
 
             String sessionTokenId = parsedToken.getBody().getSubject();
-            SessionToken sessionToken = userDbManager.findById(Long.parseLong(sessionTokenId)).orElseThrow(UserLoggedOutException::new);
+            SessionToken sessionToken = userDbManager.findBySessionTokenId(Long.parseLong(sessionTokenId)).orElseThrow(UserLoggedOutException::new);
 
             String uuid = (String) ((Map) parsedToken.getBody().get("user")).get("uuid");
             if (!sessionToken.getUser().getUuid().equals(uuid)) {

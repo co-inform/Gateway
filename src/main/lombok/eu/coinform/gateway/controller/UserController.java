@@ -1,8 +1,8 @@
 package eu.coinform.gateway.controller;
 
-import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
 import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
+import eu.coinform.gateway.controller.forms.ChangeSettings;
 import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
 import eu.coinform.gateway.controller.forms.RegisterForm;
@@ -15,7 +15,6 @@ import eu.coinform.gateway.events.OnPasswordResetEvent;
 import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
 import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
 import eu.coinform.gateway.jwt.JwtToken;
-import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -178,13 +177,13 @@ public class UserController {
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
 
-        User user = userDbManager.registerUser(registerForm.getEmail(), registerForm.getPassword(), roles);
+        User user = userDbManager.registerUser(registerForm, roles);
 
         try {
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
         } catch (Exception me){
             log.debug(me.getMessage());
-            ResponseEntity.badRequest().body(ErrorResponse.USEREXISTS);
+            return ResponseEntity.badRequest().body(ErrorResponse.USEREXISTS);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
@@ -239,7 +238,8 @@ public class UserController {
         }
 
         User user = userDbManager.getBySessionTokenId(sessionTokenId).get();
-        SessionToken st = user.getSessionTokenList().get(0);
+        SessionToken st = userDbManager.findBySessionTokenId(sessionTokenId).get(); // This should be better than the below...
+//        SessionToken st = user.getSessionTokenList().get(0);
         String jwtToken = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         try {
@@ -253,6 +253,33 @@ public class UserController {
 
     @RequestMapping(value = "/change-password", method = RequestMethod.OPTIONS)
     public void corsHeadersChangePassword(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @RequestMapping(value = "/change-settings", method = RequestMethod.POST)
+    public ResponseEntity<?> changeSettings(@RequestBody @Valid ChangeSettings form){
+
+        SecurityContext ctx = SecurityContextHolder.getContext();
+        Authentication auth = ctx.getAuthentication();
+        Long sessionTokenId = (Long) auth.getPrincipal();
+
+        Optional<User> oUser = userDbManager.getBySessionTokenId(sessionTokenId);
+        if(oUser.isPresent()) {
+            oUser.get().setAcceptCommunication(form.isCommunication());
+            oUser.get().setAcceptResearch(form.isResearch());
+            SessionToken st = userDbManager.findBySessionTokenId(sessionTokenId).get();
+            User dbUser = userDbManager.saveUser(oUser.get());
+            String jwtToken = jwtTokenCreator(dbUser, st, new ArrayList<>(auth.getAuthorities()));
+            return ResponseEntity.ok(new LoginResponse(jwtToken));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.USERLOGGEDOUT);
+    }
+
+    @RequestMapping(value = "/change-settings", method = RequestMethod.OPTIONS)
+    public void corsHeadersChangeSettings(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");

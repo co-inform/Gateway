@@ -67,6 +67,8 @@ public class User implements Serializable {
     public User(){
         this.enabled = false;
         this.uuid = UUID.randomUUID().toString();
+        this.acceptResearch = false;
+        this.acceptCommunication = false;
     }
 
 
