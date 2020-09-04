@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.GatewayApplication;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.cache.Views;
+import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.db.PasswordAuthRepository;
 import eu.coinform.gateway.db.RoleRepository;
@@ -61,6 +62,9 @@ public class CheckControllerTest {
 
     @MockBean
     private CheckController checkController;
+
+    @MockBean
+    private UserController userController;
 
     private TwitterUser twitterUser = new TwitterUser();
     private Tweet tweet = new Tweet();
@@ -343,6 +347,19 @@ public class CheckControllerTest {
         assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getModuleResponseCode().size()).isEqualTo(2);
         assertThat(response.getModuleResponseCode().get("first")).isNotNull();
+    }
+
+    @Test
+    public void jsonMapperTesting() throws Exception {
+        log.debug("In {}", methodName.apply(StackWalker.getInstance()));
+
+        String json = "{ \"email\": \"test@test.com\", \"password\": \"test\"}";
+
+        RegisterForm form = mapper.readValue(json, RegisterForm.class);
+        log.debug("Form: {}",form);
+        assertThat(form.isCommunication()).isFalse();
+        assertThat(form.isResearch()).isFalse();
+
     }
 
 }

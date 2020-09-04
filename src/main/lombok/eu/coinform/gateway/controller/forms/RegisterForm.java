@@ -1,10 +1,8 @@
 package eu.coinform.gateway.controller.forms;
 
 import lombok.Data;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 public class RegisterForm {
@@ -12,8 +10,6 @@ public class RegisterForm {
     String email;
     @NotEmpty
     String password;
-    @NotNull
     boolean research;
-    @NotNull
     boolean communication;
 }
