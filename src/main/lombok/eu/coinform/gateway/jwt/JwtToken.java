@@ -66,6 +66,8 @@ public class JwtToken {
             this.user = new HashMap<>();
             this.user.put("uuid", user.getUuid());
             this.user.put("email", user.getPasswordAuth().getEmail());
+            this.user.put("research", user.isAcceptResearch() ? "true" : "false");
+            this.user.put("communication", user.isAcceptCommunication() ? "true" : "false");
             return this;
         }
 

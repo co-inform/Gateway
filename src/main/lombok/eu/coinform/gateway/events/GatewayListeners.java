@@ -171,7 +171,7 @@ public class GatewayListeners {
             event.getSource().setCollectionId(collectionId);
             // Send the tweet of to SOMA for external review
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
-            log.info("SOMA: {}", result.body());
+            log.info("SOMA: {}", result != null ? result.body() : null);
             if(result != null){
                 List<FactChecker> fcList = List.of(new FactChecker("Organization","Truly-Media","http://truly.media"));
                 ItemToReview itReview = new ItemToReview("SocialMediaPosting", event.getSource().getValue());
@@ -179,7 +179,7 @@ public class GatewayListeners {
                 log.debug("RRFORM: {}", rrform);
                 // Store the request of a review with SOMA with our backend
                 HttpResponse<String> ccresult = sendToModule(mapper.writeValueAsString(rrform), claimCredHost+"/factchecker/recordRequest", userInfo);
-                log.info("CC RESULT: {}", ccresult.body());
+                log.info("CC RESULT: {}", ccresult != null ? ccresult.body() : null);
             }
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
