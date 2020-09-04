@@ -259,6 +259,7 @@ public class UserController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/change-settings", method = RequestMethod.POST)
     public ResponseEntity<?> changeSettings(@RequestBody @Valid ChangeSettings form){
 
