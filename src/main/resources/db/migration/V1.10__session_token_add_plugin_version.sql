@@ -1,1 +1,1 @@
-ALTER TABLE sessiontoken ADD plugin_version VARCHAR(40)
+ALTER TABLE sessiontoken ADD COLUMN IF NOT EXISTS plugin_version VARCHAR(40)
