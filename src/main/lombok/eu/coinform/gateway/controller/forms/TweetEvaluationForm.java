@@ -15,7 +15,7 @@ public class TweetEvaluationForm implements Serializable {
     @NotNull(message = "Comment cannot be empty")
     String comment;
 
-    @NotNull(message = "rating needs to be choosen")
+    @NotNull(message = "rating needs to be chosen")
     String rating;
 
     @NotNull(message = "at least on item/url to support the chosen rating")
@@ -27,4 +27,7 @@ public class TweetEvaluationForm implements Serializable {
     @NotNull(message = "tweet_id cannot be empty")
     @JsonProperty("tweet_id")
     String tweetId;
+
+    @JsonProperty("request_factcheck")
+    boolean requestFactcheck;
 }

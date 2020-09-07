@@ -19,7 +19,7 @@ public class AccuracyEvaluationImplementation extends LabelEvaluationBase implem
     private String reviewAspect;
     private ReviewRating reviewRating;
     private Map<String, Object> itemReviewed;
-    private boolean requestFactCheck = false;
+    private boolean requestFactCheck;
 
     public AccuracyEvaluationImplementation(TweetEvaluationForm tweetEvaluationForm, String uuid){
         super("https://schema.org","CoinformUserReview");
@@ -27,6 +27,7 @@ public class AccuracyEvaluationImplementation extends LabelEvaluationBase implem
         this.author = new Author(uuid);
         this.text = tweetEvaluationForm.getComment();
         this.name = tweetEvaluationForm.getRating();
+        this.requestFactCheck = tweetEvaluationForm.isRequestFactcheck();
         tweetEvaluationForm.getSupportingUrl().forEach(item -> supportingItem.add(new SupportingItem(item)));
         this.reviewAspect = "accuracy";
         this.reviewRating = new ReviewRating(tweetEvaluationForm.getRating());

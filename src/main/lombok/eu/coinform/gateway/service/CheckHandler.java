@@ -88,6 +88,7 @@ public class CheckHandler {
                             try {
                                 moduleRequest.makeRequest(); // make the request as specified by the function
                             } catch (ModuleRequestException ex) {
+                                //todo: Implement email to module users upon request failure. part of monitoring feature
                                 log.error("failed request to {}: {}", module.getName(), ex.getMessage());
                                 eventPublisher.publishEvent(new FailedModuleRequestEvent(module.getName(), ex.getMessage()));
                                 redisHandler.getAndDeleteModuleTransaction(moduleRequest.getTransactionId());
