@@ -278,8 +278,10 @@ public class UserController {
             oUser.get().setAcceptResearch(form.isResearch());
             SessionToken st = userDbManager.findBySessionTokenId(sessionTokenId).get();
             User dbUser = userDbManager.saveUser(oUser.get());
-            String jwtToken = jwtTokenCreator(st, new ArrayList<>(auth.getAuthorities()));
-            return ResponseEntity.ok(new LoginResponse(jwtToken));
+
+            //String jwtToken = jwtTokenCreator(st, new ArrayList<>(auth.getAuthorities()));
+            //return ResponseEntity.ok(new LoginResponse(jwtToken));
+            return ResponseEntity.ok(SuccesfullResponse.SETTINGSCHANGED);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.USERLOGGEDOUT);
     }
