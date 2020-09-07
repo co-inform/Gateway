@@ -39,6 +39,11 @@ public class SessionToken implements Serializable {
     @Column(name = "counter")
     private int counter;
 
+    @Getter
+    @Setter
+    @Column(name = "plugin_version")
+    private String pluginVersion;
+
     public SessionToken() {
         this.sessionToken = TokenCreator.createSessionToken();
         this.createdAt = new Date();

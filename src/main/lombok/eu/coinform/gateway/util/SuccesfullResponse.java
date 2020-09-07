@@ -14,7 +14,8 @@ public enum SuccesfullResponse {
     TOKENRENEWED("Token renewed"),
     EXTERNAL("External review received"),
     SETTINGSCHANGED("Settings changed"),
-    USERVERIFIED("User successfully verified");
+    USERVERIFIED("User successfully verified"),
+    EVALUATIONLOGRECIEVED("The evaluation log have been recieved");
 
     @Getter
     private final String status;

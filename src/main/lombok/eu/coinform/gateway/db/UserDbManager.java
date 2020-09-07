@@ -299,6 +299,10 @@ public class UserDbManager {
         return sessionTokenRepository.findById(sessionId).map(SessionToken::getUser);
     }
 
+    public Optional<SessionToken> getSessionToken(Long sessionId) {
+        return sessionTokenRepository.findById(sessionId);
+    }
+
     public User saveUser(User user) {
         return userRepository.save(user);
     }
