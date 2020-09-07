@@ -12,9 +12,7 @@ import eu.coinform.gateway.db.entity.Role;
 import eu.coinform.gateway.db.entity.RoleEnum;
 import eu.coinform.gateway.db.entity.SessionToken;
 import eu.coinform.gateway.db.entity.User;
-import eu.coinform.gateway.events.OnPasswordResetEvent;
-import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
-import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
+import eu.coinform.gateway.events.*;
 import eu.coinform.gateway.jwt.JwtToken;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
@@ -328,9 +326,15 @@ public class UserController {
         Authentication authentication = context.getAuthentication();
 
         SessionToken st = userDbManager.getSessionToken((Long) authentication.getPrincipal()).get();
+        if (!st.getUser().isAcceptResearch()) {
+            return ResponseEntity.badRequest().body(ErrorResponse.NOTAREASEARCHUSER);
+        }
+
         log.debug("We recieved the following evaluation-logs from {} on plugin_version {}:",
                 st.getUser().getUuid(), st.getPluginVersion());
         pluginEvaluationLogs.forEach((pel) -> log.debug("\t{}", pel));
+
+        eventPublisher.publishEvent(new EvaluationLogReceivedEvent(pluginEvaluationLogs, st));
 
         return ResponseEntity.ok(SuccesfullResponse.EVALUATIONLOGRECIEVED);
     }

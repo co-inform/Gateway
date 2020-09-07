@@ -17,6 +17,7 @@ public enum ErrorResponse {
     JWTEXCEPTION("A JWT token exception"),
     MISSINGRENEWTOKEN("No renew-token cookie supplied"),
     MISSINGARGUMENT("Request body missing mandatory field/parameter"),
+    NOTAREASEARCHUSER("The user is not registered as a research user"),
     NOSUCHRENEWTOKEN("No such renew-token");
 
     @Getter
