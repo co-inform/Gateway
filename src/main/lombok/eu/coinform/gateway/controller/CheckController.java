@@ -190,21 +190,31 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-    @RequestMapping(value = "/user-feedback/{tweet_id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/user-feedback", method = RequestMethod.GET)
     public ResponseEntity<?> userFeedback(@RequestParam(value = "tweet_id", required = true) String tweet_id){
+        log.debug("URI: {}", URI.create(String.format(claimCredUrl+"?tweet_id=%s", tweet_id)));
         RestClient client = new RestClient(HttpMethod.GET, URI.create(String.format(claimCredUrl+"?tweet_id=%s",tweet_id)), "", "Authorization", userInfo );
         HttpResponse<String> res;
-        Response response;
+        UserFeedback response;
 
         try {
             res = client.sendRequest().join();
             log.info("Body: {}", res.body());
-            response = objectMapper.readValue(res.body(), Response.class);
+            response = objectMapper.readValue(res.body(), UserFeedback.class);
             return ResponseEntity.ok().body(response);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
+    }
+
+    @RequestMapping(value = "/user-feedback", method = RequestMethod.OPTIONS)
+    public void userfeedBackCors(HttpServletResponse response,
+                                 @RequestParam(value = "tweet_id", required = true) String tweet_id) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
     }
 
 

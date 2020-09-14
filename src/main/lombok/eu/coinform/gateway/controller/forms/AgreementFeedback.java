@@ -17,7 +17,7 @@ public class AgreementFeedback implements Serializable {
     @JsonProperty("mostly_credible")
     private CredibilityLabels mostlyCredible;
 
-    @JsonProperty("not_Credible")
+    @JsonProperty("not_credible")
     private CredibilityLabels notCredible;
 
     @JsonProperty("not_verifiable")
