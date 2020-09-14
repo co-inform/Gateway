@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
-import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
-import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
-import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
-import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
+import eu.coinform.gateway.controller.forms.*;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
@@ -64,6 +61,11 @@ public class CheckController {
 
     @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
     private String misInfoMeUrl;
+
+    @Value("${claimcredibility.server.scheme}://${claimcredibility.server.url}${claimcredibility.server.base_endpoint}/tweet/accuracy-review")
+    private String claimCredUrl;
+    @Value("${CLAIM_CRED_USER_INFO}")
+    protected String userInfo;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
@@ -144,7 +146,6 @@ public class CheckController {
         log.trace("query for response received with query_id '{}'", query_id);
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
-
         log.trace("findById: {}", queryResponse);
         return queryResponse;
     }
@@ -188,6 +189,24 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
     }
+
+    @RequestMapping(value = "/user-feedback/{tweet_id}", method = RequestMethod.GET)
+    public ResponseEntity<?> userFeedback(@RequestParam(value = "tweet_id", required = true) String tweet_id){
+        RestClient client = new RestClient(HttpMethod.GET, URI.create(String.format(claimCredUrl+"?tweet_id=%s",tweet_id)), "", "Authorization", userInfo );
+        HttpResponse<String> res;
+        Response response;
+
+        try {
+            res = client.sendRequest().join();
+            log.info("Body: {}", res.body());
+            response = objectMapper.readValue(res.body(), Response.class);
+            return ResponseEntity.ok().body(response);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
+    }
+
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
