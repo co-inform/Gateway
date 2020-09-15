@@ -1,11 +1,14 @@
 package eu.coinform.gateway.controller.forms;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import eu.coinform.gateway.cache.Views;
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
+@JsonView(Views.NoDebug.class)
 public class AgreementFeedback implements Serializable {
 
     @JsonProperty("credibility_uncertain")

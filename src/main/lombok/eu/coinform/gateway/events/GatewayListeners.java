@@ -148,11 +148,15 @@ public class GatewayListeners {
         }
 
         try {
-            UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
-            QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
-            long oldVersionHash = qr.getVersionHash();
-            qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
-            redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash);
+            boolean updatedCache;
+            do {
+                UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
+                QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
+                long oldVersionHash = qr.getVersionHash();
+                qr.setVersionHash();
+                qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
+                updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
+            } while (!updatedCache);
         } catch (JsonProcessingException e) {
             log.debug("JSONPROCESSING exception: {}",res.body());
             e.printStackTrace();
