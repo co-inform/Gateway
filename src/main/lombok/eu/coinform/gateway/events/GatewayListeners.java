@@ -148,9 +148,9 @@ public class GatewayListeners {
         }
         log.debug("User Feedback body: {}", res.body());
         try {
+            UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
             boolean updatedCache;
             do {
-                UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
                 QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
                 long oldVersionHash = qr.getVersionHash();
                 qr.setVersionHash();
