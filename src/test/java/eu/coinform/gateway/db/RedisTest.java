@@ -36,7 +36,7 @@ public class RedisTest {
 
     @Before
     public void setup() {
-        queryResponse = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+        queryResponse = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, 0L, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
     }
 
     @After
@@ -63,7 +63,7 @@ public class RedisTest {
         Boolean oldRet = redisHandler.setQueryResponseAtomic(QUERY_ID, queryResponse, QueryResponse.NO_VERSION_HASH).join();
         assertThat(oldRet).isTrue();
         CompletableFuture<Boolean> slowSetQR = CompletableFuture.supplyAsync(() -> {
-            QueryResponse slowQR = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+            QueryResponse slowQR = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, 0L, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
@@ -72,7 +72,7 @@ public class RedisTest {
             return redisHandler.setQueryResponseAtomic(QUERY_ID, slowQR, queryResponse.getVersionHash()).join();
         });
         CompletableFuture<Boolean> fastSetQR = CompletableFuture.supplyAsync(() -> {
-            QueryResponse fastQR = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+            QueryResponse fastQR = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, 0L, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
             return redisHandler.setQueryResponseAtomic(QUERY_ID, fastQR, queryResponse.getVersionHash()).join();
         });
         CompletableFuture.allOf(slowSetQR, fastSetQR).join();
@@ -88,7 +88,7 @@ public class RedisTest {
             List<Boolean> list = new LinkedList<>();
             for (int i = 0; i < 1000; i++) {
                 QueryResponse existingQR = redisHandler.getQueryResponse(QUERY_ID).join();
-                QueryResponse resp = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+                QueryResponse resp = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, 0L, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
                 list.add(redisHandler.setQueryResponseAtomic(QUERY_ID, resp, existingQR.getVersionHash()).join());
             }
             return list;
@@ -97,7 +97,7 @@ public class RedisTest {
             List<Boolean> list = new LinkedList<>();
             for (int i = 0; i < 1000; i++) {
                 QueryResponse existingQR = redisHandler.getQueryResponse(QUERY_ID).join();
-                QueryResponse resp = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+                QueryResponse resp = new QueryResponse(QUERY_ID, QueryResponse.Status.partly_done, 0L, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
                 list.add(redisHandler.setQueryResponseAtomic(QUERY_ID, resp, existingQR.getVersionHash()).join());
             }
             return list;

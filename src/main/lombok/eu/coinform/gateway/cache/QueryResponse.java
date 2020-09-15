@@ -3,6 +3,8 @@ package eu.coinform.gateway.cache;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import eu.coinform.gateway.controller.forms.AgreementFeedback;
+import eu.coinform.gateway.controller.forms.CredibilityReviews;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -27,11 +29,13 @@ public class QueryResponse implements Serializable {
     }
     public QueryResponse(String queryId,
                          Status status,
+                         Long tweetid,
                          LinkedHashMap<String, Object> response,
                          LinkedHashMap<String, Object> moduleResponseCode,
                          LinkedHashMap<String, Object> flattenedModuleResponses) {
         this.queryId = queryId;
         this.status = status;
+        this.tweetid = tweetid;
         this.response = response;
         this.moduleResponseCode = moduleResponseCode;
         this.flattenedModuleResponses = flattenedModuleResponses;
@@ -67,6 +71,10 @@ public class QueryResponse implements Serializable {
     @JsonView(Views.NoDebug.class)
     private Status status;
 
+    @Getter
+    @JsonView(Views.Debug.class)
+    private long tweetid;
+
     /**
      * The response to give to the users why query the gateway.
      * -- GETTER --
@@ -89,6 +97,13 @@ public class QueryResponse implements Serializable {
      *
      * @return The latest response or null if no response is produced yet
      */
+
+    @Getter
+    @Setter
+    @JsonView(Views.NoDebug.class)
+    @JsonProperty("(dis)agreement_feedback")
+    private AgreementFeedback agreementFeedback;
+
     @Getter
     @JsonProperty("module_response_code")
     @JsonView(Views.Debug.class)

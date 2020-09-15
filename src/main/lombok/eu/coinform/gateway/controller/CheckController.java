@@ -8,10 +8,7 @@ import eu.coinform.gateway.controller.forms.*;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.events.ExternalReviewReceivedEvent;
-import eu.coinform.gateway.events.SendToSomaEvent;
-import eu.coinform.gateway.events.UserLabelReviewEvent;
-import eu.coinform.gateway.events.UserTweetEvaluationEvent;
+import eu.coinform.gateway.events.*;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
@@ -124,12 +121,13 @@ public class CheckController {
 
     private QueryResponse queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         log.trace("query received with query_id '{}'", queryObject.getQueryId());
-        QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
+        QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, ((Tweet) queryObject).getTweetId(), null, new LinkedHashMap<>(), new LinkedHashMap<>());
         QueryResponse response = redisHandler.getQueryResponse(queryObject.getQueryId(), qrIfAbsent).join();
         if (response.getVersionHash() == qrIfAbsent.getVersionHash()) {
             //We only send out new requests for new Queries
             queryObjectConsumer.accept(queryObject);
         }
+        eventPublisher.publishEvent(new FeedbackReviewEvent(queryObject));
         return response;
     }
 
@@ -146,6 +144,9 @@ public class CheckController {
         log.trace("query for response received with query_id '{}'", query_id);
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
+        Tweet t = new Tweet();
+        t.setTweetId(queryResponse.getTweetid());
+        eventPublisher.publishEvent(new FeedbackReviewEvent(t));
         log.trace("findById: {}", queryResponse);
         return queryResponse;
     }
@@ -165,8 +166,10 @@ public class CheckController {
     public QueryResponse findById(@PathVariable(value = "query_id", required = true) String query_id, @PathVariable(value = "debug", required = true) String debug) {
 
         log.trace("query for response received with query_id '{}'", query_id);
-
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
+        Tweet t = new Tweet();
+        t.setTweetId(queryResponse.getTweetid());
+        eventPublisher.publishEvent(new FeedbackReviewEvent(t));
         Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(query_id).join();
         LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap();
         for (Map.Entry<String, ModuleResponse> entry : moduleResponses.entrySet()) {
