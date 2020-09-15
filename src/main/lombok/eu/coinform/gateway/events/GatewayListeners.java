@@ -146,7 +146,7 @@ public class GatewayListeners {
         if(res == null){
             return;
         }
-
+        log.debug("User Feedback body: {}", res.body());
         try {
             boolean updatedCache;
             do {
@@ -156,6 +156,9 @@ public class GatewayListeners {
                 qr.setVersionHash();
                 qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
                 updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
+                if (updatedCache) {
+                    log.debug("updatedCache: {}", qr.toString());
+                }
             } while (!updatedCache);
         } catch (JsonProcessingException e) {
             log.debug("JSONPROCESSING exception: {}",res.body());
