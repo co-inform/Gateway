@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -140,10 +141,10 @@ public class GatewayListeners {
 
     @EventListener
     public void feedBackReviewListener(FeedbackReviewEvent event){
-        log.info("Requesting userFeedbacks from ESI");
+        log.debug("Requesting userFeedbacks from ESI");
         Tweet tweet = (Tweet) event.getQueryObject();
         HttpResponse<String> res = sendToModule(HttpMethod.GET, "", String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s", tweet.getTweetId()), userInfo);
-        if(res == null){
+        if(res == null || res.body() == null){
             return;
         }
         log.debug("User Feedback returned");
@@ -154,8 +155,10 @@ public class GatewayListeners {
                 QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
                 long oldVersionHash = qr.getVersionHash();
                 qr.setVersionHash();
-                //todo: see if possible to set it in qr.getResponse().put("(dis)agreement_feedback", ...getAgreementFeedback())
-                qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
+                if(qr.getResponse() == null){
+                    qr.setResponse(new LinkedHashMap<>());
+                }
+                qr.getResponse().put("(dis)agreement_feedback",response.getResponse().getCredibilityReviews().getAgreementFeedback());
                 updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
             } while (!updatedCache);
             log.debug("updatedCache successful");

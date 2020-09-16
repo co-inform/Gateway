@@ -118,7 +118,6 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-
     private QueryResponse queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         log.trace("query received with query_id '{}'", queryObject.getQueryId());
         QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, ((Tweet) queryObject).getTweetId(), null, new LinkedHashMap<>(), new LinkedHashMap<>());
@@ -167,9 +166,9 @@ public class CheckController {
 
         log.trace("query for response received with query_id '{}'", query_id);
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
-        Tweet t = new Tweet();
-        t.setTweetId(queryResponse.getTweetid());
-        eventPublisher.publishEvent(new FeedbackReviewEvent(t));
+//        Tweet t = new Tweet();
+//        t.setTweetId(queryResponse.getTweetid());
+//        eventPublisher.publishEvent(new FeedbackReviewEvent(t));
         Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(query_id).join();
         LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap();
         for (Map.Entry<String, ModuleResponse> entry : moduleResponses.entrySet()) {
@@ -192,33 +191,6 @@ public class CheckController {
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
         response.addHeader("Access-Control-Max-Age", "3600");
     }
-
-//    @RequestMapping(value = "/user-feedback", method = RequestMethod.GET)
-//    public ResponseEntity<?> userFeedback(@RequestParam(value = "tweet_id", required = true) String tweet_id){
-//        log.debug("URI: {}", URI.create(String.format(claimCredUrl+"?tweet_id=%s", tweet_id)));
-//        RestClient client = new RestClient(HttpMethod.GET, URI.create(String.format(claimCredUrl+"?tweet_id=%s",tweet_id)), "", "Authorization", userInfo );
-//        HttpResponse<String> res;
-//        UserFeedback response;
-//
-//        try {
-//            res = client.sendRequest().join();
-//            log.info("Body: {}", res.body());
-//            response = objectMapper.readValue(res.body(), UserFeedback.class);
-//            return ResponseEntity.ok().body(response);
-//        } catch (IOException | InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        return ResponseEntity.badRequest().body(ErrorResponse.GENERIC);
-//    }
-//
-//    @RequestMapping(value = "/user-feedback", method = RequestMethod.OPTIONS)
-//    public void userfeedBackCors(HttpServletResponse response,
-//                                 @RequestParam(value = "tweet_id", required = true) String tweet_id) {
-//        response.addHeader("Access-Control-Allow-Origin", "*");
-//        response.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-//        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
-//        response.addHeader("Access-Control-Max-Age", "3600");
-//    }
 
 
     @CrossOrigin(origins = "*")
