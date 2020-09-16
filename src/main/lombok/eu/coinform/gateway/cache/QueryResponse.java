@@ -98,9 +98,10 @@ public class QueryResponse implements Serializable {
      * @return The latest response or null if no response is produced yet
      */
 
+    //todo: remove at a later date
     @Getter
     @Setter
-    @JsonView(Views.NoDebug.class)
+    @JsonView(Views.Debug.class)
     @JsonProperty("(dis)agreement_feedback")
     private AgreementFeedback agreementFeedback;
 
