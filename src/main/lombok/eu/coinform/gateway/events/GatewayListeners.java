@@ -109,7 +109,7 @@ public class GatewayListeners {
     public void userLabelReviewListener(UserLabelReviewEvent event){
         try {
             HttpResponse<String> result = sendToModule(HttpMethod.POST, mapper.writeValueAsString(event.getSource()), claimCredHost+"/user/accuracy-review", userInfo);
-            log.info("LABEL REVIEW: {}", result.body());
+            log.info("LABEL REVIEW: {}", result != null ? result.statusCode() : null);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
@@ -120,7 +120,7 @@ public class GatewayListeners {
         try {
             String url = claimCredHost + "/user/accuracy-review"; //?factCheckRequested=" + event.getForm().isRequestFactcheck();
             HttpResponse<String> result = sendToModule(HttpMethod.POST, mapper.writeValueAsString(event.getSource()), url, userInfo);
-            log.info("CLAIM REVIEW: {}", result.body());
+            log.info("CLAIM REVIEW: {}", result != null ? result.statusCode() : null);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}",e.getMessage());
         }
@@ -133,7 +133,7 @@ public class GatewayListeners {
             HttpResponse<String> result = sendToModule(HttpMethod.POST, mapper.writeValueAsString(event.getSource()), claimCredHost+"/factchecker/review", userInfo);
             //todo: Here we should receive a list of uuids connected to users who has requested a review for this tweet.
             // logic for emailing them a link to the review needs to be implemented.
-            log.info("EXTERNAL REVIEW: {}", result.body());
+            log.info("EXTERNAL REVIEW: {}", result != null ? result.statusCode() : null);
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
         }
@@ -141,7 +141,7 @@ public class GatewayListeners {
 
     @EventListener
     public void feedBackReviewListener(FeedbackReviewEvent event){
-        log.debug("Requesting userFeedbacks from ESI");
+        log.info("Requesting userFeedbacks from ESI");
         Tweet tweet = (Tweet) event.getQueryObject();
         HttpResponse<String> res = sendToModule(HttpMethod.GET, "", String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s", tweet.getTweetId()), userInfo);
         if(res == null || res.body() == null){
