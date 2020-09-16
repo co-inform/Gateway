@@ -143,9 +143,6 @@ public class CheckController {
         log.trace("query for response received with query_id '{}'", query_id);
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
-        Tweet t = new Tweet();
-        t.setTweetId(queryResponse.getTweetid());
-        eventPublisher.publishEvent(new FeedbackReviewEvent(t));
         log.trace("findById: {}", queryResponse);
         return queryResponse;
     }
@@ -166,9 +163,6 @@ public class CheckController {
 
         log.trace("query for response received with query_id '{}'", query_id);
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
-//        Tweet t = new Tweet();
-//        t.setTweetId(queryResponse.getTweetid());
-//        eventPublisher.publishEvent(new FeedbackReviewEvent(t));
         Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(query_id).join();
         LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap();
         for (Map.Entry<String, ModuleResponse> entry : moduleResponses.entrySet()) {

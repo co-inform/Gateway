@@ -163,7 +163,7 @@ public class GatewayListeners {
             } while (!updatedCache);
             log.debug("updatedCache successful");
         } catch (JsonProcessingException e) {
-            log.debug("JSONPROCESSING exception: {}",res.body());
+            log.info("JSONPROCESSING exception: {}",res.body());
             e.printStackTrace();
         }
     }
@@ -219,7 +219,7 @@ public class GatewayListeners {
     }
 
     @EventListener
-    private void evaluationLogReceivedListener(EvaluationLogReceivedEvent event) {
+    public void evaluationLogReceivedListener(EvaluationLogReceivedEvent event) {
         List<ClaimCredAction> pluginActions = event.getEvaluationLogList().stream()
                 .map(pel -> new ClaimCredAction(pel, event.sessionToken))
                 .collect(Collectors.toList());
