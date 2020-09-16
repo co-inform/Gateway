@@ -146,7 +146,7 @@ public class GatewayListeners {
         if(res == null){
             return;
         }
-        log.debug("User Feedback body: {}", res.body());
+        log.debug("User Feedback returned");
         try {
             UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
             boolean updatedCache;
@@ -158,7 +158,7 @@ public class GatewayListeners {
                 qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
                 updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
                 if (updatedCache) {
-                    log.debug("updatedCache: {}", qr.toString());
+                    log.debug("updatedCache successful");
                 }
             } while (!updatedCache);
         } catch (JsonProcessingException e) {
