@@ -154,6 +154,7 @@ public class GatewayListeners {
                 QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
                 long oldVersionHash = qr.getVersionHash();
                 qr.setVersionHash();
+                //todo: see if possible to set it in qr.getResponse().put("(dis)agreement_feedback", ...getAgreementFeedback())
                 qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
                 updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
                 if (updatedCache) {
