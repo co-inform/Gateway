@@ -157,10 +157,8 @@ public class GatewayListeners {
                 //todo: see if possible to set it in qr.getResponse().put("(dis)agreement_feedback", ...getAgreementFeedback())
                 qr.setAgreementFeedback(response.getResponse().getCredibilityReviews().getAgreementFeedback());
                 updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
-                if (updatedCache) {
-                    log.debug("updatedCache successful");
-                }
             } while (!updatedCache);
+            log.debug("updatedCache successful");
         } catch (JsonProcessingException e) {
             log.debug("JSONPROCESSING exception: {}",res.body());
             e.printStackTrace();
