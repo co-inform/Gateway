@@ -70,7 +70,7 @@ public class GatewayListeners {
         User user = event.getUser();
         String token = userDbManager.resetPassword(user);
         if(token.isEmpty()){
-            log.info("Something went wrong when fetching token for {}", user. getPasswordAuth().getEmail());
+            log.warn("Something went wrong when fetching token for {}", user. getPasswordAuth().getEmail());
             return;
         }
         String verifyUrl = gatewayUrl + "/passwordreset?token="+token;
@@ -88,7 +88,7 @@ public class GatewayListeners {
         User user = event.getUser();
         Optional<VerificationToken> oToken = userDbManager.getVerificationToken(user);
         if(oToken.isEmpty()){
-            log.info("No verificationToken for user {}", user.getPasswordAuth().getEmail());
+            log.warn("No verificationToken for user {}", user.getPasswordAuth().getEmail());
             return;
         }
         String toAddress = user.getPasswordAuth().getEmail();
@@ -112,7 +112,7 @@ public class GatewayListeners {
             log.info("LABEL REVIEW: {}", result != null ? result.statusCode() : null);
             log.debug("LABEL REVIEW: {}", result != null ? result.body() : null);
         } catch (JsonProcessingException e) {
-            log.info("JSON error: {}",e.getMessage());
+            log.error("JSON error: {}",e.getMessage());
         }
     }
 
@@ -124,7 +124,7 @@ public class GatewayListeners {
             log.info("CLAIM REVIEW: {}", result != null ? result.statusCode() : null);
             log.debug("CLAIM REVIEW: {}", result != null ? result.body() : null);
         } catch (JsonProcessingException e) {
-            log.info("JSON error: {}",e.getMessage());
+            log.error("JSON error: {}",e.getMessage());
         }
     }
 
@@ -138,7 +138,7 @@ public class GatewayListeners {
             log.info("EXTERNAL REVIEW: {}", result != null ? result.statusCode() : null);
             log.debug("EXTERNAL REVIEW: {}", result != null ? result.body() : null);
         } catch (JsonProcessingException e) {
-            log.info("JSON error: {}", e.getMessage());
+            log.error("JSON error: {}", e.getMessage());
         }
     }
 
@@ -167,7 +167,7 @@ public class GatewayListeners {
             } while (!updatedCache);
             log.debug("updatedCache successful");
         } catch (JsonProcessingException e) {
-            log.info("JSONPROCESSING exception: {}",res.body());
+            log.error("JSONPROCESSING exception: {}",res.body());
             e.printStackTrace();
         }
     }
@@ -177,7 +177,7 @@ public class GatewayListeners {
         log.info("Sending email to {} owner about failed request", event.getModule());
         Optional<ModuleInfo> oModuleInfo = userDbManager.findByModulename(event.getModule());
         if(oModuleInfo.isEmpty()){
-            log.info("No ModuleInfo found for {}", event.getModule());
+            log.warn("No ModuleInfo found for {}", event.getModule());
             return;
         }
         ModuleInfo moduleInfo = oModuleInfo.get();
@@ -219,7 +219,7 @@ public class GatewayListeners {
                 log.debug("CC RESULT: {}", ccresult != null ? ccresult.body() : null);
             }
         } catch (JsonProcessingException e) {
-            log.info("JSON error: {}", e.getMessage());
+            log.error("JSON error: {}", e.getMessage());
         }
 
     }
@@ -234,7 +234,7 @@ public class GatewayListeners {
             body = mapper.writeValueAsString(pluginActions);
             log.trace("plugin action list: {}", body);
         } catch (JsonProcessingException e) {
-            log.info("JSON error: {}", e.getMessage());
+            log.error("JSON error: {}", e.getMessage());
             return;
         }
         sendToModule(HttpMethod.POST, body, claimCredHost + "/log/plugin/action", userInfo);
@@ -259,7 +259,7 @@ public class GatewayListeners {
             }
             return status;
         } catch (InterruptedException | IOException e) {
-            log.info("HTTP error: {}", e.getMessage());
+            log.error("HTTP error: {}", e.getMessage());
         }
         return null;
     }
