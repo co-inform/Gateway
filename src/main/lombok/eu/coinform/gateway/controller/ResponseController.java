@@ -56,7 +56,7 @@ public class ResponseController {
         CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getAndDeleteModuleTransaction(transaction_id);
         responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());
         return ResponseEntity.ok().build();
-    };
+    }
 
     @Async("endpointExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {
