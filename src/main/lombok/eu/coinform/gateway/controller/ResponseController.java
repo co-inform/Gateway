@@ -52,6 +52,9 @@ public class ResponseController {
     ResponseEntity<?> postResponse(@PathVariable(value = "transaction_id", required = true) String transaction_id,
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
         log.debug("Response received with transaction_id: {}", transaction_id);
+        if(transaction_id.equals("module-testing-transaction-id")) {
+            return ResponseEntity.ok(moduleResponse);
+        }
         CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
         CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getAndDeleteModuleTransaction(transaction_id);
         responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());

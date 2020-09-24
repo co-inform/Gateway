@@ -3,8 +3,6 @@ package eu.coinform.gateway.cache;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import eu.coinform.gateway.controller.forms.AgreementFeedback;
-import eu.coinform.gateway.controller.forms.CredibilityReviews;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
