@@ -1,6 +1,7 @@
 package eu.coinform.gateway.db;
 
 import com.google.common.collect.Lists;
+import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -44,24 +45,25 @@ public class UserDbManager {
     /**
      * Registers a new User with the CoInform system using the supplied email, password and list of roles
      *
-     * @param email the users email
-     * @param password the users password
+     * @param form the RegisterFOrm containing the new user information
      * @param roleList a list of actual roles for the user
      * @return the created User
      * @throws UsernameAlreadyExistException
      */
 
-    public User registerUser(String email, String password, List<RoleEnum> roleList) throws UsernameAlreadyExistException {
-        if (passwordAuthRepository.existsByEmail(email)) {
-            throw new UsernameAlreadyExistException(email);
+    public User registerUser(RegisterForm form, List<RoleEnum> roleList) throws UsernameAlreadyExistException {
+        if (passwordAuthRepository.existsByEmail(form.getEmail())) {
+            throw new UsernameAlreadyExistException(form.getEmail());
         }
 
         User user = new User();
         user.setCreatedAt(new Date());
         User dbUser = userRepository.save(user);
+        dbUser.setAcceptResearch(form.isResearch());
+        dbUser.setAcceptCommunication(form.isCommunication());
         PasswordAuth passwordAuth = new PasswordAuth();
-        passwordAuth.setEmail(email.toLowerCase());
-        passwordAuth.setPassword(passwordEncoder.encode(password));
+        passwordAuth.setEmail(form.getEmail().toLowerCase());
+        passwordAuth.setPassword(passwordEncoder.encode(form.getPassword()));
         passwordAuth.setUser(dbUser);
         passwordAuth.setId(dbUser.getId());
         dbUser.setPasswordAuth(passwordAuth);
@@ -297,11 +299,15 @@ public class UserDbManager {
         return sessionTokenRepository.findById(sessionId).map(SessionToken::getUser);
     }
 
+    public Optional<SessionToken> getSessionToken(Long sessionId) {
+        return sessionTokenRepository.findById(sessionId);
+    }
+
     public User saveUser(User user) {
         return userRepository.save(user);
     }
 
-    public Optional<SessionToken> findById(Long id){
+    public Optional<SessionToken> findBySessionTokenId(Long id){
         return sessionTokenRepository.findById(id);
     }
 
@@ -311,6 +317,10 @@ public class UserDbManager {
 
     public ModuleInfo saveModuleInfo(ModuleInfo module){
         return moduleInfoRepository.save(module);
+    }
+
+    public boolean existsByUuid(String uuid){
+        return userRepository.existsByUuid(uuid);
     }
 
 

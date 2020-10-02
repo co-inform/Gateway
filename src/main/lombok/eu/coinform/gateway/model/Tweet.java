@@ -72,6 +72,22 @@ public class Tweet implements QueryObject {
     private String tweetAuthor;
 
     /**
+     * The coinform user uuid
+     * -- SETTER --
+     * Set the uuid of the Coinform user
+     *
+     * @param userId set the 'userId'
+     * -- GETTER --
+     * Get the 'userId'
+     *
+     * @return the userId
+     */
+    @Getter
+    @Setter
+    @JsonProperty("coinform_user_id")
+    private String userId;
+
+    /**
      * Set the 'tweet_id'
      *
      * @param tweetId set the 'tweet_id'

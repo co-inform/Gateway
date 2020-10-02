@@ -4,17 +4,11 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.Views;
-import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
-import eu.coinform.gateway.controller.forms.SomaEvaluationForm;
-import eu.coinform.gateway.controller.forms.TweetEvaluationForm;
-import eu.coinform.gateway.controller.forms.TweetLabelEvaluationForm;
+import eu.coinform.gateway.controller.forms.*;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
-import eu.coinform.gateway.events.ExternalReviewReceivedEvent;
-import eu.coinform.gateway.events.SendToSomaEvent;
-import eu.coinform.gateway.events.UserLabelReviewEvent;
-import eu.coinform.gateway.events.UserTweetEvaluationEvent;
+import eu.coinform.gateway.events.*;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
@@ -64,6 +58,11 @@ public class CheckController {
 
     @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
     private String misInfoMeUrl;
+
+    @Value("${claimcredibility.server.scheme}://${claimcredibility.server.url}${claimcredibility.server.base_endpoint}/tweet/accuracy-review")
+    private String claimCredUrl;
+    @Value("${CLAIM_CRED_USER_INFO}")
+    protected String userInfo;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
@@ -119,15 +118,15 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-
     private QueryResponse queryEndpoint(QueryObject queryObject, Consumer<QueryObject> queryObjectConsumer) {
         log.trace("query received with query_id '{}'", queryObject.getQueryId());
-        QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, null, new LinkedHashMap<>(), new LinkedHashMap<>());
+        QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, ((Tweet) queryObject).getTweetId(), null, new LinkedHashMap<>(), new LinkedHashMap<>());
         QueryResponse response = redisHandler.getQueryResponse(queryObject.getQueryId(), qrIfAbsent).join();
         if (response.getVersionHash() == qrIfAbsent.getVersionHash()) {
             //We only send out new requests for new Queries
             queryObjectConsumer.accept(queryObject);
         }
+        eventPublisher.publishEvent(new FeedbackReviewEvent(queryObject));
         return response;
     }
 
@@ -144,7 +143,6 @@ public class CheckController {
         log.trace("query for response received with query_id '{}'", query_id);
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
-
         log.trace("findById: {}", queryResponse);
         return queryResponse;
     }
@@ -164,7 +162,6 @@ public class CheckController {
     public QueryResponse findById(@PathVariable(value = "query_id", required = true) String query_id, @PathVariable(value = "debug", required = true) String debug) {
 
         log.trace("query for response received with query_id '{}'", query_id);
-
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         Map<String, ModuleResponse> moduleResponses = redisHandler.getModuleResponses(query_id).join();
         LinkedHashMap<String, Object> flattenedModuleResponses = new LinkedHashMap();
@@ -189,6 +186,7 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)
     public ResponseEntity<?> evaluateTweet(@Valid @RequestBody TweetEvaluationForm tweetEvaluationForm) {
@@ -198,6 +196,7 @@ public class CheckController {
         Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
 
         if(user.isEmpty()){
+            log.warn("User empty");
             log.debug("No user with sessionId: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
@@ -225,6 +224,7 @@ public class CheckController {
         Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
 
         if(user.isEmpty()){
+            log.warn("User empty");
             log.debug("No user: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
@@ -269,20 +269,22 @@ public class CheckController {
             RestClient client = new RestClient(HttpMethod.GET,URI.create(String.format(misInfoMeUrl, source)),"");
             status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
-                log.debug("Http error: {}", status);
+                log.warn("Http error: {}", status.statusCode());
+                log.debug("Body: {}", status.body());
                 return ResponseEntity.status(status.statusCode()).body(status.body());
             }
             LinkedHashMap<String, Object> answer = objectMapper.readValue(status.body(), LinkedHashMap.class);
-            //todo: remove workshop hack
+//            //todo: remove workshop hack
             log.debug("checkurl answer ${}: ${}", source, answer);
-            if (source.matches("^https?(://|%3A%2F%2F)www.breitbart.com.*")) {
-                log.debug("matches breitbart");
-                ((Map) answer.get("credibility")).put("value", Math.max((Double) ((Map) answer.get("credibility")).get("value")-1, -1));
-                log.debug("checkurl answer: ${}", answer);
-            }
+//            if (source.matches("^https?(://|%3A%2F%2F)www.breitbart.com.*")) {
+//                log.debug("matches breitbart");
+//                ((Map) answer.get("credibility")).put("value", Math.max((Double) ((Map) answer.get("credibility")).get("value")-1, -1));
+//                log.debug("checkurl answer: ${}", answer);
+//            }
             return ResponseEntity.ok(checkUrlRuleEngine(answer));
 
         } catch (InterruptedException | IOException e) {
+            log.error("/check-url exception: {}", e.getClass().getName());
             log.debug("Something went wrong: {}", e.getMessage());
             return ResponseEntity.badRequest().body(String.format(ErrorResponse.FORMATTED.getError(), e.getMessage()));
         }
@@ -303,7 +305,7 @@ public class CheckController {
             new URL(url).toURI().parseServerAuthority();
             return true;
         } catch (MalformedURLException | URISyntaxException e) {
-            log.debug("Invalid url: {}", url);
+            log.error("Invalid url: {}", url);
             return false;
         }
     }

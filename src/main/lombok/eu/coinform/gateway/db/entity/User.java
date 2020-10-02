@@ -54,9 +54,21 @@ public class User implements Serializable {
     @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
     private VerificationToken verificationToken;
 
+    @Getter
+    @Setter
+    @Column(name = "research")
+    private boolean acceptResearch;
+
+    @Getter
+    @Setter
+    @Column(name = "communication")
+    private boolean acceptCommunication;
+
     public User(){
         this.enabled = false;
         this.uuid = UUID.randomUUID().toString();
+        this.acceptResearch = false;
+        this.acceptCommunication = false;
     }
 
 

@@ -52,11 +52,15 @@ public class ResponseController {
     ResponseEntity<?> postResponse(@PathVariable(value = "transaction_id", required = true) String transaction_id,
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
         log.debug("Response received with transaction_id: {}", transaction_id);
+        if(transaction_id.equals("module-testing-transaction-id")) {
+            log.info("Module testing");
+            return ResponseEntity.ok(moduleResponse);
+        }
         CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
         CompletableFuture<ModuleTransaction> moduleTransactionFuture = redisHandler.getAndDeleteModuleTransaction(transaction_id);
         responseConsumer(moduleTransactionFuture.join(), moduleResponseFuture.join());
         return ResponseEntity.ok().build();
-    };
+    }
 
     @Async("endpointExecutor")
     public void responseConsumer(ModuleTransaction moduleTransaction, ModuleResponse moduleResponse) {

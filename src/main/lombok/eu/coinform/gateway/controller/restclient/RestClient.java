@@ -1,6 +1,7 @@
 package eu.coinform.gateway.controller.restclient;
 
 import com.google.common.base.Charsets;
+import eu.coinform.gateway.controller.forms.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 

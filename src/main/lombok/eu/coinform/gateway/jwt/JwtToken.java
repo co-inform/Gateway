@@ -45,6 +45,8 @@ public class JwtToken {
             this.user = new HashMap<>();
             this.user.put("uuid", sessionToken.getUser().getUuid());
             this.user.put("email", sessionToken.getUser().getPasswordAuth().getEmail());
+            this.user.put("research", sessionToken.getUser().isAcceptResearch() ? "true" : "false");
+            this.user.put("communication", sessionToken.getUser().isAcceptCommunication() ? "true" : "false");
             this.user.put("created_at", sessionToken.getUser().getCreatedAt().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             return this;
         }
