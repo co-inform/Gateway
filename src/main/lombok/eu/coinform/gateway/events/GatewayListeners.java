@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpMethod;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -147,7 +146,12 @@ public class GatewayListeners {
         log.info("Requesting userFeedbacks from ESI");
         Tweet tweet = (Tweet) event.getQueryObject();
         String url;
-        HttpResponse<String> res = sendToModule(HttpMethod.GET, "", String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s", tweet.getTweetId()), userInfo);
+        if(tweet.getUserId() == null || tweet.getUserId().isEmpty() || !userDbManager.existsByUuid(tweet.getUserId())){
+            url = String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s", tweet.getTweetId());
+        } else {
+            url = String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s&user_id=%s", tweet.getTweetId(),tweet.getUserId());
+        }
+        HttpResponse<String> res = sendToModule(HttpMethod.GET, "", url, userInfo);
         if(res == null || res.body() == null){
             log.info("ESI Result null");
             return;

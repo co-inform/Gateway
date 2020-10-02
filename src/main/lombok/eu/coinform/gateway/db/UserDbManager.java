@@ -319,5 +319,9 @@ public class UserDbManager {
         return moduleInfoRepository.save(module);
     }
 
+    public boolean existsByUuid(String uuid){
+        return userRepository.existsByUuid(uuid);
+    }
+
 
 }
