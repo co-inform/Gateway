@@ -53,6 +53,7 @@ public class ResponseController {
                                    @Valid @RequestBody ModuleResponse moduleResponse ) {
         log.debug("Response received with transaction_id: {}", transaction_id);
         if(transaction_id.equals("module-testing-transaction-id")) {
+            log.info("Module testing");
             return ResponseEntity.ok(moduleResponse);
         }
         CompletableFuture<ModuleResponse> moduleResponseFuture = redisHandler.setModuleResponse(transaction_id, moduleResponse);
