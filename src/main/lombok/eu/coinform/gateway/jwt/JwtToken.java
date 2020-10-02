@@ -7,8 +7,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class JwtToken {
@@ -38,6 +42,12 @@ public class JwtToken {
 
         public Builder setSessionToken(SessionToken sessionToken) {
             this.sessionToken = sessionToken;
+            this.user = new HashMap<>();
+            this.user.put("uuid", sessionToken.getUser().getUuid());
+            this.user.put("email", sessionToken.getUser().getPasswordAuth().getEmail());
+            this.user.put("research", sessionToken.getUser().isAcceptResearch() ? "true" : "false");
+            this.user.put("communication", sessionToken.getUser().isAcceptCommunication() ? "true" : "false");
+            this.user.put("created_at", sessionToken.getUser().getCreatedAt().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             return this;
         }
 
@@ -62,13 +72,6 @@ public class JwtToken {
             return this;
         }
 
-        public Builder setUser(User user) {
-            this.user = new HashMap<>();
-            this.user.put("uuid", user.getUuid());
-            this.user.put("email", user.getPasswordAuth().getEmail());
-            return this;
-        }
-
         public JwtToken build() {
 
             String token = Jwts.builder()
@@ -81,6 +84,7 @@ public class JwtToken {
                     .claim("rol", roles)
                     .claim("count", sessionToken.getCounter())
                     .claim("user", user)
+                    .claim("plugin_version", sessionToken.getPluginVersion())
                     .compact();
             return new JwtToken(token);
         }

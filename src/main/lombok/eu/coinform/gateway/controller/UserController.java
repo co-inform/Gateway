@@ -1,21 +1,19 @@
 package eu.coinform.gateway.controller;
 
-import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.controller.exceptions.MissingRenewToken;
 import eu.coinform.gateway.controller.exceptions.NoSuchRenewToken;
+import eu.coinform.gateway.controller.forms.ChangeSettings;
 import eu.coinform.gateway.controller.forms.PasswordChangeForm;
 import eu.coinform.gateway.controller.forms.PasswordResetForm;
+import eu.coinform.gateway.controller.forms.PluginEvaluationLog;
 import eu.coinform.gateway.controller.forms.RegisterForm;
 import eu.coinform.gateway.db.*;
 import eu.coinform.gateway.db.entity.Role;
 import eu.coinform.gateway.db.entity.RoleEnum;
 import eu.coinform.gateway.db.entity.SessionToken;
 import eu.coinform.gateway.db.entity.User;
-import eu.coinform.gateway.events.OnPasswordResetEvent;
-import eu.coinform.gateway.events.OnRegistrationCompleteEvent;
-import eu.coinform.gateway.events.SuccessfulPasswordResetEvent;
+import eu.coinform.gateway.events.*;
 import eu.coinform.gateway.jwt.JwtToken;
-import eu.coinform.gateway.model.TwitterUser;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -62,7 +60,8 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/renew-token", method = RequestMethod.GET)
-    public ResponseEntity<?> renewToken(HttpServletRequest request) {
+    public ResponseEntity<?> renewToken(HttpServletRequest request,
+                                        @RequestParam(required = false, name = "plugin_version") String pluginVersion ) {
         Optional<Cookie> cookie = findCookie(RENEWAL_TOKEN_NAME,request);
         if(cookie.isEmpty()){
             throw new MissingRenewToken();
@@ -76,6 +75,9 @@ public class UserController {
 
         User user = ost.get().getUser();
         ost.get().setCounter(ost.get().getCounter()+1);
+        if (pluginVersion != null) {
+            ost.get().setPluginVersion(pluginVersion);
+        }
         userDbManager.saveUser(user);
 
         Collection<GrantedAuthority> grantedAuthorities = new LinkedList<>();
@@ -84,7 +86,7 @@ public class UserController {
             grantedAuthorities.add(authority);
         }
 
-        String jwtToken = jwtTokenCreator(user, ost.get(), grantedAuthorities);
+        String jwtToken = jwtTokenCreator(ost.get(), grantedAuthorities);
 
         return ResponseEntity.ok(new LoginResponse(jwtToken));
     }
@@ -100,7 +102,8 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public LoginResponse login(HttpServletResponse response) {
+    public LoginResponse login(HttpServletResponse response,
+                               @RequestParam(required = false, name = "plugin_version") String pluginVersion ) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
@@ -115,8 +118,11 @@ public class UserController {
             user.setSessionTokenList(new LinkedList<>());
         }
         st = new SessionToken(user);
+        if (pluginVersion != null) {
+            st.setPluginVersion(pluginVersion);
+        }
         userDbManager.saveSessionToken(st);
-        String token = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
+        String token = jwtTokenCreator(st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         final Cookie cookie = new Cookie(RENEWAL_TOKEN_NAME, st.getSessionToken());
         cookie.setDomain(RENEWAL_TOKEN_DOMAIN);
@@ -152,7 +158,7 @@ public class UserController {
                 .findAny();
     }
 
-    private String jwtTokenCreator(User user, SessionToken st, Collection<GrantedAuthority> authorities){
+    private String jwtTokenCreator(SessionToken st, Collection<GrantedAuthority> authorities){
         long expirationTime;
         if (authorities.stream()
                 .map(GrantedAuthority::getAuthority)
@@ -167,7 +173,6 @@ public class UserController {
                 .setExpirationTime(expirationTime)
                 .setSessionToken(st)
                 .setRoles(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .setUser(user)
                 .build().getToken();
     }
 
@@ -178,13 +183,13 @@ public class UserController {
         List<RoleEnum> roles = new LinkedList<>();
         roles.add(RoleEnum.USER);
 
-        User user = userDbManager.registerUser(registerForm.getEmail(), registerForm.getPassword(), roles);
+        User user = userDbManager.registerUser(registerForm, roles);
 
         try {
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user));
         } catch (Exception me){
             log.debug(me.getMessage());
-            ResponseEntity.badRequest().body(ErrorResponse.USEREXISTS);
+            return ResponseEntity.badRequest().body(ErrorResponse.USEREXISTS);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(SuccesfullResponse.USERCREATED);
     }
@@ -239,8 +244,8 @@ public class UserController {
         }
 
         User user = userDbManager.getBySessionTokenId(sessionTokenId).get();
-        SessionToken st = user.getSessionTokenList().get(0);
-        String jwtToken = jwtTokenCreator(user, st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
+        SessionToken st = userDbManager.findBySessionTokenId(sessionTokenId).get(); // This should be better than the below...
+        String jwtToken = jwtTokenCreator(st, new ArrayList<GrantedAuthority>(authentication.getAuthorities()));
 
         try {
             eventPublisher.publishEvent(new SuccessfulPasswordResetEvent(user));
@@ -253,6 +258,36 @@ public class UserController {
 
     @RequestMapping(value = "/change-password", method = RequestMethod.OPTIONS)
     public void corsHeadersChangePassword(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/user/change-settings", method = RequestMethod.POST)
+    public ResponseEntity<?> changeSettings(@RequestBody @Valid ChangeSettings form){
+
+        SecurityContext ctx = SecurityContextHolder.getContext();
+        Authentication auth = ctx.getAuthentication();
+        Long sessionTokenId = (Long) auth.getPrincipal();
+
+        Optional<User> oUser = userDbManager.getBySessionTokenId(sessionTokenId);
+        if(oUser.isPresent()) {
+            oUser.get().setAcceptCommunication(form.isCommunication());
+            oUser.get().setAcceptResearch(form.isResearch());
+            SessionToken st = userDbManager.findBySessionTokenId(sessionTokenId).get();
+            User dbUser = userDbManager.saveUser(oUser.get());
+
+            //String jwtToken = jwtTokenCreator(st, new ArrayList<>(auth.getAuthorities()));
+            //return ResponseEntity.ok(new LoginResponse(jwtToken));
+            return ResponseEntity.ok(SuccesfullResponse.SETTINGSCHANGED);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.USERLOGGEDOUT);
+    }
+
+    @RequestMapping(value = "/user/change-settings", method = RequestMethod.OPTIONS)
+    public void corsHeadersChangeSettings(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
@@ -286,4 +321,31 @@ public class UserController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/user/evaluation-log", method = RequestMethod.POST)
+    public ResponseEntity<?> evaluationLog(HttpServletResponse response, @RequestBody @Valid List<PluginEvaluationLog> pluginEvaluationLogs) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+
+        SessionToken st = userDbManager.getSessionToken((Long) authentication.getPrincipal()).get();
+        if (!st.getUser().isAcceptResearch()) {
+            return ResponseEntity.badRequest().body(ErrorResponse.NOTAREASEARCHUSER);
+        }
+
+        log.debug("We recieved the following evaluation-logs from {} on plugin_version {}:",
+                st.getUser().getUuid(), st.getPluginVersion());
+        pluginEvaluationLogs.forEach((pel) -> log.debug("\t{}", pel));
+
+        eventPublisher.publishEvent(new EvaluationLogReceivedEvent(pluginEvaluationLogs, st));
+
+        return ResponseEntity.ok(SuccesfullResponse.EVALUATIONLOGRECIEVED);
+    }
+
+    @RequestMapping(value = "/user/evaluation-log", method = RequestMethod.OPTIONS)
+    public void corsHeadersEvaluationLog(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
 }

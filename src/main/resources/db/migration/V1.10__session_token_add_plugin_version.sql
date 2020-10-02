@@ -1,0 +1,1 @@
+ALTER TABLE sessiontoken ADD COLUMN IF NOT EXISTS plugin_version VARCHAR(40)

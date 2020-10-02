@@ -10,6 +10,7 @@ import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.db.entity.ModuleInfo;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.entity.VerificationToken;
+import eu.coinform.gateway.module.iface.ClaimCredAction;
 import eu.coinform.gateway.module.iface.FactChecker;
 import eu.coinform.gateway.module.iface.ItemToReview;
 import eu.coinform.gateway.service.EmailService;
@@ -26,6 +27,7 @@ import java.net.http.HttpResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -134,7 +136,6 @@ public class GatewayListeners {
         }
     }
 
-    @Async("endpointExecutor")
     @EventListener
     public void failedModuleRequestListener(FailedModuleRequestEvent event){
         log.info("Sending email to {} owner about failed request", event.getModule());
@@ -171,7 +172,7 @@ public class GatewayListeners {
             event.getSource().setCollectionId(collectionId);
             // Send the tweet of to SOMA for external review
             HttpResponse<String> result = sendToModule(mapper.writeValueAsString(event.getSource()), String.format(somaUrl,collectionId), somaJWT);
-            log.info("SOMA: {}", result.body());
+            log.info("SOMA: {}", result != null ? result.body() : null);
             if(result != null){
                 List<FactChecker> fcList = List.of(new FactChecker("Organization","Truly-Media","http://truly.media"));
                 ItemToReview itReview = new ItemToReview("SocialMediaPosting", event.getSource().getValue());
@@ -179,12 +180,28 @@ public class GatewayListeners {
                 log.debug("RRFORM: {}", rrform);
                 // Store the request of a review with SOMA with our backend
                 HttpResponse<String> ccresult = sendToModule(mapper.writeValueAsString(rrform), claimCredHost+"/factchecker/recordRequest", userInfo);
-                log.info("CC RESULT: {}", ccresult.body());
+                log.info("CC RESULT: {}", ccresult != null ? ccresult.body() : null);
             }
         } catch (JsonProcessingException e) {
             log.debug("JSON error: {}", e.getMessage());
         }
 
+    }
+
+    @EventListener
+    private void evaluationLogReceivedListener(EvaluationLogReceivedEvent event) {
+        List<ClaimCredAction> pluginActions = event.getEvaluationLogList().stream()
+                .map(pel -> new ClaimCredAction(pel, event.sessionToken))
+                .collect(Collectors.toList());
+        String body;
+        try {
+            body = mapper.writeValueAsString(pluginActions);
+            log.trace("plugin action list: {}", body);
+        } catch (JsonProcessingException e) {
+            log.debug("JSON error: {}", e.getMessage());
+            return;
+        }
+        sendToModule(body, claimCredHost + "/log/plugin/action", userInfo);
     }
 
     // Method below is the generic method to send evaluations to modules/partners
