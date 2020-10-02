@@ -196,6 +196,7 @@ public class CheckController {
         Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
 
         if(user.isEmpty()){
+            log.warn("User empty");
             log.debug("No user with sessionId: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
@@ -223,6 +224,7 @@ public class CheckController {
         Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
 
         if(user.isEmpty()){
+            log.warn("User empty");
             log.debug("No user: {}", authentication.getPrincipal());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.NOSUCHUSER);
         }
@@ -267,7 +269,8 @@ public class CheckController {
             RestClient client = new RestClient(HttpMethod.GET,URI.create(String.format(misInfoMeUrl, source)),"");
             status = client.sendRequest().join();
             if(status.statusCode() < 200 || status.statusCode() > 299){
-                log.debug("Http error: {}", status);
+                log.warn("Http error: {}", status.statusCode());
+                log.debug("Body: {}", status.body());
                 return ResponseEntity.status(status.statusCode()).body(status.body());
             }
             LinkedHashMap<String, Object> answer = objectMapper.readValue(status.body(), LinkedHashMap.class);
@@ -281,6 +284,7 @@ public class CheckController {
             return ResponseEntity.ok(checkUrlRuleEngine(answer));
 
         } catch (InterruptedException | IOException e) {
+            log.error("/check-url exception: {}", e.getClass().getName());
             log.debug("Something went wrong: {}", e.getMessage());
             return ResponseEntity.badRequest().body(String.format(ErrorResponse.FORMATTED.getError(), e.getMessage()));
         }
@@ -301,7 +305,7 @@ public class CheckController {
             new URL(url).toURI().parseServerAuthority();
             return true;
         } catch (MalformedURLException | URISyntaxException e) {
-            log.debug("Invalid url: {}", url);
+            log.error("Invalid url: {}", url);
             return false;
         }
     }

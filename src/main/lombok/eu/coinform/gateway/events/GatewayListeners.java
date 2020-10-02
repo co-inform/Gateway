@@ -151,6 +151,7 @@ public class GatewayListeners {
         } else {
             url = String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s&user_id=%s", tweet.getTweetId(),tweet.getUserId());
         }
+        log.debug("Feedback URL: {}", url);
         HttpResponse<String> res = sendToModule(HttpMethod.GET, "", url, userInfo);
         if(res == null || res.body() == null){
             log.info("ESI Result null");
