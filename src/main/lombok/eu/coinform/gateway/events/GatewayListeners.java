@@ -146,6 +146,7 @@ public class GatewayListeners {
     public void feedBackReviewListener(FeedbackReviewEvent event){
         log.info("Requesting userFeedbacks from ESI");
         Tweet tweet = (Tweet) event.getQueryObject();
+        String url;
         HttpResponse<String> res = sendToModule(HttpMethod.GET, "", String.format(claimCredHost+"/tweet/accuracy-review?tweet_id=%s", tweet.getTweetId()), userInfo);
         if(res == null || res.body() == null){
             log.info("ESI Result null");
