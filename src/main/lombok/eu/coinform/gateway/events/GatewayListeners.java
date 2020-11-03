@@ -1,6 +1,7 @@
 package eu.coinform.gateway.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.controller.forms.*;
@@ -10,9 +11,7 @@ import eu.coinform.gateway.db.entity.ModuleInfo;
 import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.db.entity.VerificationToken;
 import eu.coinform.gateway.model.Tweet;
-import eu.coinform.gateway.module.iface.ClaimCredAction;
-import eu.coinform.gateway.module.iface.FactChecker;
-import eu.coinform.gateway.module.iface.ItemToReview;
+import eu.coinform.gateway.module.iface.*;
 import eu.coinform.gateway.service.EmailService;
 import eu.coinform.gateway.service.RedisHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +23,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpResponse;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -132,6 +130,30 @@ public class GatewayListeners {
         try {
             // The review from EXTERNAL partner has arrived, store it with our backend
             HttpResponse<String> result = sendToModule(HttpMethod.POST, mapper.writeValueAsString(event.getSource()), claimCredHost+"/factchecker/review", userInfo);
+            List<FeedbackRequester> feedbackRequesters = new LinkedList<>();
+            JsonNode root = mapper.readTree(result.body());
+            root.get("response")
+                .get("relatedUserReviews")
+                .get("usersWhoRequestedFactcheck")
+                .elements().forEachRemaining(node -> {
+                    JsonNode ar = node.get("mostRecentAccuracyReview");
+                    feedbackRequesters.add(new FeedbackRequester(
+                            node.get("author.url").asText(),
+                            node.get("type").asText(),
+                            new AccuracyReview(
+                                    ar.get("name").asText(),
+                                    new ReviewRating(ar.get("reviewRating").get("ratingValue").asText()),
+                                    ZonedDateTime.parse(ar.get("dateCreated").asText(),
+                                            DateTimeFormatter.ISO_DATE_TIME),
+                                    ar.get("text").asText())));
+            });
+
+            feedbackRequesters.forEach((fr) -> {
+                userDbManager.getUserByUUID(fr.getAuthorUUID()).ifPresentOrElse(
+                        (user) -> emailService.sendUserRequestedFactcheckFeedback(user.getPasswordAuth().getEmail(), fr, event.getExternalEvaluationForm()),
+                        () -> log.error("User UUID don't exist, ${}", fr.getAuthorUUID())
+                );
+            });
             //todo: Here we should receive a list of uuids connected to users who has requested a review for this tweet.
             // logic for emailing them a link to the review needs to be implemented.
             log.info("EXTERNAL REVIEW: {}", result != null ? result.statusCode() : null);

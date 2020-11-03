@@ -262,6 +262,10 @@ public class UserDbManager {
                 .map(PasswordAuth::getUser).get();
     }
 
+    public Optional<User> getUserByUUID(String uuid) {
+        return userRepository.findByUuid(uuid);
+    }
+
     /**
      * Finds a SessionToken object for the corresponding User
      * @param user the User for whom to find a SessionToken

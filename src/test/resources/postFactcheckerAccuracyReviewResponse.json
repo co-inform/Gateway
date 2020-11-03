@@ -1,0 +1,61 @@
+{
+  "response": {
+    "docs": [
+      {
+        "itemReviewed": {
+          "url": "https://twitter.com/msara1973/status/889218085605040129"
+        }
+      }
+    ],
+    "msg": "Stored new review and closed 0 (of 0) active reviewRecord(s).",
+    "relatedUserReviews": {
+      "type": "CoinformUserAccuracyReviewsByReviewedItem",
+      "itemReviewed.url": "https://twitter.com/msara1973/status/889218085605040129",
+      "numUsersWhoRequestedFactcheck": 1,
+      "numUsersWhoReviewedItem": 3,
+      "usersWhoRequestedFactcheck": [
+        {
+          "author.url": "http://coinform.eu/user/2094970a-2b0d-4f1a-999c-d0a41b3c677f",
+          "type": "AuthorAndMostRecentReview",
+          "mostRecentAccuracyReview": {
+            "dateCreated": "2020-09-25T14:22:40.376Z",
+            "name": "accurate",
+            "reviewRating": {
+              "ratingValue": "accurate"
+            },
+            "text": "it is true that Apollo 11 astronauts visited Ankara and Ataturks mausoleum in 1969. factcheckers link added"
+          }
+        }
+      ],
+      "usersWhoReviewedItem": [
+        {
+          "author.url": "http://coinform.eu/user/2094970a-2b0d-4f1a-999c-d0a41b3c677f",
+          "type": "AuthorAndMostRecentReview",
+          "mostRecentAccuracyReview": {
+            "dateCreated": "2020-09-25T14:22:40.376Z"
+          }
+        },
+        {
+          "author.url": "http://coinform.eu/user/837a0f4f-0c20-42fa-b29c-68a03e5d46cd",
+          "type": "AuthorAndMostRecentReview",
+          "mostRecent(dis)agreeReview": {
+            "type": "CoinformUserReview",
+            "dateCreated": "2020-09-23T06:35:03.909Z",
+            "itemReviewed": {
+              "name": "not_verifiable",
+              "url": "https://api.coinform.eu/response/ebb4efa1c465201d3c6d8eb9445854150d88c4614e5ab67eda0ce866928a7d59/x"
+            },
+            "name": "inaccurate",
+            "reviewRating": {
+              "ratingValue": "inaccurate"
+            }
+          }
+        },
+        {
+          "author.url": "http://coinform.eu/user/2094970a-2b0d-4f1a-999c-d0a41b3c677f",
+          "type": "AuthorAndMostRecentReview",
+          "mostRecent(dis)agreeReview": {}}
+        ]
+        }
+      }
+      }

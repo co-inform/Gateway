@@ -1,5 +1,7 @@
 package eu.coinform.gateway.service;
 
+import eu.coinform.gateway.controller.forms.ExternalEvaluationForm;
+import eu.coinform.gateway.module.iface.FeedbackRequester;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -71,4 +73,11 @@ public class EmailService {
         emailSender.send(message);
     }
 
+    public void sendUserRequestedFactcheckFeedback(String to, FeedbackRequester feedbackRequester, ExternalEvaluationForm evaluation) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Requested factcheck completed");
+        message.setText(String.format("The requested review %s is finished %s", feedbackRequester, evaluation));
+    }
 }
