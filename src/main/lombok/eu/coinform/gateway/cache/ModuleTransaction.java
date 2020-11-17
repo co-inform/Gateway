@@ -1,8 +1,11 @@
 package eu.coinform.gateway.cache;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
@@ -13,11 +16,8 @@ import java.util.Objects;
 @RedisHash("transactionId")
 @ToString
 @AllArgsConstructor
-public class ModuleTransaction {
-
-    public ModuleTransaction() {
-        this.createdAt = Date.from(Instant.now());
-    }
+@NoArgsConstructor
+public class ModuleTransaction implements Serializable {
 
     public ModuleTransaction(String transactionId, String module, String queryId) {
         this.transactionId = transactionId;
@@ -33,6 +33,7 @@ public class ModuleTransaction {
      *
      * @return The 'transaction_id'
      */
+    @Setter
     @Getter
     @NonNull
     private String transactionId;
@@ -43,6 +44,7 @@ public class ModuleTransaction {
      *
      * @return The module name
      */
+    @Setter
     @Getter
     @NonNull
     private String module;
@@ -53,11 +55,15 @@ public class ModuleTransaction {
      *
      * @return The 'query_id'
      */
+    @Setter
     @Getter
     @NonNull
     private String queryId;
 
+    @Setter
     @Getter
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private Date createdAt;
 
     @Override
