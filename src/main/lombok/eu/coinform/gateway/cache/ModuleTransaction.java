@@ -3,14 +3,26 @@ package eu.coinform.gateway.cache;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.time.Instant;
+import java.util.Objects;
+
 /**
  * A small data holder connecting transactionId's with their modules and queries
  */
 @RedisHash("transactionId")
-@RequiredArgsConstructor
-@NoArgsConstructor
 @ToString
 public class ModuleTransaction {
+
+    public ModuleTransaction() {
+        this.createdAt = Instant.now();
+    }
+
+    public ModuleTransaction(String transactionId, String module, String queryId) {
+        this.transactionId = transactionId;
+        this.module = module;
+        this.queryId = queryId;
+        this.createdAt = Instant.now();
+    }
 
     /**
      * The 'transaction_id'
@@ -42,5 +54,24 @@ public class ModuleTransaction {
     @Getter
     @NonNull
     private String queryId;
+
+    @Getter
+    private Instant createdAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ModuleTransaction that = (ModuleTransaction) o;
+        return transactionId.equals(that.transactionId) &&
+                module.equals(that.module) &&
+                queryId.equals(that.queryId) &&
+                createdAt.equals(that.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(transactionId);
+    }
 }
 

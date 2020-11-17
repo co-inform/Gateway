@@ -5,7 +5,6 @@ import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
-import eu.coinform.gateway.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.HashOperations;
@@ -15,12 +14,10 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Redishandler is the main class handling the Redis cache.
@@ -31,6 +28,7 @@ public class RedisHandler {
 
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
     private static final String EVALUATION_LIST_KEY = "EVAL_LST_KEY";
+    private static final String ACTIVE_QUERY_TRANSACTIONS_PREFIX = "AQTRAN_";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -182,6 +180,7 @@ public class RedisHandler {
             throw new NoSuchTransactionIdException(transactionId);
         }
         redisTemplate.delete(transactionId);
+        redisTemplate.opsForSet().remove(String.format("%s%s", ACTIVE_QUERY_TRANSACTIONS_PREFIX, moduleTransaction.getQueryId()), moduleTransaction);
         return CompletableFuture.completedFuture(moduleTransaction);
     }
 
@@ -197,7 +196,24 @@ public class RedisHandler {
         log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
         Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.HOURS);
         log.trace("was previously absent: {}", isAbsent);
+        redisTemplate.opsForSet().add(String.format("%s%s", ACTIVE_QUERY_TRANSACTIONS_PREFIX, moduleTransaction.getQueryId()), moduleTransaction, 1, TimeUnit.HOURS);
 
         return CompletableFuture.completedFuture(moduleTransaction);
+    }
+
+    public CompletableFuture<Set<ModuleTransaction>> getActiveTransactions(String queryId) {
+        Set<Object> activeTransactions = redisTemplate.opsForSet().members(String.format("%s%s", ACTIVE_QUERY_TRANSACTIONS_PREFIX, queryId));
+        if ( activeTransactions == null ) {
+            return CompletableFuture.completedFuture(new HashSet<>());
+        }
+        return CompletableFuture.completedFuture(activeTransactions.stream().map(o -> (ModuleTransaction) o).collect(Collectors.toSet()));
+    }
+
+    public CompletableFuture<Boolean> deleteActiveTransaction(ModuleTransaction moduleTransaction) {
+        Long ret = redisTemplate.opsForSet().remove(String.format("%s%s", ACTIVE_QUERY_TRANSACTIONS_PREFIX, moduleTransaction.getQueryId()), moduleTransaction);
+        if (ret == 1) {
+            return CompletableFuture.completedFuture(true);
+        }
+        return CompletableFuture.completedFuture(false);
     }
 }
