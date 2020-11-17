@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -11,17 +12,18 @@ import java.util.Objects;
  */
 @RedisHash("transactionId")
 @ToString
+@AllArgsConstructor
 public class ModuleTransaction {
 
     public ModuleTransaction() {
-        this.createdAt = Instant.now();
+        this.createdAt = Date.from(Instant.now());
     }
 
     public ModuleTransaction(String transactionId, String module, String queryId) {
         this.transactionId = transactionId;
         this.module = module;
         this.queryId = queryId;
-        this.createdAt = Instant.now();
+        this.createdAt = Date.from(Instant.now());
     }
 
     /**
@@ -56,7 +58,7 @@ public class ModuleTransaction {
     private String queryId;
 
     @Getter
-    private Instant createdAt;
+    private Date createdAt;
 
     @Override
     public boolean equals(Object o) {
