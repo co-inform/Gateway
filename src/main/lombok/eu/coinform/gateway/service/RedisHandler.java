@@ -196,7 +196,7 @@ public class RedisHandler {
         log.trace("set ModuleTransaction: {} -> {}", moduleTransaction.getTransactionId(), moduleTransaction);
         Boolean isAbsent = redisTemplate.opsForValue().setIfAbsent(moduleTransaction.getTransactionId(), moduleTransaction, 1, TimeUnit.HOURS);
         log.trace("was previously absent: {}", isAbsent);
-        redisTemplate.opsForSet().add(String.format("%s%s", ACTIVE_QUERY_TRANSACTIONS_PREFIX, moduleTransaction.getQueryId()), moduleTransaction, 1, TimeUnit.HOURS);
+        redisTemplate.opsForSet().add(String.format("%s%s", ACTIVE_QUERY_TRANSACTIONS_PREFIX, moduleTransaction.getQueryId()), moduleTransaction);
 
         return CompletableFuture.completedFuture(moduleTransaction);
     }

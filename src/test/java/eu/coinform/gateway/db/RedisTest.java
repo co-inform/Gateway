@@ -14,10 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +29,7 @@ public class RedisTest {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     private QueryResponse queryResponse;
-    private String QUERY_ID = "test_query";
+    private String QUERY_ID = "test_query3";
     private String MODULE_NAME = "test_module_name";
 
     public RedisTest() {
@@ -116,6 +113,7 @@ public class RedisTest {
         String transaction_ID = UUID.randomUUID().toString();
         ModuleTransaction moduleTransaction = new ModuleTransaction(transaction_ID, MODULE_NAME, QUERY_ID);
         redisHandler.setModuleTransaction(moduleTransaction).join();
+        Set<ModuleTransaction> activeTransactions = redisHandler.getActiveTransactions(moduleTransaction.getQueryId()).join();
         ModuleTransaction moduleTransactionRet = redisHandler.getAndDeleteModuleTransaction(transaction_ID).join();
         assertThat(moduleTransaction).isEqualTo(moduleTransactionRet);
     }
