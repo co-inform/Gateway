@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 @RedisHash("transactionId")
 @ToString
-@AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor
 public class ModuleTransaction implements Serializable {
 
@@ -23,7 +23,7 @@ public class ModuleTransaction implements Serializable {
         this.transactionId = transactionId;
         this.module = module;
         this.queryId = queryId;
-        this.createdAt = Date.from(Instant.now());
+        this.createdAt = Instant.now();
     }
 
     /**
@@ -62,9 +62,9 @@ public class ModuleTransaction implements Serializable {
 
     @Setter
     @Getter
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @NonNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private Date createdAt;
+    private Instant createdAt;
 
     @Override
     public boolean equals(Object o) {

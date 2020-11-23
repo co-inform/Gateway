@@ -196,7 +196,7 @@ public class CheckController {
     private void refreshStaleRequests(QueryResponse queryResponse) {
         redisHandler.getActiveTransactions(queryResponse.getQueryId()).join().stream()
                 .filter(moduleTransaction ->
-                        Instant.now().minusSeconds(requestTimeout).isAfter(moduleTransaction.getCreatedAt().toInstant()))
+                        Instant.now().minusSeconds(requestTimeout).isAfter(moduleTransaction.getCreatedAt()))
                 .filter(moduleTransaction -> redisHandler.deleteActiveTransaction(moduleTransaction).join())
                 .forEach(moduleTransaction ->
                     {
