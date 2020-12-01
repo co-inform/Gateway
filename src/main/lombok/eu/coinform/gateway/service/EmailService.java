@@ -6,8 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.Date;
 
 @Service
@@ -15,6 +20,7 @@ import java.util.Date;
 public class EmailService {
 
     private JavaMailSender emailSender;
+    private TemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -28,9 +34,11 @@ public class EmailService {
     @Value("${email.successful}")
     private String success;
 
-    EmailService(JavaMailSender emailSender){
+    EmailService(JavaMailSender emailSender, TemplateEngine templateEngine){
         this.emailSender = emailSender;
+        this.templateEngine = templateEngine;
     }
+
 
     public void sendVerifyEmailMessage(String to, String link){
         SimpleMailMessage message = new SimpleMailMessage();
@@ -74,10 +82,22 @@ public class EmailService {
     }
 
     public void sendUserRequestedFactcheckFeedback(String to, FeedbackRequester feedbackRequester, ExternalEvaluationForm evaluation) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(to);
-        message.setSubject("Requested factcheck completed");
-        message.setText(String.format("The requested review %s is finished %s", feedbackRequester, evaluation));
+        final MimeMessage mimeMessage = this.emailSender.createMimeMessage();
+        try {
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            message.setFrom(from);
+            message.setTo(to);
+            message.setSubject("Requested factcheck completed");
+
+            final Context ctx = new Context();
+            ctx.setVariable("requester", feedbackRequester);
+            ctx.setVariable("evaluation", evaluation);
+            final String htmlContent = templateEngine.process("factcheck_feedback.html", ctx);
+
+            message.setText(htmlContent, true);
+            emailSender.send(mimeMessage);
+        } catch (MessagingException ex) {
+            log.error("sendUserRequestedFactcheckFeedback: {}\n requester: {}\n evaluation: {}\n stack trace: {}", ex.getMessage(), feedbackRequester, evaluation, ex.getStackTrace());
+        }
     }
 }
