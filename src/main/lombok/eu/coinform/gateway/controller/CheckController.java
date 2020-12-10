@@ -1,6 +1,7 @@
 package eu.coinform.gateway.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,6 +84,7 @@ public class CheckController {
         this.userDbManager = userDbManager;
         this.eventPublisher = eventPublisher;
         this.objectMapper = new ObjectMapper();
+        objectMapper.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
 
         //todo: remove
         try {
@@ -93,7 +95,7 @@ public class CheckController {
     }
 
     //todo: remove
-    //final private String hardCacheFile = Resources.getResource("src/testing-cache/hardcache.json").getFile();
+    //final private File hardCacheFile = new File(Resources.getResource("testing-cache/hardcache.json").getFile());
     final private File hardCacheFile = new File("/opt/hardcache.json");
     final private Object hardCacheFileLock = new Object();
     final private Object hardCacheLock = new Object();
