@@ -39,6 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.HttpResponse;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -63,6 +64,8 @@ public class CheckController {
     private String claimCredUrl;
     @Value("${CLAIM_CRED_USER_INFO}")
     protected String userInfo;
+    @Value("${gateway.request.timeout}")
+    private Long requestTimeout;
 
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
@@ -107,7 +110,7 @@ public class CheckController {
     @PostMapping("/twitter/tweet")
     public QueryResponse twitterTweet(@Valid @RequestBody Tweet tweet) {
         return queryEndpoint(tweet,
-                (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet));
+                (aTweet) -> checkHandler.tweetConsumer((Tweet) aTweet, module -> true));
     }
 
     @RequestMapping(value = "/twitter/tweet", method = RequestMethod.OPTIONS)
@@ -125,6 +128,8 @@ public class CheckController {
         if (response.getVersionHash() == qrIfAbsent.getVersionHash()) {
             //We only send out new requests for new Queries
             queryObjectConsumer.accept(queryObject);
+        } else {
+            refreshStaleRequests(response);
         }
         eventPublisher.publishEvent(new FeedbackReviewEvent(queryObject));
         return response;
@@ -144,6 +149,7 @@ public class CheckController {
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         log.trace("findById: {}", queryResponse);
+        refreshStaleRequests(queryResponse);
         return queryResponse;
     }
 
@@ -172,6 +178,7 @@ public class CheckController {
 
         log.trace("findById: {}", queryResponse);
 
+        refreshStaleRequests(queryResponse);
         return queryResponse;
     }
 
@@ -186,6 +193,24 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    private void refreshStaleRequests(QueryResponse queryResponse) {
+        redisHandler.getActiveTransactions(queryResponse.getQueryId()).join().stream()
+                .filter(moduleTransaction ->
+                        Instant.now().minusSeconds(requestTimeout).isAfter(moduleTransaction.getCreatedAt().toInstant()))
+                .filter(moduleTransaction -> redisHandler.deleteActiveTransaction(moduleTransaction).join())
+                .forEach(moduleTransaction ->
+                    {
+                        Tweet tweet = new Tweet();
+                        tweet.setTweetId(queryResponse.getTweetid());
+                        checkHandler.tweetConsumer(
+                                tweet,
+                                module -> module.getName().equalsIgnoreCase(moduleTransaction.getModule())
+                        );
+                        eventPublisher.publishEvent(new FailedModuleRequestEvent(
+                                moduleTransaction.getModule(),
+                                String.format("Request for check on tweet '%s' with transaction-id '%s' timed out", tweet.getTweetId(), moduleTransaction.getTransactionId())));
+                    });
+    }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/twitter/evaluate", method = RequestMethod.POST)

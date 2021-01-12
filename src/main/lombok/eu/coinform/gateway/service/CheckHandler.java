@@ -16,6 +16,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * CheckHandler is the class responsible for consuming the received objects from the plugin and making the requests
@@ -72,9 +74,9 @@ public class CheckHandler {
      * @param tweet a Tweet object received from the plugin
      */
     @Async("endpointExecutor")
-    public void tweetConsumer(Tweet tweet) {
+    public void tweetConsumer(Tweet tweet, Predicate<Module> filter) {
         log.trace("handle tweet object: {}", tweet);
-        for (Module module: moduleList) {
+        for (Module module: moduleList.stream().filter(filter).collect(Collectors.toList())) {
             log.trace("handle for module: {} -> {}", module.getName(), module);
             if(module instanceof TwitterTweetRequestInterface){
                 log.trace("making tweet requests for {}", module.getName());
