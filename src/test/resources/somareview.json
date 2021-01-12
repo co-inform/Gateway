@@ -1,0 +1,23 @@
+{
+  "context": "http://schema.org",
+  "type": "Review",
+  "url": "http://truly.media/path/to/resource/for/this/review",
+  "author": {
+    "type": "Organization",
+    "url": "http://truly.media",
+    "name": "Truly-media"
+  },
+  "text": "The Tweet is inaccurate because reasons name: inaccurate",
+  "reviewRating": {
+    "context": "http://schema.org",
+    "type": "Rating",
+    "ratingValue": "inaccurate",
+    "reviewAspect": "accuracy",
+    "reviewExplanation": "The Tweet is inaccurate because reasons"
+  },
+  "itemReviewed": {
+    "type": "SocialMediaPosting",
+    "url": "https://twitter.com/realDonaldTrump/status/1181172459325800448"
+  },
+  "dateCreated": "2020-05-08T10:16:29.130Z"
+}
