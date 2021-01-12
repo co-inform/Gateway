@@ -21,11 +21,13 @@ import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
 import eu.coinform.gateway.module.iface.LabelEvaluationImplementation;
 import eu.coinform.gateway.rule_engine.RuleEngineConnector;
 import eu.coinform.gateway.service.CheckHandler;
+import eu.coinform.gateway.service.EmailService;
 import eu.coinform.gateway.service.RedisHandler;
 import eu.coinform.gateway.util.ErrorResponse;
 import eu.coinform.gateway.util.SuccesfullResponse;
 import eu.coinform.gateway.util.RuleEngineHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpMethod;
@@ -62,6 +64,9 @@ public class CheckController {
     private final ApplicationEventPublisher eventPublisher;
     private final UserDbManager userDbManager;
     private final ObjectMapper objectMapper;
+
+    //@Autowired
+    //private EmailService emailService;
 
     @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/sources/?source=%s")
     private String misInfoMeUrl;
@@ -378,6 +383,14 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
+    /*
+    //todo: remove ugly test
+    @RequestMapping(value = "/external/evaluation/test", method = RequestMethod.POST)
+    public ResponseEntity<?> testExternalEvaluation(@Valid @RequestBody ExternalEvaluationForm evaluationForm) {
+        emailService.sendUserRequestedFactcheckFeedback("andreas.berg@dsv.su.se", null, evaluationForm);
+        return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
+    }
+     */
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/check-url", method = RequestMethod.GET)
