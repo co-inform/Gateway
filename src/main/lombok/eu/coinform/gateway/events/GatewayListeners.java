@@ -117,6 +117,7 @@ public class GatewayListeners {
     public void userTweetEvaluationListener(UserTweetEvaluationEvent event){
         try {
             String url = claimCredHost + "/user/accuracy-review"; //?factCheckRequested=" + event.getForm().isRequestFactcheck();
+            log.debug("tweet evaluation sent to claim credibility: {}", mapper.writeValueAsString(event.getSource()));
             HttpResponse<String> result = sendToModule(HttpMethod.POST, mapper.writeValueAsString(event.getSource()), url, userInfo);
             log.info("CLAIM REVIEW: {}", result != null ? result.statusCode() : null);
             log.debug("CLAIM REVIEW: {}", result != null ? result.body() : null);

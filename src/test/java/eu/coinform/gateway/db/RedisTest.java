@@ -1,5 +1,6 @@
 package eu.coinform.gateway.db;
 
+import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.service.RedisHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +29,8 @@ public class RedisTest {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     private QueryResponse queryResponse;
-    private String QUERY_ID = "test_query";
+    private String QUERY_ID = "test_query3";
+    private String MODULE_NAME = "test_module_name";
 
     public RedisTest() {
     }
@@ -106,4 +107,15 @@ public class RedisTest {
         assertThat(qr1.join()).contains(Boolean.FALSE);
         assertThat(qr2.join()).contains(Boolean.FALSE);
     }
+
+    @Test
+    public void testModuleTransaction() {
+        String transaction_ID = UUID.randomUUID().toString();
+        ModuleTransaction moduleTransaction = new ModuleTransaction(transaction_ID, MODULE_NAME, QUERY_ID);
+        redisHandler.setModuleTransaction(moduleTransaction).join();
+        Set<ModuleTransaction> activeTransactions = redisHandler.getActiveTransactions(moduleTransaction.getQueryId()).join();
+        ModuleTransaction moduleTransactionRet = redisHandler.getAndDeleteModuleTransaction(transaction_ID).join();
+        assertThat(moduleTransaction).isEqualTo(moduleTransactionRet);
+    }
+
 }
