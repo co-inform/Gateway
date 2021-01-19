@@ -181,26 +181,7 @@ public class GatewayListeners {
             return;
         }
         log.debug("User Feedback returned");
-        if(tweet.getUserId() == null || tweet.getUserId().isEmpty() || !userDbManager.existsByUuid(tweet.getUserId())) {
-            try {
-                UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
-                boolean updatedCache;
-                do {
-                    QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
-                    long oldVersionHash = qr.getVersionHash();
-                    qr.setVersionHash();
-                    if (qr.getResponse() == null) {
-                        qr.setResponse(new LinkedHashMap<>());
-                    }
-                    qr.getResponse().put("(dis)agreement_feedback", response.getResponse().getCredibilityReviews().getAgreementFeedback());
-                    updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
-                } while (!updatedCache);
-                log.debug("updatedCache successful");
-            } catch (JsonProcessingException e) {
-                log.error("JSONPROCESSING exception: {}", res.body());
-                e.printStackTrace();
-            }
-        } else {
+        if(tweet.getUserId() != null && !tweet.getUserId().isEmpty() && userDbManager.existsByUuid(tweet.getUserId())) {
             try {
                 UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
                 redisHandler.setDisagreementFeedback(tweet.getQueryId(), tweet.getUserId(), response.getResponse().getCredibilityReviews().getAgreementFeedback());
@@ -208,6 +189,36 @@ public class GatewayListeners {
                 log.error("JSONPROCESSING exception: {}", res.body());
                 e.printStackTrace();
             }
+        }
+        try {
+            UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
+            boolean updatedCache;
+            do {
+                QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
+                long oldVersionHash = qr.getVersionHash();
+                qr.setVersionHash();
+                if (qr.getResponse() == null) {
+                    qr.setResponse(new LinkedHashMap<>());
+                }
+                AgreementFeedback agreementFeedback = response.getResponse().getCredibilityReviews().getAgreementFeedback();
+                agreementFeedback.getCredibilityUncertain().setUserFeedback(null);
+                agreementFeedback.getCredibilityUncertain().setUserReviews(new LinkedList<>());
+                agreementFeedback.getCredible().setUserFeedback(null);
+                agreementFeedback.getCredible().setUserReviews(new LinkedList<>());
+                agreementFeedback.getMostlyCredible().setUserFeedback(null);
+                agreementFeedback.getMostlyCredible().setUserReviews(new LinkedList<>());
+                agreementFeedback.getNotCredible().setUserFeedback(null);
+                agreementFeedback.getNotCredible().setUserReviews(new LinkedList<>());
+                agreementFeedback.getNotVerifiable().setUserFeedback(null);
+                agreementFeedback.getNotVerifiable().setUserReviews(new LinkedList<>());
+
+                qr.getResponse().put("(dis)agreement_feedback", agreementFeedback);
+                updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
+            } while (!updatedCache);
+            log.debug("updatedCache successful");
+        } catch (JsonProcessingException e) {
+            log.error("JSONPROCESSING exception: {}", res.body());
+            e.printStackTrace();
         }
     }
 
