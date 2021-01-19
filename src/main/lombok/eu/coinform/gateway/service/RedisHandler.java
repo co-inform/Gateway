@@ -219,8 +219,8 @@ public class RedisHandler {
         return CompletableFuture.completedFuture(false);
     }
 
-    private String disFeedKey(String queryId, String userId) {
-        return String.format("%s%s_%s", DISAGREEMENT_FEEDBACK_PREFIX, userId, queryId);
+    private String disFeedKey(String queryId, String userUUID) {
+        return String.format("%s%s_%s", DISAGREEMENT_FEEDBACK_PREFIX, userUUID, queryId);
     }
 
     public void setDisagreementFeedback(String queryId, String userUUID, AgreementFeedback disagreementFeedback) {
