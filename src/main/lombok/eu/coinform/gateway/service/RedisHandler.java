@@ -3,6 +3,7 @@ package eu.coinform.gateway.service;
 import eu.coinform.gateway.cache.ModuleResponse;
 import eu.coinform.gateway.cache.ModuleTransaction;
 import eu.coinform.gateway.cache.QueryResponse;
+import eu.coinform.gateway.controller.forms.AgreementFeedback;
 import eu.coinform.gateway.model.NoSuchQueryIdException;
 import eu.coinform.gateway.model.NoSuchTransactionIdException;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class RedisHandler {
     private static final String MODULE_RESPONSE_PREFIX = "MOD_";
     private static final String EVALUATION_LIST_KEY = "EVAL_LST_KEY";
     private static final String ACTIVE_QUERY_TRANSACTIONS_PREFIX = "AQTRAN_";
+    private static final String DISAGREEMENT_FEEDBACK_PREFIX = "DIS_FEE_";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -215,5 +217,17 @@ public class RedisHandler {
             return CompletableFuture.completedFuture(true);
         }
         return CompletableFuture.completedFuture(false);
+    }
+
+    private String disFeedKey(String queryId, String userId) {
+        return String.format("%s%s_%s", DISAGREEMENT_FEEDBACK_PREFIX, userId, queryId);
+    }
+
+    public void setDisagreementFeedback(String queryId, String userUUID, AgreementFeedback disagreementFeedback) {
+        redisTemplate.opsForValue().set(disFeedKey(queryId, userUUID), disagreementFeedback, 1, TimeUnit.HOURS);
+    }
+
+    public CompletableFuture<AgreementFeedback> getDisagreementFeedback(String queryId, String userUUID) {
+        return CompletableFuture.completedFuture((AgreementFeedback) redisTemplate.opsForValue().get(disFeedKey(queryId, userUUID)));
     }
 }

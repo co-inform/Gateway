@@ -181,23 +181,33 @@ public class GatewayListeners {
             return;
         }
         log.debug("User Feedback returned");
-        try {
-            UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
-            boolean updatedCache;
-            do {
-                QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
-                long oldVersionHash = qr.getVersionHash();
-                qr.setVersionHash();
-                if(qr.getResponse() == null){
-                    qr.setResponse(new LinkedHashMap<>());
-                }
-                qr.getResponse().put("(dis)agreement_feedback",response.getResponse().getCredibilityReviews().getAgreementFeedback());
-                updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
-            } while (!updatedCache);
-            log.debug("updatedCache successful");
-        } catch (JsonProcessingException e) {
-            log.error("JSONPROCESSING exception: {}",res.body());
-            e.printStackTrace();
+        if(tweet.getUserId() == null || tweet.getUserId().isEmpty() || !userDbManager.existsByUuid(tweet.getUserId())) {
+            try {
+                UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
+                boolean updatedCache;
+                do {
+                    QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
+                    long oldVersionHash = qr.getVersionHash();
+                    qr.setVersionHash();
+                    if (qr.getResponse() == null) {
+                        qr.setResponse(new LinkedHashMap<>());
+                    }
+                    qr.getResponse().put("(dis)agreement_feedback", response.getResponse().getCredibilityReviews().getAgreementFeedback());
+                    updatedCache = redisHandler.setQueryResponseAtomic(tweet.getQueryId(), qr, oldVersionHash).join();
+                } while (!updatedCache);
+                log.debug("updatedCache successful");
+            } catch (JsonProcessingException e) {
+                log.error("JSONPROCESSING exception: {}", res.body());
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                UserFeedback response = mapper.readValue(res.body(), UserFeedback.class);
+                redisHandler.setDisagreementFeedback(tweet.getQueryId(), tweet.getUserId(), response.getResponse().getCredibilityReviews().getAgreementFeedback());
+            } catch (JsonProcessingException e) {
+                log.error("JSONPROCESSING exception: {}", res.body());
+                e.printStackTrace();
+            }
         }
     }
 
