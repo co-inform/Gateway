@@ -9,6 +9,7 @@ import eu.coinform.gateway.db.entity.User;
 import eu.coinform.gateway.controller.restclient.RestClient;
 import eu.coinform.gateway.db.UserDbManager;
 import eu.coinform.gateway.events.*;
+import eu.coinform.gateway.jwt.JwtAuthenticationToken;
 import eu.coinform.gateway.model.*;
 import eu.coinform.gateway.cache.QueryResponse;
 import eu.coinform.gateway.module.iface.AccuracyEvaluationImplementation;
@@ -136,8 +137,25 @@ public class CheckController {
         } else {
             refreshStaleRequests(response);
         }
+
         eventPublisher.publishEvent(new FeedbackReviewEvent(queryObject));
+        setDisagreementFeedback(response, queryObject.getQueryId());
         return response;
+    }
+
+    private void setDisagreementFeedback(QueryResponse response, String queryId) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            Long sessionId = (Long) authentication.getPrincipal();
+            Optional<User> user = userDbManager.getBySessionTokenId(sessionId);
+            user.ifPresent(user1 -> {
+                AgreementFeedback feedback = redisHandler.getDisagreementFeedback(queryId, user1.getUuid()).join();
+                if (feedback != null) {
+                    response.getResponse().put("(dis)agreement_feedback", feedback);
+                }
+            });
+        }
     }
 
     /**
@@ -155,6 +173,7 @@ public class CheckController {
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         log.trace("findById: {}", queryResponse);
         refreshStaleRequests(queryResponse);
+        setDisagreementFeedback(queryResponse, query_id);
         return queryResponse;
     }
 
@@ -184,6 +203,7 @@ public class CheckController {
         log.trace("findById: {}", queryResponse);
 
         refreshStaleRequests(queryResponse);
+        setDisagreementFeedback(queryResponse, query_id);
         return queryResponse;
     }
 
