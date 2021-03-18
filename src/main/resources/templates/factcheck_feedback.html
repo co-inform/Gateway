@@ -12,15 +12,13 @@
 </p>
 <p>
     The tweet <a href="https://twitter.com/realDonaldTrump/status/1181172459325800447" th:href="${evaluation.itemReviewed.url}" th:text="${evaluation.itemReviewed.url}">https://twitter.com/realDonaldTrump/status/1181172459325800447</a>
-    you reported have received an external review has been rated as <mark th:text="${evaluation.reviewRating.ratingValue}">inaccurate</mark>.
+    you reported have received an external review.
 </p>
     <div class="row">
-        <div class="col-md-8"><a class="text-right" href="http://truly.media/path/to/resource/for/this/review" th:text="${evaluation.url}" th:href="${evaluation.url}" >http://truly.media/path/to/resource/for/this/review</a> </div>
-        <div class="col-md-4"> <span th:text="${evaluation.type}">Review</span> by  <a href="http://truly.media" th:text="${evaluation.author.name}" th:href="${evaluation.author.url}">Truly-media </a> </div>
+        <div class="col-md"> <span th:text="${evaluation.type}">Review</span> by  <a href="http://truly.media" th:text="${evaluation.author.name}" th:href="${evaluation.author.url}">Truly-media </a> </div>
     </div>
     <div class="row">
-        <div class="col-md-8"><a href="https://twitter.com/realDonaldTrump/status/1181172459325800448" th:href="${evaluation.itemReviewed.url}" th:text="${evaluation.itemReviewed.url}">https://twitter.com/realDonaldTrump/status/1181172459325800448</a> </div>
-        <div class="col-md-4"><span th:text="${evaluation.reviewRating.ratingValue}">inaccurate</span> </div>
+        <div class="col-md"><a href="https://twitter.com/realDonaldTrump/status/1181172459325800448" th:href="${evaluation.itemReviewed.url}" th:text="${evaluation.itemReviewed.url}">https://twitter.com/realDonaldTrump/status/1181172459325800448</a> </div>
     </div>
     <div class="row">
         <div class="col-md">Explanation: <span th:text="${evaluation.reviewRating.reviewExplanation}">The Tweet is inaccurate because reasons</span> </div>
