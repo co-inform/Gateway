@@ -155,8 +155,6 @@ public class GatewayListeners {
                         () -> log.error("User UUID don't exist, ${}", fr.getAuthorUUID())
                 );
             });
-            //todo: Here we should receive a list of uuids connected to users who has requested a review for this tweet.
-            // logic for emailing them a link to the review needs to be implemented.
             log.info("EXTERNAL REVIEW: {}", result != null ? result.statusCode() : null);
             log.debug("EXTERNAL REVIEW: {}", result != null ? result.body() : null);
         } catch (JsonProcessingException e) {

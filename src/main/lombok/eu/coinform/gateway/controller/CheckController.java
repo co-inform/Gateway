@@ -79,6 +79,9 @@ public class CheckController {
     @Value("${gateway.request.timeout}")
     private Long requestTimeout;
 
+    @Autowired
+    private EmailService emailService;
+
     CheckController(RedisHandler redisHandler,
                     CheckHandler checkHandler,
                     RuleEngineConnector ruleEngineConnector,
@@ -390,7 +393,7 @@ public class CheckController {
 
     @RequestMapping(value = "/external/evaluation", method = RequestMethod.POST)
     public ResponseEntity<?> externalEvaluation(@Valid @RequestBody ExternalEvaluationForm externalEvaluationForm){
-        log.debug("Form: {}", externalEvaluationForm);
+        log.info("Form: {}", externalEvaluationForm);
         eventPublisher.publishEvent(new ExternalReviewReceivedEvent(externalEvaluationForm));
         return ResponseEntity.ok(SuccesfullResponse.EXTERNAL);
     }
@@ -403,8 +406,8 @@ public class CheckController {
         response.addHeader("Access-Control-Max-Age", "3600");
     }
 
-    /*
     //todo: remove ugly test
+    /*
     @RequestMapping(value = "/external/evaluation/test", method = RequestMethod.POST)
     public ResponseEntity<?> testExternalEvaluation(@Valid @RequestBody ExternalEvaluationForm evaluationForm) {
         emailService.sendUserRequestedFactcheckFeedback("andreas.berg@dsv.su.se", null, evaluationForm);
