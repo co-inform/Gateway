@@ -92,7 +92,8 @@ public class CheckHandler {
                             } catch (ModuleRequestException ex) {
                                 log.error("failed request to {}: {}", module.getName(), ex.getMessage());
                                 eventPublisher.publishEvent(new FailedModuleRequestEvent(module.getName(), ex.getMessage()));
-                                redisHandler.getAndDeleteModuleTransaction(moduleRequest.getTransactionId());
+                                // THe below is done to have the GW rerequest the same tweet if it is older than 600 seconds through the refreshStaleRequest method in CheckController class
+                                //redisHandler.getAndDeleteModuleTransaction(moduleRequest.getTransactionId());
                             }
                         });
             }
