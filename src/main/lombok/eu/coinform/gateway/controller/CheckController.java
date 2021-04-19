@@ -95,36 +95,36 @@ public class CheckController {
         this.objectMapper = new ObjectMapper();
         objectMapper.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
 
-        //todo: remove
-        try {
-            loadHardCache();
-        } catch (Exception e) {
-            log.error("{}\n{}", e.getMessage(), e.getStackTrace());
-        }
+//        //todo: remove
+//        try {
+//            loadHardCache();
+//        } catch (Exception e) {
+//            log.error("{}\n{}", e.getMessage(), e.getStackTrace());
+//        }
     }
+//
+//    //todo: remove
+//    //final private File hardCacheFile = new File(Resources.getResource("testing-cache/hardcache.json").getFile());
+//    final private File hardCacheFile = new File("/opt/hardcache.json");
+//    final private Object hardCacheFileLock = new Object();
+//    final private Object hardCacheLock = new Object();
+//    private HardCache hardCache;
 
-    //todo: remove
-    //final private File hardCacheFile = new File(Resources.getResource("testing-cache/hardcache.json").getFile());
-    final private File hardCacheFile = new File("/opt/hardcache.json");
-    final private Object hardCacheFileLock = new Object();
-    final private Object hardCacheLock = new Object();
-    private HardCache hardCache;
-
-    private void loadHardCache() throws IOException, JsonParseException, JsonMappingException {
-        synchronized (hardCacheFileLock) {
-            hardCache = objectMapper.readValue(hardCacheFile, HardCache.class);
-            if (hardCache.getHardCacheTweetMap() == null) {
-                hardCache.setHardCacheTweetMap(new HashMap<>());
-            }
-        }
-    }
-
-    private void saveHardCache() throws IOException {
-        synchronized (hardCacheFileLock) {
-            //objectMapper.writeValue(new BufferedWriter(new FileWriter(Resources.getResource("testing-cache/hardcache.json").getFile())), hardCache);
-            objectMapper.writeValue(new OutputStreamWriter(new FileOutputStream(hardCacheFile)), hardCache);
-        }
-    }
+//    private void loadHardCache() throws IOException, JsonParseException, JsonMappingException {
+//        synchronized (hardCacheFileLock) {
+//            hardCache = objectMapper.readValue(hardCacheFile, HardCache.class);
+//            if (hardCache.getHardCacheTweetMap() == null) {
+//                hardCache.setHardCacheTweetMap(new HashMap<>());
+//            }
+//        }
+//    }
+//
+//    private void saveHardCache() throws IOException {
+//        synchronized (hardCacheFileLock) {
+//            //objectMapper.writeValue(new BufferedWriter(new FileWriter(Resources.getResource("testing-cache/hardcache.json").getFile())), hardCache);
+//            objectMapper.writeValue(new OutputStreamWriter(new FileOutputStream(hardCacheFile)), hardCache);
+//        }
+//    }
 
     /**
      * The '/twitter/user' endpoint, querying for information about a twitter user.
@@ -172,44 +172,44 @@ public class CheckController {
         QueryResponse qrIfAbsent = new QueryResponse(queryObject.getQueryId(), QueryResponse.Status.in_progress, ((Tweet) queryObject).getTweetId(), null, new LinkedHashMap<>(), new LinkedHashMap<>());
         QueryResponse response = redisHandler.getQueryResponse(queryObject.getQueryId(), qrIfAbsent).join();
 
-        //todo: remove
-        if (queryObject instanceof Tweet) {
-            Tweet tweet = (Tweet) queryObject;
-            HardCacheTweet hct = hardCache.getHardCacheTweetMap().get(tweet.getQueryId());
-            if (hct == null && hardCache.getTweets().contains(tweet.getTweetId())) {
-                HardCacheTweet tmp = new HardCacheTweet();
-                tmp.setTweet_id(tweet.getTweetId());
-                synchronized (hardCacheLock) {
-                    if (hardCache.getHardCacheTweetMap().get(tweet.getQueryId()) == null) {
-                        hardCache.getHardCacheTweetMap().put(tweet.getQueryId(), tmp);
-                        hct = hardCache.getHardCacheTweetMap().get(tweet.getQueryId());
-                        try {
-                            saveHardCache();
-                        } catch (IOException e) {
-                            log.error("{}\n{}", e.getMessage(), e.getStackTrace());
-                        }
-                    }
-                }
-            }
-            if (hct != null) {
-                if (hct.getQueryResponse() == null) {
-                    QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
-                    if (qr.getStatus() == QueryResponse.Status.done) {
-                        synchronized (hardCacheLock) {
-                            hct.setQueryResponse(qr);
-                            try {
-                                saveHardCache();
-                            } catch (IOException e) {
-                                log.error("{}\n{}", e.getMessage(), e.getStackTrace());
-                            }
-                        }
-                        return qr;
-                    }
-                } else {
-                    return hct.getQueryResponse();
-                }
-            }
-        }
+//        //todo: remove
+//        if (queryObject instanceof Tweet) {
+//            Tweet tweet = (Tweet) queryObject;
+//            HardCacheTweet hct = hardCache.getHardCacheTweetMap().get(tweet.getQueryId());
+//            if (hct == null && hardCache.getTweets().contains(tweet.getTweetId())) {
+//                HardCacheTweet tmp = new HardCacheTweet();
+//                tmp.setTweet_id(tweet.getTweetId());
+//                synchronized (hardCacheLock) {
+//                    if (hardCache.getHardCacheTweetMap().get(tweet.getQueryId()) == null) {
+//                        hardCache.getHardCacheTweetMap().put(tweet.getQueryId(), tmp);
+//                        hct = hardCache.getHardCacheTweetMap().get(tweet.getQueryId());
+//                        try {
+//                            saveHardCache();
+//                        } catch (IOException e) {
+//                            log.error("{}\n{}", e.getMessage(), e.getStackTrace());
+//                        }
+//                    }
+//                }
+//            }
+//            if (hct != null) {
+//                if (hct.getQueryResponse() == null) {
+//                    QueryResponse qr = redisHandler.getQueryResponse(tweet.getQueryId()).join();
+//                    if (qr.getStatus() == QueryResponse.Status.done) {
+//                        synchronized (hardCacheLock) {
+//                            hct.setQueryResponse(qr);
+//                            try {
+//                                saveHardCache();
+//                            } catch (IOException e) {
+//                                log.error("{}\n{}", e.getMessage(), e.getStackTrace());
+//                            }
+//                        }
+//                        return qr;
+//                    }
+//                } else {
+//                    return hct.getQueryResponse();
+//                }
+//            }
+//        }
 
         if (response.getVersionHash() == qrIfAbsent.getVersionHash()) {
             //We only send out new requests for new Queries
@@ -250,26 +250,26 @@ public class CheckController {
 
         log.trace("query for response received with query_id '{}'", query_id);
 
-        //todo: remove
-        HardCacheTweet hct = hardCache.getHardCacheTweetMap().get(query_id);
-        if (hct != null) {
-            if (hct.getQueryResponse() == null) {
-                QueryResponse qr = redisHandler.getQueryResponse(query_id).join();
-                if (qr.getStatus() == QueryResponse.Status.done) {
-                    synchronized (hardCacheLock) {
-                        hct.setQueryResponse(qr);
-                        try {
-                            saveHardCache();
-                        } catch (IOException e) {
-                            log.error("{}\n{}", e.getMessage(), e.getStackTrace());
-                        }
-                    }
-                    return qr;
-                }
-            } else {
-                return hct.getQueryResponse();
-            }
-        }
+//        //todo: remove
+//        HardCacheTweet hct = hardCache.getHardCacheTweetMap().get(query_id);
+//        if (hct != null) {
+//            if (hct.getQueryResponse() == null) {
+//                QueryResponse qr = redisHandler.getQueryResponse(query_id).join();
+//                if (qr.getStatus() == QueryResponse.Status.done) {
+//                    synchronized (hardCacheLock) {
+//                        hct.setQueryResponse(qr);
+//                        try {
+//                            saveHardCache();
+//                        } catch (IOException e) {
+//                            log.error("{}\n{}", e.getMessage(), e.getStackTrace());
+//                        }
+//                    }
+//                    return qr;
+//                }
+//            } else {
+//                return hct.getQueryResponse();
+//            }
+//        }
 
         QueryResponse queryResponse = redisHandler.getQueryResponse(query_id).join();
         log.trace("findById: {}", queryResponse);
