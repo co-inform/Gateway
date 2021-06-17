@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD COLUMN IF NOT EXISTS `app_config` JSON AFTER `communication`;

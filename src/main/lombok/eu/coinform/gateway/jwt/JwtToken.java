@@ -38,7 +38,7 @@ public class JwtToken {
         private Date expiration;
         private SignatureAlgorithm signatureAlgorithm;
         private String key;
-        private Map<String, String> user;
+        private Map<String, Object> user;
 
         public Builder setSessionToken(SessionToken sessionToken) {
             this.sessionToken = sessionToken;
@@ -48,6 +48,11 @@ public class JwtToken {
             this.user.put("research", sessionToken.getUser().isAcceptResearch() ? "true" : "false");
             this.user.put("communication", sessionToken.getUser().isAcceptCommunication() ? "true" : "false");
             this.user.put("created_at", sessionToken.getUser().getCreatedAt().toInstant().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+            if (sessionToken.getUser().getAppConfig() != null) {
+                this.user.put("config", sessionToken.getUser().getAppConfig());
+            } else {
+                this.user.put("config", new HashMap<>());
+            }
             return this;
         }
 

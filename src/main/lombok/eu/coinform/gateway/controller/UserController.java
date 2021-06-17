@@ -276,6 +276,7 @@ public class UserController {
         if(oUser.isPresent()) {
             oUser.get().setAcceptCommunication(form.isCommunication());
             oUser.get().setAcceptResearch(form.isResearch());
+            oUser.get().setAppConfig(form.getConfig());
             SessionToken st = userDbManager.findBySessionTokenId(sessionTokenId).get();
             User dbUser = userDbManager.saveUser(oUser.get());
 

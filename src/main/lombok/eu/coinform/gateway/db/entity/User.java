@@ -1,16 +1,21 @@
 package eu.coinform.gateway.db.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
+@TypeDefs({
+        @TypeDef(name = "json", typeClass = JsonStringType.class)
+})
 public class User implements Serializable {
 
     @Getter
@@ -63,6 +68,12 @@ public class User implements Serializable {
     @Setter
     @Column(name = "communication")
     private boolean acceptCommunication;
+
+    @Getter
+    @Setter
+    @Type(type = "json")
+    @Column(name = "app_config")
+    private LinkedHashMap<String, Object> appConfig;
 
     public User(){
         this.enabled = false;
