@@ -69,7 +69,7 @@ public class CheckController {
     //@Autowired
     //private EmailService emailService;
 
-    @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/urls?urls=%s")
+    @Value("${misinfome.server.scheme}://${misinfome.server.url}${misinfome.server.base_endpoint}/credibility/urls?url=%s")
     private String misInfoMeUrl;
 
     @Value("${claimcredibility.server.scheme}://${claimcredibility.server.url}${claimcredibility.server.base_endpoint}/tweet/accuracy-review")
