@@ -450,7 +450,9 @@ public class CheckController {
         RuleEngineHelper.flatResponseMap(moduleResponse, flatMap, "misinfome", "_");
         Set<String> modules = new HashSet<>();
         modules.add("misinfome");
-        return ruleEngineConnector.evaluateResults(flatMap, modules);
+        LinkedHashMap<String, Object> res = ruleEngineConnector.evaluateResults(flatMap, modules);
+        res.put("assessments", misinfomeAnswer.get("assessments"));
+        return res;
     }
 
     private boolean validUrl(String url){
